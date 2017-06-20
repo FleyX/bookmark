@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+    <title>Chat</title>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="./css/style.css"/>
+</head>
+<body>
+    <div id="content">
+        <div>当前聊天室:<span id="room"></span>&nbsp;&nbsp;&nbsp;&nbsp;我的昵称：<span id="nickName"></span></div>
+        <div id="room-list"></div>
+        <div id="messages"></div>
+
+        <form id="send-form">
+            <input id="send-message" type="text"/>
+            <input id="send-button" type="button" value="发送"/>
+        </form>
+
+        <div id="help">
+            命令：
+            <ul>
+                <li>修改昵称：<code>/nick [username]</code></li>
+                <li>加入/创建房间：<code>/join [room name]</code></li>
+            </ul>
+        </div>
+
+    </div>
+    <script src="/js/jquery-3.1.1.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/init.js"></script>
+    <script src="/js/chat_ui.js"></script>
+    <script src="/js/chat.js"></script>
+</body>
+</html>
