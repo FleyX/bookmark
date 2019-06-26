@@ -1,0 +1,37 @@
+.main {
+  text-align: center;
+  width: 600px;
+  height: 400px;
+  box-shadow: #ccc 0px 0px 20px;
+  border-radius: 5px;
+
+  .top {
+    height: 50%;
+    border-radius: 5px 5px 0 0;
+    background: #3d4fae;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8rem;
+    color: white;
+  }
+
+  .bottom {
+    height: 50%;
+    background: #ebf2f9;
+    border-radius: 0 0 5px 5px;
+
+    .inputArea {
+      padding: 0.2rem 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      :global {
+        .ant-input {
+          width: 20em;
+        }
+      }
+    }
+  }
+}
