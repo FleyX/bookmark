@@ -4,7 +4,7 @@ import { withRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./redux";
 import Login from "./pages/public/Login";
-import Main from "./pages/Main";
+import Main from "./pages/index";
 import NotFound from "./pages/public/notFound/NotFound";
 
 class App extends Component {
@@ -15,7 +15,7 @@ class App extends Component {
 
   render() {
     const mainStyle = {
-      fontSize: "0.16rem"
+      fontSize: "0.14rem"
     };
     return (
       <Provider store={store}>

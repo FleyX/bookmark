@@ -23,12 +23,19 @@ instance.interceptors.response.use(
     } else {
       message = "出问题啦:" + error.response.status;
       description = JSON.stringify(error.response.data);
+      //401跳转到登录页面
     }
     notification.open({
       message,
       description,
       duration: 2
     });
+    setTimeout(() => {
+      if (error.response && error.response.status === 401) {
+        let redirect = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.replace("/public/login?redirect=" + redirect);
+      }
+    }, 1000);
     return Promise.reject(error);
   }
 );

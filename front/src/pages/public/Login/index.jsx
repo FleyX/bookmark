@@ -1,13 +1,14 @@
 import React, { Component } from "react";
+import queryString from "query-string";
 import { Button, Input, message } from "antd";
 import IconFont from "../../../components/IconFont";
 import styles from "./index.module.less";
 import { connect } from "react-redux";
-import { changeLoginInfo } from "../../../redux/action/LoginInfoAction";
+import { changeLoginInfo, DATA_NAME } from "../../../redux/action/loginInfoAction";
 import axios from "../../../util/httpUtil";
 
 function mapStateToProps(state) {
-  return {};
+  return state[DATA_NAME];
 }
 
 function mapDispatchToProps(dispatch) {
@@ -23,6 +24,7 @@ class Login extends Component {
       username: "",
       password: ""
     };
+    this.query = queryString.parse(window.location.search);
   }
 
   usernameInput = e => {
@@ -40,7 +42,11 @@ class Login extends Component {
       window.userInfo = res.userInfo;
       message.success("登录成功");
       this.props.updateLoginInfo(res.token, res.userInfo);
-      this.props.history.replace("/");
+      if (this.query.redirect) {
+        this.props.history.replace(decodeURIComponent(this.query.redirect));
+      } else {
+        this.props.history.replace("/");
+      }
     });
   };
 
