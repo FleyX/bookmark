@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "homepage": ".",
+  "proxy": "http://ali.tapme.top:8081/mock/16/chat/api/",
   "dependencies": {
     "antd": "^3.19.8",
+    "axios": "^0.19.0",
     "babel-plugin-import": "^1.12.0",
     "customize-cra": "^0.2.14",
     "less": "^3.9.0",

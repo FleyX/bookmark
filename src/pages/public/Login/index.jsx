@@ -1,10 +1,10 @@
 import React, { Component } from "react";
-import { Button, Input } from "antd";
+import { Button, Input, message } from "antd";
 import IconFont from "../../../components/IconFont";
 import styles from "./index.module.less";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
 import { changeLoginInfo } from "../../../redux/action/LoginInfoAction";
+import axios from "../../../util/httpUtil";
 
 function mapStateToProps(state) {
   return {};
@@ -12,7 +12,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    dealClick: () => dispatch(changeLoginInfo("12345", { name: "fanxb", age: "12" }))
+    updateLoginInfo: (token, userInfo) => dispatch(changeLoginInfo(token, userInfo))
   };
 }
 
@@ -32,8 +32,16 @@ class Login extends Component {
     this.setState({ password: e.target.value });
   };
 
-  login = () => {
-    console.log("登陆了");
+  submit = () => {
+    axios.post("/public/login", this.state).then(res => {
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("userInfo", JSON.stringify(res.userInfo));
+      window.token = res.token;
+      window.userInfo = res.userInfo;
+      message.success("登录成功");
+      this.props.updateLoginInfo(res.token, res.userInfo);
+      this.props.history.replace("/");
+    });
   };
 
   render() {
@@ -59,10 +67,9 @@ class Login extends Component {
                 </div>
               </div>
             </div>
-            <Button type="primary" onClick={this.props.dealClick}>
+            <Button type="primary" onClick={this.submit}>
               登录
             </Button>
-            <Link to="/">回到首页</Link>
           </div>
         </div>
       </div>

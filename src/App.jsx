@@ -1,27 +1,16 @@
 import React, { Component } from "react";
-import { Route } from "react-router-dom";
+import { Route, Switch, Redirect } from "react-router-dom";
 import { withRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./redux";
 import Login from "./pages/public/Login";
-import Main from "./pages/main";
+import Main from "./pages/Main";
+import NotFound from "./pages/public/notFound/NotFound";
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.checkRoute(this.props.location.pathname);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.checkRoute(nextProps.location.pathname);
-  }
-
-  checkRoute(currentPath) {
-    // if (currentPath !== "/login") {
-    //   console.log("不在登录页，跳转到登录页去");
-    //   this.props.history.replace("/login");
-    // }
   }
 
   render() {
@@ -31,8 +20,13 @@ class App extends Component {
     return (
       <Provider store={store}>
         <div className="fullScreen" style={mainStyle}>
-          <Route exact path="/" component={Main} />
-          <Route exact path="/login" component={Login} />
+          <Switch>
+            <Route exact path="/" component={Main} />
+            <Route exact path="/public/login" component={Login} />
+            <Route exact path="/404" component={NotFound} />
+            {/* 当前面的路由都匹配不到时就会重定向到/404 */}
+            <Redirect path="/" to="/404" />
+          </Switch>
         </div>
       </Provider>
     );
