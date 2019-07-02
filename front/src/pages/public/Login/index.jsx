@@ -6,6 +6,7 @@ import styles from "./index.module.less";
 import { connect } from "react-redux";
 import { changeLoginInfo, DATA_NAME } from "../../../redux/action/loginInfoAction";
 import axios from "../../../util/httpUtil";
+import { LoginLayout, LOGIN_TYPE } from "../../../layout/LoginLayout";
 
 function mapStateToProps(state) {
   return state[DATA_NAME];
@@ -52,33 +53,12 @@ class Login extends Component {
 
   render() {
     return (
-      <div className="fullScreen flex main-center across-center">
+      <LoginLayout type={LOGIN_TYPE}>
         <div className={styles.main}>
-          <div className={styles.top}>
-            <IconFont type="icon-LC_icon_chat_fill" />
-            <span>FIM</span>
-          </div>
-          <div className={styles.bottom}>
-            <div className={styles.inputArea}>
-              <IconFont type="icon-head" style={{ fontSize: "3em" }} />
-              {/* 用户名密码输入框 */}
-              <div>
-                <div>
-                  <Input placeholder="用户名" onChange={this.usernameInput} />
-                  注册账户
-                </div>
-                <div>
-                  <Input type="password" placeholder="密码" onChange={this.passwordInput} />
-                  找回密码
-                </div>
-              </div>
-            </div>
-            <Button type="primary" onClick={this.submit}>
-              登录
-            </Button>
-          </div>
+          <Input type="text" placeholder="输入邮箱" />
+          <Input type="text" placeholder="验证码" addonAfter={<span className={styles.getCode}>获取验证码</span>} />
         </div>
-      </div>
+      </LoginLayout>
     );
   }
 }
