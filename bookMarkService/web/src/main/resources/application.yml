@@ -1,0 +1,16 @@
+
+spring:
+  mail:
+    host:
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          port: 465
+server:
+  port: 8088
