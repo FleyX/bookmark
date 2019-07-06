@@ -31,7 +31,7 @@ export function LoginLayout({ type, children }) {
     <div className={"fullScreen " + styles.main}>
       <div className={styles.LOGO}>CR</div>
       <div className={styles.content}>
-        {type === RESET_PASSWORD_TYPE ? <div>重置密码</div> : <LoginOrRegister type={type} />}
+        {type === RESET_PASSWORD_TYPE ? <div style={{ fontSize: "0.3rem" }}>重置密码</div> : <LoginOrRegister type={type} />}
         {children}
         {type === RESET_PASSWORD_TYPE ? <Link to="/public/login">返回登录注册</Link> : null}
       </div>

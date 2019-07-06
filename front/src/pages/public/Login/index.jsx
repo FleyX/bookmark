@@ -1,10 +1,11 @@
 import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import queryString from "query-string";
-import { Button, Input, message } from "antd";
+import { Button, Input, message, Checkbox } from "antd";
 import IconFont from "../../../components/IconFont";
 import styles from "./index.module.less";
 import { connect } from "react-redux";
-import { changeLoginInfo, DATA_NAME } from "../../../redux/action/loginInfoAction";
+import { changeLoginInfo, DATA_NAME } from "../../../redux/action/LoginInfoAction.js";
 import axios from "../../../util/httpUtil";
 import { LoginLayout, LOGIN_TYPE } from "../../../layout/LoginLayout";
 
@@ -22,17 +23,15 @@ class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: "",
-      password: ""
+      email: "",
+      password: "",
+      rememberMe: false
     };
     this.query = queryString.parse(window.location.search);
   }
 
-  usernameInput = e => {
-    this.setState({ username: e.target.value });
-  };
-  passwordInput = e => {
-    this.setState({ password: e.target.value });
+  valueChange = e => {
+    this.setState({ [e.target.name]: e.target.value });
   };
 
   submit = () => {
@@ -52,11 +51,21 @@ class Login extends Component {
   };
 
   render() {
+    const { email, password, rememberMe } = this.state;
     return (
       <LoginLayout type={LOGIN_TYPE}>
         <div className={styles.main}>
-          <Input type="text" placeholder="输入邮箱" />
-          <Input type="text" placeholder="验证码" addonAfter={<span className={styles.getCode}>获取验证码</span>} />
+          <Input type="text" size="large" name="email" value={email} onChange={this.valueChange} addonBefore={<IconFont type="icon-mail" style={{ fontSize: "0.3rem" }} />} placeholder="邮箱" />
+          <Input type="text" size="large" name="password" value={password} onChange={this.valueChange} addonBefore={<IconFont type="icon-password" style={{ fontSize: "0.3rem" }} />} placeholder="密码" />
+          <div className={styles.action}>
+            <Checkbox value={rememberMe} name="rememberMe" onChange={this.valueChange}>
+              记住我
+            </Checkbox>
+            <Link to="/public/resetPassword">忘记密码</Link>
+          </div>
+          <Button type="primary" onClick={this.submit} block>
+            登录
+          </Button>
         </div>
       </LoginLayout>
     );

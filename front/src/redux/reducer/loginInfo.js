@@ -1,4 +1,4 @@
-import * as loginAction from "../action/loginInfoAction";
+import * as loginAction from "../action/LoginInfoAction.js";
 
 function getInitData() {
   let token, userInfo;
