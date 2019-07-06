@@ -1,5 +1,6 @@
 package com.fanxb.bookmark.common;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,7 +27,31 @@ public class Constant {
     /**
      * 验证码过期时间
      */
-    public static int VERIFY_CODE_EXPIRE = 15 * 60 * 1000;
+    public static int AUTH_CODE_EXPIRE = 15 * 60 * 1000;
 
+    /**
+     * Description: 生成email存在redis中的key
+     *
+     * @param email 邮箱地址
+     * @return java.lang.String
+     * @author fanxb
+     * @date 2019/7/6 10:56
+     */
+    public static String authCodeKey(String email) {
+        return email + "_authCode";
+    }
 
+    public static boolean isDev = false;
+
+    @Value("${isDev}")
+    public void setIsDev(boolean isDev) {
+        Constant.isDev = isDev;
+    }
+
+    public static String jwtSecret = "";
+
+    @Value("${jwtSecret}")
+    public void setJwtSecret(String jwtSecret) {
+        Constant.jwtSecret = jwtSecret;
+    }
 }

@@ -21,10 +21,12 @@ public class ExceptionHandle {
     @ExceptionHandler(Exception.class)
     public Result handleException(Exception e) {
         logger.error("捕获到错误:", e);
+        CustomException ce;
         if (e instanceof CustomException) {
-            return Result.failed(e.getMessage());
+            ce = (CustomException) e;
         } else {
-            return Result.failed("");
+            ce = new CustomException(e);
         }
+        return new Result(ce.getCode(), ce.getMessage(), null);
     }
 }
