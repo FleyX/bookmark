@@ -1,0 +1,33 @@
+version: "2"
+services: 
+  bookmark-mysql:
+    image: mysql:8.0.16
+    container_name: bookmark-mysql
+    ports: 
+      - 3307:3306
+    networks: 
+      - bookmark
+    volumes: 
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/temp:/var/lib/mysql-files
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+      - /etc/localtime:/etc/localtime
+      - ./timezone:/etc/timezone
+    environment: 
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASS}
+      - MYSQL_DATABASE=bookmark
+  bookmark-redis:
+    image: redis:3.2.10
+    container_name: bookmark-redis
+    volumes: 
+      - /etc/localtime:/etc/localtime
+      - ./timezone:/etc/timezone
+    networks: 
+      - bookmark
+    ports:
+      - 6380:6379
+
+    
+
+networks: 
+  bookmark:
