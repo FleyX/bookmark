@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fanxb.bookmark.business.user.dao.UserDao">
+
+
+    <insert id="addOne">
+        insert into user (username, email, icon, password, createTime, lastLoginTime)
+            value
+            (#{username}, #{email}, #{icon}, #{password}, #{createTime}, #{lastLoginTime})
+    </insert>
+
+    <select id="selectByUsernameOrEmail" resultType="com.fanxb.bookmark.common.entity.User">
+        select
+            userId,
+            username,
+            email,
+            icon,
+            password,
+            createTime
+        from user
+        where username = #{str} or email = #{str}
+    </select>
+
+    <update id="updateLastLoginTime">
+        update user
+        set lastLoginTime = #{time}
+        where userId= #{userId}
+    </update>
+
+
+</mapper>

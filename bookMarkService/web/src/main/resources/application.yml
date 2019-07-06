@@ -1,9 +1,43 @@
-
+isDev: true
+jwtSecret: abcdefgh
+server:
+  port: 8088
+  servlet:
+    context-path: /bookmark/api/
 spring:
+  profiles:
+    active: dev
+  application:
+    name: bookmark
+  flyway:
+    baseline-on-migrate: true
+  cache:
+    type: redis
+  redis:
+    database: 0
+    host: localhost
+    password:
+    timeout: 500ms
+    lettuce:
+      pool:
+        max-active: 20
+        max-wait: 1000ms
+        max-idle: 20
+        min-idle: 2
+  datasource:
+    name: mysql
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      url: jdbc:mysql://localhost:3306/bookmark?useUnicode=true&characterEncoding=utf-8&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+      username: root
+      password: 123456
+      # 其他连接池参数使用默认值
   mail:
     host:
     username:
     password:
+    port: 465
     properties:
       mail:
         smtp:
@@ -11,6 +45,8 @@ spring:
           starttls:
             enable: true
             required: true
-          port: 465
-server:
-  port: 8088
+
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.commons.JakartaCommonsLoggingImpl
+  mapper-locations: classpath:mapper/*.xml
