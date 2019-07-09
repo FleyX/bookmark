@@ -26,12 +26,13 @@ public interface UserDao {
     /**
      * Description: 通过用户名或者email获取用户信息
      *
-     * @param str username/email
+     * @param name username
+     * @param email email
      * @return com.fanxb.bookmark.common.entity.User
      * @author fanxb
      * @date 2019/7/6 16:45
      */
-    User selectByUsernameOrEmail(String str);
+    User selectByUsernameOrEmail(@Param("name") String name,@Param("email") String email);
 
     /**
      * Description: 更新用户上次登录时间

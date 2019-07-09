@@ -18,7 +18,7 @@
             password,
             createTime
         from user
-        where username = #{str} or email = #{str}
+        where username = #{name} or email = #{email}
     </select>
 
     <update id="updateLastLoginTime">

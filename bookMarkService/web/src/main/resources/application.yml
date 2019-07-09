@@ -3,8 +3,14 @@ jwtSecret: abcdefgh
 server:
   port: 8088
   servlet:
-    context-path: /bookmark/api/
+    # 不要在最后加/
+    context-path: /bookmark/api
 spring:
+  servlet:
+    # 表单配置
+    multipart:
+      max-request-size: 10MB
+      max-file-size: 10MB
   profiles:
     active: dev
   application:
@@ -48,5 +54,7 @@ spring:
 
 mybatis:
   configuration:
-    log-impl: org.apache.ibatis.logging.commons.JakartaCommonsLoggingImpl
-  mapper-locations: classpath:mapper/*.xml
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  # classpath后面加*，值里面的*才起作用
+  mapper-locations: classpath*:mapper/*.xml
+debug: false

@@ -8,7 +8,9 @@ package com.fanxb.bookmark.common.exception;
  * @date 2019/7/5 15:49
  */
 public class NoLoginException extends CustomException {
-    NoLoginException() {
-        super("您尚未登录", -1, null);
+    public static final int CODE = -1;
+    public static final String MESSAGE= "您尚未登录";
+    public NoLoginException() {
+        super(MESSAGE, CODE, null);
     }
 }

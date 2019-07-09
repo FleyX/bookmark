@@ -75,7 +75,16 @@ public class UserService {
             throw new CustomException("验证码错误");
         }
         RedisUtil.delete(codeKey);
-        User user = new User();
+        User user = userDao.selectByUsernameOrEmail(body.getUsername(), body.getEmail());
+        if (user != null) {
+            if (user.getUsername().equals(body.getUsername())) {
+                throw new FormDataException("用户名已经被注册");
+            }
+            if (user.getEmail().equals(body.getEmail())) {
+                throw new FormDataException("邮箱已经被注册");
+            }
+        }
+        user = new User();
         user.setUsername(body.getUsername());
         user.setEmail(body.getEmail());
         user.setIcon(DEFAULT_ICON);
@@ -94,7 +103,7 @@ public class UserService {
      * @date 2019/7/6 16:37
      */
     public LoginRes login(LoginBody body) {
-        User userInfo = userDao.selectByUsernameOrEmail(body.getStr());
+        User userInfo = userDao.selectByUsernameOrEmail(body.getStr(), body.getStr());
         if (userInfo == null) {
             throw new FormDataException("账号/密码错误");
         }

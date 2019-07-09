@@ -12,7 +12,6 @@ import lombok.Data;
 @Data
 public class UserContext {
 
-    private User user;
+    private int userId;
     private String jwt;
-    private String sessionId;
 }

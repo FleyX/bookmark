@@ -4,7 +4,6 @@ import com.fanxb.bookmark.business.user.entity.LoginBody;
 import com.fanxb.bookmark.business.user.entity.RegisterBody;
 import com.fanxb.bookmark.business.user.service.UserService;
 import com.fanxb.bookmark.common.entity.Result;
-import com.fanxb.bookmark.common.entity.User;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +48,6 @@ public class UserController {
     public Result login(@RequestBody LoginBody body) {
         return Result.success(userService.login(body));
     }
-
 
     /**
      * Description: 获取验证码

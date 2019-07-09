@@ -1,12 +1,31 @@
 package com.fanxb.bookmark.common.filter;
 
+import com.alibaba.fastjson.JSON;
+import com.auth0.jwt.interfaces.Claim;
+import com.fanxb.bookmark.common.Constant;
+import com.fanxb.bookmark.common.dao.UrlDao;
+import com.fanxb.bookmark.common.entity.Result;
+import com.fanxb.bookmark.common.entity.Url;
+import com.fanxb.bookmark.common.entity.UserContext;
+import com.fanxb.bookmark.common.exception.NoLoginException;
+import com.fanxb.bookmark.common.util.JwtUtil;
+import com.fanxb.bookmark.common.util.StringUtil;
+import com.fanxb.bookmark.common.util.UserContextHolder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 类功能简述：
@@ -17,14 +36,26 @@ import java.io.IOException;
  */
 
 @Component
-@WebFilter(urlPatterns = "/*", filterName = "loginFilter")
 @Slf4j
-@Order(100)
+@WebFilter(urlPatterns = "/*", filterName = "loginFilter")
+@Order(1000)
 public class LoginFilter implements Filter {
+
+    @Value("${server.servlet.context-path}")
+    private String urlPrefix;
+
+    @Value("${jwtSecret}")
+    private String secret;
+
+    @Autowired
+    private UrlDao urlDao;
+
+    private static AntPathMatcher matcher = new AntPathMatcher();
+
+    volatile private static List<Url> publicUrl;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-
     }
 
     @Override
@@ -34,6 +65,56 @@ public class LoginFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        filterChain.doFilter(servletRequest, servletResponse);
+        UserContextHolder.remove();
+        List<Url> publicUrl = this.getPublicUrl();
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
+        String requestUrl = request.getRequestURI().replace(urlPrefix, "");
+        String requestMethod = request.getMethod();
+        for (Url url : publicUrl) {
+            if (url.getMethod().equalsIgnoreCase(requestMethod) && matcher.match(url.getUrl(), requestUrl)) {
+                filterChain.doFilter(servletRequest, servletResponse);
+                return;
+            }
+        }
+        if (this.checkJwt(request.getHeader(Constant.JWT_KEY))) {
+            filterChain.doFilter(servletRequest, servletResponse);
+        } else {
+            HttpServletResponse response = (HttpServletResponse) servletResponse;
+            response.setStatus(HttpStatus.OK.value());
+            response.setContentType("application/json");
+            response.setCharacterEncoding("utf-8");
+            response.getWriter().write(JSON.toJSONString(new Result(NoLoginException.CODE, NoLoginException.MESSAGE, null)));
+        }
+
+    }
+
+    private List<Url> getPublicUrl() {
+        if (publicUrl == null) {
+            synchronized (LoginFilter.class) {
+                if (publicUrl == null) {
+                    publicUrl = this.urlDao.getPublicUrl();
+                }
+            }
+        }
+        return publicUrl;
+    }
+
+    private boolean checkJwt(String jwt) {
+        if (StringUtil.isEmpty(jwt)) {
+            log.error("jwt为空");
+            return false;
+        }
+        try {
+            Map<String, Claim> map = JwtUtil.decode(jwt, secret);
+            int userId = Integer.valueOf(map.get("userId").asString());
+            UserContext context = new UserContext();
+            context.setJwt(jwt);
+            context.setUserId(userId);
+            UserContextHolder.set(context);
+            return true;
+        } catch (Exception e) {
+            log.error("jwt解密失败：{}", jwt, e);
+            return false;
+        }
     }
 }
