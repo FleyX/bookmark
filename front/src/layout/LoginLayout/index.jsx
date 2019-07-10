@@ -1,3 +1,6 @@
+/**
+ * 登陆/注册/重置密码 通用布局
+ */
 import React from "react";
 import styles from "./index.module.less";
 import { Link } from "react-router-dom";
@@ -29,7 +32,9 @@ const LoginOrRegister = ({ type }) => {
 export function LoginLayout({ type, children }) {
   return (
     <div className={"fullScreen " + styles.main}>
-      <div className={styles.LOGO}>CR</div>
+      <div className={styles.LOGO}>
+        <img src="/img/bookmarkLogo.png" alt="logo" />
+      </div>
       <div className={styles.content}>
         {type === RESET_PASSWORD_TYPE ? <div style={{ fontSize: "0.3rem" }}>重置密码</div> : <LoginOrRegister type={type} />}
         {children}

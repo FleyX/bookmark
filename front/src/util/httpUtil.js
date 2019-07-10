@@ -1,43 +1,55 @@
 import { notification } from "antd";
+import { createBrowserHistory } from "history";
 import axios from "axios";
+
+const history = createBrowserHistory();
 
 //定义http实例
 const instance = axios.create({
   //   baseURL: "http://ali.tapme.top:8081/mock/16/chat/api/",
   headers: {
-    token: window.token
+    "jwt-token": window.token
   }
 });
 
 //实例添加拦截器
 instance.interceptors.response.use(
   function(res) {
-    return res.data;
+    console.log(res);
+    const data = res.data;
+    if (data.code === 1) {
+      return data.data;
+    } else if (data.code === -2) {
+      return Promise.reject(data.message);
+    } else {
+      showError(data);
+      return Promise.reject(data.message);
+    }
   },
   function(error) {
-    console.log(error);
-    let message, description;
-    if (error.response === undefined) {
-      message = "出问题啦";
-      description = "你的网络有问题";
-    } else {
-      message = "出问题啦:" + error.response.status;
-      description = JSON.stringify(error.response.data);
-      //401跳转到登录页面
-    }
-    notification.open({
-      message,
-      description,
-      duration: 2
-    });
-    setTimeout(() => {
-      if (error.response && error.response.status === 401) {
-        let redirect = encodeURIComponent(window.location.pathname + window.location.search);
-        window.location.replace("/public/login?redirect=" + redirect);
-      }
-    }, 1000);
-    return Promise.reject(error);
+    showError(error.response);
   }
 );
+
+function showError(response) {
+  let description,
+    message = "出问题啦";
+  if (response) {
+    description = response.message;
+    if (response.code === -1) {
+      setTimeout(() => {
+        let redirect = encodeURIComponent(window.location.pathname + window.location.search);
+        history.replace("/public/login?redirect=" + redirect);
+      }, 1000);
+    }
+  } else {
+    description = "无网络连接";
+  }
+  notification.open({
+    message,
+    description,
+    duration: 2
+  });
+}
 
 export default instance;

@@ -3,11 +3,12 @@ import { Route, Switch, Redirect } from "react-router-dom";
 import { withRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./redux";
-import Main from "./pages/index";
 import NotFound from "./pages/public/notFound/NotFound";
 
 import Login from "./pages/public/Login";
 import RegisterOrReset from "./pages/public/RegisterOrReset";
+
+import ManageOverview from "./pages/manage/OverView";
 
 class App extends Component {
   constructor(props) {
@@ -23,7 +24,10 @@ class App extends Component {
       <Provider store={store}>
         <div className="fullScreen" style={mainStyle}>
           <Switch>
-            <Route exact path="/" component={Main} />
+            <Redirect exact path="/" to="/manage/overview" />
+            <Route exact path="/manage/overview" component={ManageOverview} />
+
+            {/* 公共页面 */}
             <Route exact path="/public/login" component={Login} />
             <Route exact path="/public/register" component={RegisterOrReset} />
             <Route exact path="/public/resetPassword" component={RegisterOrReset} />

@@ -23,7 +23,7 @@ class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      email: "",
+      str: "",
       password: "",
       rememberMe: false
     };
@@ -35,28 +35,51 @@ class Login extends Component {
   };
 
   submit = () => {
-    axios.post("/public/login", this.state).then(res => {
-      localStorage.setItem("token", res.token);
-      localStorage.setItem("userInfo", JSON.stringify(res.userInfo));
-      window.token = res.token;
-      window.userInfo = res.userInfo;
-      message.success("登录成功");
-      this.props.updateLoginInfo(res.token, res.userInfo);
-      if (this.query.redirect) {
-        this.props.history.replace(decodeURIComponent(this.query.redirect));
-      } else {
-        this.props.history.replace("/");
-      }
-    });
+    axios
+      .post("/user/login", this.state)
+      .then(res => {
+        const token = res.token;
+        delete res.token;
+        localStorage.setItem("token", token);
+        localStorage.setItem("userInfo", JSON.stringify(res));
+        window.token = token;
+        window.userInfo = res;
+        message.success("登录成功");
+        this.props.updateLoginInfo(token, res);
+        if (this.query.redirect) {
+          this.props.history.replace(decodeURIComponent(this.query.redirect));
+        } else {
+          this.props.history.replace("/");
+        }
+      })
+      .catch(error => {
+        message.error(error);
+      });
   };
 
   render() {
-    const { email, password, rememberMe } = this.state;
+    const { str, password, rememberMe } = this.state;
     return (
       <LoginLayout type={LOGIN_TYPE}>
         <div className={styles.main}>
-          <Input type="text" size="large" name="email" value={email} onChange={this.valueChange} addonBefore={<IconFont type="icon-mail" style={{ fontSize: "0.3rem" }} />} placeholder="邮箱" />
-          <Input type="text" size="large" name="password" value={password} onChange={this.valueChange} addonBefore={<IconFont type="icon-password" style={{ fontSize: "0.3rem" }} />} placeholder="密码" />
+          <Input
+            type="text"
+            size="large"
+            name="str"
+            value={str}
+            onChange={this.valueChange}
+            addonBefore={<IconFont type="icon-mail" style={{ fontSize: "0.3rem" }} />}
+            placeholder="邮箱或者用户名"
+          />
+          <Input.Password
+            type="password"
+            size="large"
+            name="password"
+            value={password}
+            onChange={this.valueChange}
+            addonBefore={<IconFont type="icon-password" style={{ fontSize: "0.3rem" }} />}
+            placeholder="密码"
+          />
           <div className={styles.action}>
             <Checkbox value={rememberMe} name="rememberMe" onChange={this.valueChange}>
               记住我
