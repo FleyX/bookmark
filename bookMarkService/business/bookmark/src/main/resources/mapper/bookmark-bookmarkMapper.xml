@@ -28,5 +28,19 @@
         where userId = #{userId} and path = #{path}
     </select>
 
+    <select id="getListByUserId" resultType="com.fanxb.bookmark.common.entity.Bookmark">
+        select
+            bookmarkId,
+            path,
+            type,
+            name,
+            url,
+            icon,
+            sort
+        from bookmark
+        where userId = #{userId}
+        order by path, sort
+    </select>
+
 
 </mapper>

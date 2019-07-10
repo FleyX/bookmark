@@ -19,12 +19,19 @@
             createTime
         from user
         where username = #{name} or email = #{email}
+        limit 1
     </select>
 
     <update id="updateLastLoginTime">
         update user
         set lastLoginTime = #{time}
-        where userId= #{userId}
+        where userId = #{userId}
+    </update>
+
+    <update id="resetPassword">
+        update user
+        set password = #{password}
+        where email = #{email}
     </update>
 
 

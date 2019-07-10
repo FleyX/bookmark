@@ -11,6 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 类功能简述：
@@ -30,8 +34,16 @@ public class BookmarkService {
     @Autowired
     private BookmarkDao bookmarkDao;
 
+    /**
+     * Description: 解析书签文件
+     *
+     * @param stream 输入流
+     * @param path   存放路径
+     * @author fanxb
+     * @date 2019/7/9 18:44
+     */
     @Transactional(rollbackFor = Exception.class)
-    public void parseBookmarkFile(InputStream stream, String path) throws Exception {
+    public void parseBookmarkFile(int userId, InputStream stream, String path) throws Exception {
         Document doc = Jsoup.parse(stream, "utf-8", "");
         Elements elements = doc.select("html>body>dl>dt");
         //获取当前层sort最大值
@@ -45,11 +57,40 @@ public class BookmarkService {
                 Elements firstChildren = elements.get(0).child(1).children();
                 count = firstChildren.size();
                 for (int j = 0; j < count; j++) {
-                    dealBookmark(firstChildren.get(j), path, sortBase + j);
+                    dealBookmark(userId, firstChildren.get(j), path, sortBase + j);
                 }
             } else {
-                dealBookmark(elements.get(i), path, sortBase + count + i - 1);
+                dealBookmark(userId, elements.get(i), path, sortBase + count + i - 1);
             }
+        }
+    }
+
+    /**
+     * Description: 获取某个用户的书签树
+     *
+     * @param userId 用户id
+     * @return void
+     * @author fanxb
+     * @date 2019/7/9 18:45
+     */
+    public List<Bookmark> getOneBookmarkTree(int userId) {
+        List<Bookmark> list = bookmarkDao.getListByUserId(userId);
+        Map<String, List<Bookmark>> map = new HashMap<>(50);
+        list.forEach(item -> {
+            map.computeIfAbsent(item.getPath(), k -> new ArrayList<>());
+            map.get(item.getPath()).add(item);
+        });
+        List<Bookmark> res = map.get("");
+        res.forEach(item -> insertToBookmarkTree(item, map));
+        return res;
+    }
+
+    private void insertToBookmarkTree(Bookmark node, Map<String, List<Bookmark>> map) {
+        String path = node.getPath();
+        String key = path + (path.length() == 0 ? "" : ".") + node.getBookmarkId().toString();
+        if (map.containsKey(key)) {
+            node.setChildren(map.get(key));
+            node.getChildren().forEach(item -> insertToBookmarkTree(item, map));
         }
     }
 
@@ -62,20 +103,20 @@ public class BookmarkService {
      * @author fanxb
      * @date 2019/7/8 14:49
      */
-    private void dealBookmark(Element ele, String path, int sort) {
+    private void dealBookmark(int userId, Element ele, String path, int sort) {
         if (!DT.equalsIgnoreCase(ele.tagName())) {
             return;
         }
         Element first = ele.child(0);
         if (A.equalsIgnoreCase(first.tagName())) {
             //说明为链接
-            Bookmark node = new Bookmark(1, path, first.ownText(), first.attr("href"), first.attr("icon")
+            Bookmark node = new Bookmark(userId, path, first.ownText(), first.attr("href"), first.attr("icon")
                     , Long.valueOf(first.attr("add_date")) * 1000, sort);
             //存入数据库
             insertOne(node);
         } else {
             //说明为文件夹
-            Bookmark node = new Bookmark(1, path, first.ownText(), Long.valueOf(first.attr("add_date")) * 1000, sort);
+            Bookmark node = new Bookmark(userId, path, first.ownText(), Long.valueOf(first.attr("add_date")) * 1000, sort);
             Integer sortBase = 0;
             if (insertOne(node)) {
                 sortBase = bookmarkDao.selectMaxSort(node.getUserId(), path);
@@ -86,13 +127,13 @@ public class BookmarkService {
             String childPath = path.length() == 0 ? node.getBookmarkId().toString() : path + "." + node.getBookmarkId();
             Elements children = ele.child(1).children();
             for (int i = 0, size = children.size(); i < size; i++) {
-                dealBookmark(children.get(i), childPath, sortBase + i + 1);
+                dealBookmark(userId, children.get(i), childPath, sortBase + i + 1);
             }
         }
     }
 
     /**
-     * Description:
+     * Description: 插入一条书签，如果已经存在同名书签将跳过
      *
      * @param node node
      * @return boolean 如果已经存在返回true，否则false

@@ -6,6 +6,8 @@ server:
     # 不要在最后加/
     context-path: /bookmark/api
 spring:
+  jackson:
+    default-property-inclusion: non_null
   servlet:
     # 表单配置
     multipart:

@@ -2,7 +2,7 @@ package com.fanxb.bookmark.common.entity;
 
 import lombok.Data;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 类功能简述：书签树
@@ -20,16 +20,16 @@ public class Bookmark {
     /**
      * 类型：0：文件夹，1：具体的书签
      */
-    private int type;
-    private int userId;
+    private Integer type;
+    private Integer userId;
     private String path;
     private String name;
     private String url;
     private String icon;
-    private int sort;
-    private long addTime;
-    private long createTime;
-    private ArrayList<Bookmark> children;
+    private Integer sort;
+    private Long addTime;
+    private Long createTime;
+    private List<Bookmark> children;
 
     public Bookmark() {
     }

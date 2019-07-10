@@ -2,6 +2,7 @@ package com.fanxb.bookmark.business.bookmark.controller;
 
 import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
 import com.fanxb.bookmark.common.entity.Result;
+import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,8 +29,9 @@ public class BookmarkController {
      * @date 2019/7/9 14:20
      */
     @GetMapping("/currentUser")
-    public Result getUserBookmarkTree() {
-        return null;
+    public Result getCurrentUserBookmarkTree() {
+        int userId = UserContextHolder.get().getUserId();
+        return Result.success(bookmarkService.getOneBookmarkTree(userId));
     }
 
     /**
@@ -43,7 +45,7 @@ public class BookmarkController {
      */
     @PutMapping("/uploadBookmarkFile")
     public Result uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("path") String path) throws Exception {
-        bookmarkService.parseBookmarkFile(file.getInputStream(), path);
+        bookmarkService.parseBookmarkFile(UserContextHolder.get().getUserId(), file.getInputStream(), path);
         return Result.success(null);
     }
 

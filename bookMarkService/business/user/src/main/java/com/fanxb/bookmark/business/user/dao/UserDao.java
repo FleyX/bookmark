@@ -26,13 +26,13 @@ public interface UserDao {
     /**
      * Description: 通过用户名或者email获取用户信息
      *
-     * @param name username
+     * @param name  username
      * @param email email
      * @return com.fanxb.bookmark.common.entity.User
      * @author fanxb
      * @date 2019/7/6 16:45
      */
-    User selectByUsernameOrEmail(@Param("name") String name,@Param("email") String email);
+    User selectByUsernameOrEmail(@Param("name") String name, @Param("email") String email);
 
     /**
      * Description: 更新用户上次登录时间
@@ -43,4 +43,14 @@ public interface UserDao {
      * @date 2019/7/6 16:46
      */
     void updateLastLoginTime(@Param("time") long time, @Param("userId") int userId);
+
+    /**
+     * Description: 更新一个参数
+     *
+     * @param password 新密码
+     * @param email  邮箱
+     * @author fanxb
+     * @date 2019/7/9 20:03
+     */
+    void resetPassword(@Param("password") String password,@Param("email") String email);
 }

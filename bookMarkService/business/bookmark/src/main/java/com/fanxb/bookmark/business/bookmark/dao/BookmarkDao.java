@@ -4,6 +4,8 @@ import com.fanxb.bookmark.common.entity.Bookmark;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * 类功能简述：
  * 类功能详述：
@@ -46,4 +48,14 @@ public interface BookmarkDao {
      * @date 2019/7/8 17:35
      */
     Integer selectMaxSort(@Param("userId") int userId, @Param("path") String path);
+
+    /**
+     * Description: 根据用户id获取其所有数据
+     *
+     * @param userId userid
+     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @author fanxb
+     * @date 2019/7/9 18:55
+     */
+    List<Bookmark> getListByUserId(int userId);
 }

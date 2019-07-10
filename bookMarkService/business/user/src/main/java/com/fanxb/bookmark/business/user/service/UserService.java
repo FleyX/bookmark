@@ -34,7 +34,7 @@ public class UserService {
     /**
      * 长期jwt失效时间
      */
-    private static final long LONG_EXPIRE_TIME = 30 * TimeUtil.DAY_MS;
+    private static final long LONG_EXPIRE_TIME = 30L * TimeUtil.DAY_MS;
 
     @Autowired
     private UserDao userDao;
@@ -121,5 +121,27 @@ public class UserService {
         res.setIcon(userInfo.getIcon());
         userDao.updateLastLoginTime(System.currentTimeMillis(), userInfo.getUserId());
         return res;
+    }
+
+    /**
+     * Description: 重置密码
+     *
+     * @param body 重置密码 由于参数和注册差不多，所以用同一个表单
+     * @author fanxb
+     * @date 2019/7/9 19:59
+     */
+    public void resetPassword(RegisterBody body) {
+        User user = userDao.selectByUsernameOrEmail(body.getEmail(), body.getEmail());
+        if (user == null) {
+            throw new FormDataException("用户不存在");
+        }
+        String codeKey = Constant.authCodeKey(body.getEmail());
+        String realCode = RedisUtil.get(codeKey, String.class);
+        if (StringUtil.isEmpty(realCode) || (!realCode.equals(body.getAuthCode()))) {
+            throw new FormDataException("验证码错误");
+        }
+        RedisUtil.delete(codeKey);
+        String newPassword = HashUtil.sha1(HashUtil.md5(body.getPassword()));
+        userDao.resetPassword(newPassword, body.getEmail());
     }
 }

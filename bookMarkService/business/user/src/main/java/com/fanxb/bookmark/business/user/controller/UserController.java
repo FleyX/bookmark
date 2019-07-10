@@ -23,6 +23,20 @@ public class UserController {
     private UserService userService;
 
     /**
+     * Description: 获取验证码
+     *
+     * @param email 邮箱
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2019/7/5 17:37
+     */
+    @GetMapping("/authCode")
+    public Result getAuthCode(@Param("email") String email) {
+        userService.sendAuthCode(email);
+        return Result.success(null);
+    }
+
+    /**
      * Description: 注册用户
      *
      * @param body 注册表单
@@ -50,16 +64,18 @@ public class UserController {
     }
 
     /**
-     * Description: 获取验证码
+     * Description: 重置密码
      *
-     * @param email 邮箱
+     * @param body 重置密码表单
      * @return com.fanxb.bookmark.common.entity.Result
      * @author fanxb
-     * @date 2019/7/5 17:37
+     * @date 2019/7/9 19:57
      */
-    @GetMapping("/authCode")
-    public Result getAuthCode(@Param("email") String email) {
-        userService.sendAuthCode(email);
+    @PostMapping("/resetPassword")
+    public Result resetPassword(@RequestBody RegisterBody body) {
+        userService.resetPassword(body);
         return Result.success(null);
     }
+
+
 }
