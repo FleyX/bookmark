@@ -6,13 +6,22 @@ const history = createBrowserHistory();
 
 //定义http实例
 const instance = axios.create({
-  //   baseURL: "http://ali.tapme.top:8081/mock/16/chat/api/",
-  headers: {
-    "jwt-token": window.token
-  }
+  baseURL: "/bookmark/api",
+  timeout: 5000
 });
 
-//实例添加拦截器
+//实例添加请求拦截器
+instance.interceptors.request.use(
+  req => {
+    req.headers["jwt-token"] = window.token;
+    return req;
+  },
+  error => {
+    console.log(error);
+  }
+);
+
+//实例添加响应拦截器
 instance.interceptors.response.use(
   function(res) {
     console.log(res);
@@ -27,7 +36,9 @@ instance.interceptors.response.use(
     }
   },
   function(error) {
+    console.log(error);
     showError(error.response);
+    return Promise.reject(JSON.stringify(error));
   }
 );
 
