@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
@@ -65,11 +66,26 @@ public class LoginFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
+        // 指定允许其他域名访问
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Max-Age", "0");
+        // 响应类型
+        response.setHeader("Access-Control-Allow-Methods", "POST,GET,DELETE,OPTIONS,DELETE");
+        // 响应头设置
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type,jwt-token");
+
+        // 如果是option请求直接返回200
+        String requestMethod = request.getMethod();
+        if (requestMethod.equalsIgnoreCase(HttpMethod.OPTIONS.name())) {
+            response.setStatus(HttpStatus.OK.value());
+            return;
+        }
+
         UserContextHolder.remove();
         List<Url> publicUrl = this.getPublicUrl();
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
         String requestUrl = request.getRequestURI().replace(urlPrefix, "");
-        String requestMethod = request.getMethod();
         for (Url url : publicUrl) {
             if (url.getMethod().equalsIgnoreCase(requestMethod) && matcher.match(url.getUrl(), requestUrl)) {
                 filterChain.doFilter(servletRequest, servletResponse);
@@ -79,7 +95,6 @@ public class LoginFilter implements Filter {
         if (this.checkJwt(request.getHeader(Constant.JWT_KEY))) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
-            HttpServletResponse response = (HttpServletResponse) servletResponse;
             response.setStatus(HttpStatus.OK.value());
             response.setContentType("application/json");
             response.setCharacterEncoding("utf-8");
