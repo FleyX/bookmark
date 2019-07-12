@@ -53,6 +53,8 @@ class MainLayout extends React.Component {
         this.props.updateLoginInfo(null, null);
         localStorage.removeItem("token");
         localStorage.removeItem("userInfo");
+        delete window.token;
+        delete window.userInfo;
         history.replace("/");
         break;
       default:

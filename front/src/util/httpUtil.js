@@ -21,7 +21,6 @@ instance.interceptors.request.use(
 //实例添加响应拦截器
 instance.interceptors.response.use(
   function(res) {
-    console.log(res);
     const data = res.data;
     if (data.code === 1) {
       return data.data;
