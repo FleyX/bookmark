@@ -1,8 +1,5 @@
 import { notification } from "antd";
-import { createBrowserHistory } from "history";
 import axios from "axios";
-
-const history = createBrowserHistory();
 
 //定义http实例
 const instance = axios.create({
@@ -48,10 +45,8 @@ function showError(response) {
   if (response) {
     description = response.message;
     if (response.code === -1) {
-      setTimeout(() => {
-        let redirect = encodeURIComponent(window.location.pathname + window.location.search);
-        history.replace("/public/login?redirect=" + redirect);
-      }, 1000);
+      let redirect = encodeURIComponent(window.location.pathname + window.location.search);
+      window.reactHistory.replace("/public/login?redirect=" + redirect);
     }
   } else {
     description = "无网络连接";
