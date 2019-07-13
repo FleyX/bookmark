@@ -64,8 +64,15 @@ export function showAddModel() {
   this.setState({ isShowModal: true });
 }
 
+/**
+ * 新增书签
+ */
 export function addOne() {
   console.log(1);
+  if (this.state.addType === 2) {
+    addHtmlFile();
+    return;
+  }
   let body = {
     type: this.state.addType,
     path: parentNode == null ? "" : parentNode.path + "." + parentNode.bookmarkId,
@@ -86,6 +93,10 @@ export function addOne() {
     this.data[body.path] = arr;
     this.setState({ treeData: [...this.state.treeData], addType: 0, addName: "", addValue: "", isShowModal: false });
   });
+}
+
+export function addHtmlFile() {
+  
 }
 
 /**
