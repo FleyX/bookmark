@@ -2,6 +2,7 @@ package com.fanxb.bookmark.business.bookmark.service;
 
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.common.entity.Bookmark;
+import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -73,26 +74,60 @@ public class BookmarkService {
      * @author fanxb
      * @date 2019/7/9 18:45
      */
-    public List<Bookmark> getOneBookmarkTree(int userId) {
+    public Map<String, List<Bookmark>> getOneBookmarkTree(int userId) {
         List<Bookmark> list = bookmarkDao.getListByUserId(userId);
         Map<String, List<Bookmark>> map = new HashMap<>(50);
         list.forEach(item -> {
             map.computeIfAbsent(item.getPath(), k -> new ArrayList<>());
             map.get(item.getPath()).add(item);
         });
-        List<Bookmark> res = map.get("");
-        res.forEach(item -> insertToBookmarkTree(item, map));
-        return res;
+        return map;
+//        if (map.size() == 0) {
+//            return new ArrayList<>();
+//        } else {
+//            List<Bookmark> res = map.get("");
+//            res.forEach(item -> insertToBookmarkTree(item, map));
+//            return res;
+//        }
     }
 
-    private void insertToBookmarkTree(Bookmark node, Map<String, List<Bookmark>> map) {
-        String path = node.getPath();
-        String key = path + (path.length() == 0 ? "" : ".") + node.getBookmarkId().toString();
-        if (map.containsKey(key)) {
-            node.setChildren(map.get(key));
-            node.getChildren().forEach(item -> insertToBookmarkTree(item, map));
+    /**
+     * Description: 批量删除书签
+     *
+     * @param userId         用户id
+     * @param folderIdList   书签文件夹id list
+     * @param bookmarkIdList 书签id list
+     * @author fanxb
+     * @date 2019/7/12 14:09
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void batchDelete(int userId, List<Integer> folderIdList, List<Integer> bookmarkIdList) {
+        for (Integer item : folderIdList) {
+            bookmarkDao.deleteUserFolder(userId, item);
+            bookmarkIdList.add(item);
         }
+        bookmarkDao.deleteUserBookmark(userId, bookmarkIdList);
     }
+
+    /**
+     * Description: 详情
+     *
+     * @param bookmark 插入一条记录
+     * @return com.fanxb.bookmark.common.entity.Bookmark
+     * @author fanxb
+     * @date 2019/7/12 17:18
+     */
+    public Bookmark addOne(Bookmark bookmark) {
+        int userId = UserContextHolder.get().getUserId();
+        Integer sort = bookmarkDao.selectMaxSort(userId, bookmark.getPath());
+        bookmark.setSort(sort == null ? 1 : sort + 1);
+        bookmark.setUserId(userId);
+        bookmark.setCreateTime(System.currentTimeMillis());
+        bookmark.setAddTime(bookmark.getCreateTime());
+        bookmarkDao.insertOne(bookmark);
+        return bookmark;
+    }
+
 
     /**
      * Description: 处理html节点，解析出文件夹和书签
@@ -124,7 +159,7 @@ public class BookmarkService {
                     sortBase = 0;
                 }
             }
-            String childPath = path.length() == 0 ? node.getBookmarkId().toString() : path + "." + node.getBookmarkId();
+            String childPath = path + "." + node.getBookmarkId();
             Elements children = ele.child(1).children();
             for (int i = 0, size = children.size(); i < size; i++) {
                 dealBookmark(userId, children.get(i), childPath, sortBase + i + 1);
@@ -151,4 +186,5 @@ public class BookmarkService {
             return true;
         }
     }
+
 }

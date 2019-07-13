@@ -24,8 +24,8 @@ public class Bookmark {
     private Integer userId;
     private String path;
     private String name;
-    private String url;
-    private String icon;
+    private String url="";
+    private String icon="";
     private Integer sort;
     private Long addTime;
     private Long createTime;

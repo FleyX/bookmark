@@ -58,4 +58,25 @@ public interface BookmarkDao {
      * @date 2019/7/9 18:55
      */
     List<Bookmark> getListByUserId(int userId);
+
+    /**
+     * Description: 删除某用户某个书签文件下所有数据
+     *
+     * @param userId   用户id
+     * @param folderId 文件夹id
+     * @return void
+     * @author fanxb
+     * @date 2019/7/12 14:13
+     */
+    void deleteUserFolder(@Param("userId") int userId, @Param("folderId") int folderId);
+
+    /**
+     * Description: 删除用户书签
+     *
+     * @param userId      用户id
+     * @param bookmarkIds 书签id
+     * @author fanxb
+     * @date 2019/7/12 17:24
+     */
+    void deleteUserBookmark(@Param("userId") int userId, @Param("bookmarkIds") List<Integer> bookmarkIds);
 }

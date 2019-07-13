@@ -42,5 +42,24 @@
         order by path, sort
     </select>
 
+    <delete id="deleteUserFolder">
+        DELETE
+        FROM
+            bookmark
+        WHERE
+            userId = #{userId}
+            and path LIKE (SELECT a.path
+                           FROM (SELECT CONCAT(path, '.', '${folderId}', '%') AS path
+                                 FROM bookmark
+                                 WHERE bookmarkId = #{folderId}) a);
+    </delete>
+
+    <delete id="deleteUserBookmark">
+        delete from bookmark where userId = #{userId} and bookmarkId in
+        <foreach collection="bookmarkIds" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
 
 </mapper>
