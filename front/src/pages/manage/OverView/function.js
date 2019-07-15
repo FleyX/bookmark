@@ -1,5 +1,9 @@
 import httpUtil from "../../../util/httpUtil";
-import { Modal, message } from "antd";
+import React from "react";
+import { Modal, Button, Tooltip, Tree } from "antd";
+import styles from "./index.module.less";
+import IconFont from "../../../components/IconFont";
+const { TreeNode } = Tree;
 
 /**
  * 选中的文件夹id列表
@@ -9,11 +13,6 @@ let folderIdList = [];
  * 选中的书签id列表
  */
 let bookmarkIdList = [];
-
-/**
- * 新增书签的父节点node
- */
-let parentNode = null;
 
 /**
  * 展开/关闭
@@ -39,71 +38,108 @@ export function onCheck(keys, data) {
   this.setState({ checkedKeys: keys });
   bookmarkIdList = [];
   folderIdList = [];
-  parentNode = null;
   data.checkedNodes.forEach(item => {
     const bookmark = item.props.dataRef;
-    parentNode = bookmark;
     bookmark.type === 0 ? bookmarkIdList.push(bookmark.bookmarkId) : folderIdList.push(bookmark.bookmarkId);
   });
 }
 
 /**
- * 弹出新增modal
+ * 渲染树节点中节点内容
+ * @param {*} item
  */
-export function showAddModel() {
-  if (this.state.checkedKeys.length > 1) {
-    message.error("选中过多");
-    return;
-  } else if (this.state.checkedKeys.length === 1) {
-    const id = this.state.checkedKeys[0];
-    if (bookmarkIdList.indexOf(parseInt(id)) > -1) {
-      message.error("只能选择文件夹节点");
-      return;
-    }
-  }
-  this.setState({ isShowModal: true });
+export function renderNodeContent(item) {
+  const { isEdit } = this.state;
+  // 节点内容后面的操作按钮
+  const btns = (
+    <div className={styles.btns}>
+      {item.type === 0 ? (
+        <Button
+          size="small"
+          className="copy-to-board"
+          data-clipboard-text={item.url}
+          type="primary"
+          name="copy"
+          icon="copy"
+          shape="circle"
+          title="点击复制url"
+        />
+      ) : null}
+      {item.type === 1 ? <Button size="small" type="primary" icon="plus" shape="circle" onClick={this.addOne.bind(this, item)} /> : null}
+      <Button size="small" type="danger" icon="delete" shape="circle" onClick={deleteOne.bind(this, item)} />
+    </div>
+  );
+  return (
+    <span style={{ display: "inline-block" }}>
+      <Tooltip placement="bottom" title={item.url}>
+        <span>{item.name}</span>
+      </Tooltip>
+      {isEdit ? btns : null}
+    </span>
+  );
 }
 
 /**
- * 新增书签
+ * 渲染树节点
+ * @param {*} items
  */
-export function addOne() {
-  console.log(1);
-  if (this.state.addType === 2) {
-    addHtmlFile();
-    return;
+export function renderTreeNodes(items) {
+  if (!(items && items.length >= 0)) {
+    return null;
   }
-  let body = {
-    type: this.state.addType,
-    path: parentNode == null ? "" : parentNode.path + "." + parentNode.bookmarkId,
-    name: this.state.addName,
-    url: this.state.addValue
-  };
-  httpUtil.put("/bookmark", body).then(res => {
-    let arr;
-    if (parentNode == null) {
-      arr = this.data[""] ? this.data[""] : [];
-    } else {
-      arr = this.data[body.path] ? this.data[body.path] : [];
+  return items.map(item => {
+    const isLeaf = item.type === 0;
+    if (!isLeaf) {
+      return (
+        <TreeNode
+          icon={<IconFont type="icon-folder" />}
+          isLeaf={isLeaf}
+          title={renderNodeContent.call(this, item)}
+          key={item.bookmarkId}
+          dataRef={item}
+        >
+          {renderTreeNodes.call(this, item.children)}
+        </TreeNode>
+      );
     }
-    arr.push(res);
-    if (this.state.treeData.length === 0) {
-      this.state.treeData.push(arr);
-    }
-    this.data[body.path] = arr;
-    this.setState({ treeData: [...this.state.treeData], addType: 0, addName: "", addValue: "", isShowModal: false });
+    return (
+      <TreeNode
+        icon={<IconFont type="icon-bookmark" />}
+        isLeaf={isLeaf}
+        title={renderNodeContent.call(this, item)}
+        key={item.bookmarkId}
+        dataRef={item}
+      />
+    );
   });
 }
 
-export function addHtmlFile() {
-  
+/**
+ * 删除一个
+ * @param {*} e
+ */
+export function deleteOne(item, e) {
+  e.stopPropagation();
+  if (item.type === 0) {
+    deleteBookmark.call(this, [], [item.bookmarkId]);
+  } else {
+    deleteBookmark.call(this, [item.bookmarkId], []);
+  }
 }
 
 /**
  * 批量删除
  */
 export function batchDelete() {
-  console.log("1");
+  deleteBookmark.call(this, folderIdList, bookmarkIdList);
+}
+
+/**
+ * 删除书签
+ * @param {*} folderIdList
+ * @param {*} bookmarkIdList
+ */
+function deleteBookmark(folderIdList, bookmarkIdList) {
   const _this = this;
   Modal.confirm({
     title: "确认删除？",
@@ -115,8 +151,8 @@ export function batchDelete() {
           .then(() => {
             //遍历节点树数据，并删除
             const set = new Set();
-            folderIdList.forEach(item => set.add(item));
-            bookmarkIdList.forEach(item => set.add(item));
+            folderIdList.forEach(item => set.add(parseInt(item)));
+            bookmarkIdList.forEach(item => set.add(parseInt(item)));
             deleteTreeData(_this.state.treeData, set);
             _this.setState({ treeData: [..._this.state.treeData], checkedKeys: [] });
             resolve();

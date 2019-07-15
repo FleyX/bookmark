@@ -31,7 +31,11 @@ class Login extends Component {
   }
 
   valueChange = e => {
-    this.setState({ [e.target.name]: e.target.value });
+    if (e.target.name === "rememberMe") {
+      this.setState({ rememberMe: e.target.checked });
+    } else {
+      this.setState({ [e.target.name]: e.target.value });
+    }
   };
 
   submit = () => {
@@ -81,7 +85,7 @@ class Login extends Component {
             placeholder="密码"
           />
           <div className={styles.action}>
-            <Checkbox value={rememberMe} name="rememberMe" onChange={this.valueChange}>
+            <Checkbox checked={rememberMe} name="rememberMe" onChange={this.valueChange}>
               记住我
             </Checkbox>
             <Link to="/public/resetPassword">忘记密码</Link>

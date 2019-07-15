@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
+import { message } from "antd";
 import { withRouter } from "react-router-dom";
 import { Provider } from "react-redux";
+import Clipboard from "clipboard";
 import store from "./redux";
 import NotFound from "./pages/public/notFound/NotFound";
 
@@ -15,6 +17,15 @@ class App extends Component {
     super(props);
     this.state = {};
     window.reactHistory = this.props.history;
+  }
+
+  componentDidMount() {
+    //初始化clipboard
+    let clipboard = new Clipboard(".copy-to-board");
+    clipboard.on("success", function(e) {
+      message.success("复制成功");
+      e.clearSelection();
+    });
   }
 
   render() {
