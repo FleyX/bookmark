@@ -11,7 +11,7 @@
  Target Server Version : 80016
  File Encoding         : 65001
 
- Date: 10/07/2019 17:10:57
+ Date: 15/07/2019 18:24:36
 */
 
 SET NAMES utf8mb4;
@@ -20,8 +20,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 -- Table structure for bookmark
 -- ----------------------------
-DROP TABLE IF EXISTS `bookmark`;
-CREATE TABLE `bookmark`  (
+drop table IF EXISTS `bookmark`;
+create TABLE `bookmark`  (
   `bookmarkId` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `userId` int(10) UNSIGNED NOT NULL COMMENT '所属用户id',
   `path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '节点路径,不包含自身',
@@ -33,15 +33,19 @@ CREATE TABLE `bookmark`  (
   `addTime` bigint(20) NOT NULL COMMENT '添加书签时间',
   `createTime` bigint(20) UNSIGNED NOT NULL,
   PRIMARY KEY (`bookmarkId`) USING BTREE,
-  INDEX `userId_path_index`(`userId`, `path`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 325 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+  UNIQUE INDEX `userId_path_name_unique_index`(`userId`, `path`, `name`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
+-- ----------------------------
+-- Records of flyway_schema_history
+-- ----------------------------
+insert into `flyway_schema_history` VALUES (1, '1', 'init', 'SQL', 'V1__init.sql', 1660135926, 'root', '2019-07-10 02:12:04', 164, 1);
 
 -- ----------------------------
 -- Table structure for url
 -- ----------------------------
-DROP TABLE IF EXISTS `url`;
-CREATE TABLE `url`  (
+drop table IF EXISTS `url`;
+create TABLE `url`  (
   `urlId` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `method` enum('GET','POST','PUT','DELETE') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
@@ -52,18 +56,18 @@ CREATE TABLE `url`  (
 -- ----------------------------
 -- Records of url
 -- ----------------------------
-INSERT INTO `url` VALUES (1, 'GET', '/bookmark/currentUser', 1);
-INSERT INTO `url` VALUES (2, 'PUT', '/bookmark/uploadBookmarkFile', 1);
-INSERT INTO `url` VALUES (3, 'PUT', '/user', 0);
-INSERT INTO `url` VALUES (4, 'POST', '/user/login', 0);
-INSERT INTO `url` VALUES (5, 'GET', '/user/authCode', 0);
-INSERT INTO `url` VALUES (6, 'POST', '/user/resetPassword', 0);
+insert into `url` VALUES (2, 'PUT', '/bookmark/uploadBookmarkFile', 1);
+insert into `url` VALUES (3, 'PUT', '/user', 0);
+insert into `url` VALUES (4, 'POST', '/user/login', 0);
+insert into `url` VALUES (5, 'GET', '/user/authCode', 0);
+insert into `url` VALUES (6, 'POST', '/user/resetPassword', 0);
+insert into `url` VALUES (7, 'GET', '/bookmark/currentUser/path', 1);
 
 -- ----------------------------
 -- Table structure for user
 -- ----------------------------
-DROP TABLE IF EXISTS `user`;
-CREATE TABLE `user`  (
+drop table IF EXISTS `user`;
+create TABLE `user`  (
   `userId` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `username` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '用户名20位以内数字，字母组合',
   `email` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
@@ -72,6 +76,7 @@ CREATE TABLE `user`  (
   `createTime` bigint(20) NOT NULL DEFAULT 0,
   `lastLoginTime` bigint(20) NOT NULL DEFAULT 0,
   PRIMARY KEY (`userId`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
