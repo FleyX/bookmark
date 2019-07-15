@@ -24,16 +24,16 @@ public class BookmarkController {
     private BookmarkService bookmarkService;
 
     /**
-     * Description: 获取某个用户的节点树
+     * Description: 获取路径为path的书签数据
      *
+     * @param path 路径
      * @return com.fanxb.bookmark.common.entity.Result
      * @author fanxb
-     * @date 2019/7/9 14:20
+     * @date 2019/7/15 13:36
      */
-    @GetMapping("/currentUser")
-    public Result getCurrentUserBookmarkTree() {
-        int userId = UserContextHolder.get().getUserId();
-        return Result.success(bookmarkService.getOneBookmarkTree(userId));
+    @GetMapping("/currentUser/path")
+    public Result getCurrentBookmarkList(String path) {
+        return Result.success(bookmarkService.getBookmarkListByPath(UserContextHolder.get().getUserId(), path));
     }
 
     /**

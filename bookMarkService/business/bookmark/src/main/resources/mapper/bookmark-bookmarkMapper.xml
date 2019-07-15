@@ -42,6 +42,20 @@
         order by path, sort
     </select>
 
+    <select id="getListByUserIdAndPath" resultType="com.fanxb.bookmark.common.entity.Bookmark">
+        select
+            bookmarkId,
+            path,
+            type,
+            name,
+            url,
+            icon,
+            sort
+        from bookmark
+        where userId = #{userId} and path = #{path}
+        order by sort
+    </select>
+
     <delete id="deleteUserFolder">
         DELETE
         FROM

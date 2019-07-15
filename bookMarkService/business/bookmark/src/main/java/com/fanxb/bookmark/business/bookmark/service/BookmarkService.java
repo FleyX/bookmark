@@ -2,20 +2,19 @@ package com.fanxb.bookmark.business.bookmark.service;
 
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.common.entity.Bookmark;
+import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 类功能简述：
@@ -66,30 +65,20 @@ public class BookmarkService {
         }
     }
 
+
     /**
-     * Description: 获取某个用户的书签树
+     * Description: 根据userId和path获取书签列表
      *
-     * @param userId 用户id
-     * @return void
+     * @param userId userId
+     * @param path   path
+     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
      * @author fanxb
-     * @date 2019/7/9 18:45
+     * @date 2019/7/15 13:40
      */
-    public Map<String, List<Bookmark>> getOneBookmarkTree(int userId) {
-        List<Bookmark> list = bookmarkDao.getListByUserId(userId);
-        Map<String, List<Bookmark>> map = new HashMap<>(50);
-        list.forEach(item -> {
-            map.computeIfAbsent(item.getPath(), k -> new ArrayList<>());
-            map.get(item.getPath()).add(item);
-        });
-        return map;
-//        if (map.size() == 0) {
-//            return new ArrayList<>();
-//        } else {
-//            List<Bookmark> res = map.get("");
-//            res.forEach(item -> insertToBookmarkTree(item, map));
-//            return res;
-//        }
+    public List<Bookmark> getBookmarkListByPath(int userId, String path) {
+        return bookmarkDao.getListByUserIdAndPath(userId, path);
     }
+
 
     /**
      * Description: 批量删除书签
@@ -124,7 +113,11 @@ public class BookmarkService {
         bookmark.setUserId(userId);
         bookmark.setCreateTime(System.currentTimeMillis());
         bookmark.setAddTime(bookmark.getCreateTime());
-        bookmarkDao.insertOne(bookmark);
+        try {
+            bookmarkDao.insertOne(bookmark);
+        } catch (DuplicateKeyException e) {
+            throw new CustomException("同级目录下不能存在相同名称的数据");
+        }
         return bookmark;
     }
 

@@ -59,12 +59,13 @@ public interface BookmarkDao {
      */
     List<Bookmark> getListByUserId(int userId);
 
+    List<Bookmark> getListByUserIdAndPath(@Param("userId") int userId,@Param("path") String path);
+
     /**
      * Description: 删除某用户某个书签文件下所有数据
      *
      * @param userId   用户id
      * @param folderId 文件夹id
-     * @return void
      * @author fanxb
      * @date 2019/7/12 14:13
      */

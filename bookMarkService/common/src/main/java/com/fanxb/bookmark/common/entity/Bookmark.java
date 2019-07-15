@@ -2,6 +2,7 @@ package com.fanxb.bookmark.common.entity;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,6 +43,7 @@ public class Bookmark {
         this.setAddTime(addTime);
         this.setSort(sort);
         this.setCreateTime(System.currentTimeMillis());
+        this.setChildren(new ArrayList<>());
     }
 
     public Bookmark(int userId, String path, String name, String url, String icon, long addTime, int sort) {
