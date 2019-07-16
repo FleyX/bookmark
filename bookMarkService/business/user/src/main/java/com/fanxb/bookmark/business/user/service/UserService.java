@@ -49,16 +49,16 @@ public class UserService {
     public void sendAuthCode(String email) {
         MailInfo info = new MailInfo();
         info.setSubject("签签世界注册验证码");
-        int code = StringUtil.getRandomNumber(6, 6);
+        String code = StringUtil.getRandomString(6, 2);
         info.setContent("欢迎注册 签签世界 ，本次验证码");
         info.setContent(code + " 是您的验证码，注意验证码有效期为15分钟哦！");
         info.setReceiver(email);
         if (Constant.isDev) {
-            code = 123456;
+            code = "123456";
         } else {
             MailUtil.sendTextMail(info);
         }
-        RedisUtil.set(Constant.authCodeKey(email), String.valueOf(code), Constant.AUTH_CODE_EXPIRE);
+        RedisUtil.set(Constant.authCodeKey(email), code, Constant.AUTH_CODE_EXPIRE);
     }
 
     /**
