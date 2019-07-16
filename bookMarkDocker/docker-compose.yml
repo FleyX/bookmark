@@ -14,7 +14,7 @@ services:
       - /etc/localtime:/etc/localtime
       - ./timezone:/etc/timezone
     environment: 
-      - MYSQL_ROOT_PASSWORD=${MYSQL_PASS}
+      - MYSQL_ROOT_PASSWORD=
       - MYSQL_DATABASE=bookmark
   bookmark-redis:
     image: redis:3.2.10
@@ -25,9 +25,49 @@ services:
     networks: 
       - bookmark
     ports:
-      - 6380:6379
-
-    
-
+      # redis未设置密码，如端口暴露可能会被攻击
+      # - 6380:6379
+  bookmark-front:
+    image: nginx
+    container_name: bookmark-front
+    networks: 
+      - bookmark
+    volumes: 
+      - /etc/localtime:/etc/localtime
+      - ./timezone:/etc/timezone
+      - ../front/build:/opt/dist
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/log:/var/log/nginx
+    ports: 
+      - 8083:8080
+  bookmark-service:
+    image: registry.cn-hangzhou.aliyuncs.com/fleyx/node-java-env:v1
+    container_name: bookmark-service
+    depends_on: 
+      - bookmark-mysql
+      - bookmark-redis
+    networks: 
+      - bookmark
+    volumes: 
+      - /etc/localtime:/etc/localtime
+      - ./timezone:/etc/timezone
+      - ../bookMarkService/web/target/web-1.0-SNAPSHOT.jar:/opt/app/service.jar
+    working_dir: /opt/app
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        sleep 20 && \
+        java -jar -DisDev=false \
+        -DjwtSecret= \
+        -Dmybatis.configuration.log-impl=org.apache.ibatis.logging.nologging.NoLoggingImpl \
+        -Dspring.mail.host= \
+        -Dspring.mail.username= \
+        -Dspring.mail.password= \
+        -Dspring.mail.port= \
+        -Dspring.datasource.druid.password= \
+        -Dspring.datasource.druid.url=jdbc:mysql://bookmark-mysql:3306/psn?useUnicode=true&characterEncoding=utf-8&useSSL=false \
+        -Dspring.redis.host=bookmark-redis \
+        service.jar
 networks: 
   bookmark:
