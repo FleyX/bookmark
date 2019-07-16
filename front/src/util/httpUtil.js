@@ -4,7 +4,7 @@ import axios from "axios";
 //定义http实例
 const instance = axios.create({
   baseURL: "/bookmark/api",
-  timeout: 5000
+  timeout: 15000
 });
 
 //实例添加请求拦截器
