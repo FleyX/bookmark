@@ -10,5 +10,5 @@ RUN cd /opt && \
     mv apache-maven-3.6.1 maven && \
     rm apache-maven-3.6.1-bin.tar.gz && \ 
     mv maven/conf/settings.xml maven/conf/settings.xml.bak && \
-    mv setttings.xml maven/conf/settings.xml && \
+    mv settings.xml maven/conf/settings.xml
 ENV PATH=$PATH:/opt/jdk11/bin:/opt/maven/bin
