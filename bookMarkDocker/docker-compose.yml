@@ -14,7 +14,7 @@ services:
       - /etc/localtime:/etc/localtime
       - ./timezone:/etc/timezone
     environment: 
-      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_DATABASE=bookmark
   bookmark-redis:
     image: redis:3.2.10
@@ -30,6 +30,8 @@ services:
   bookmark-front:
     image: nginx
     container_name: bookmark-front
+    depends_on:
+      - bookmark-service
     networks: 
       - bookmark
     volumes: 
@@ -51,21 +53,22 @@ services:
     volumes: 
       - /etc/localtime:/etc/localtime
       - ./timezone:/etc/timezone
-      - ../bookMarkService/web/target/web-1.0-SNAPSHOT.jar:/opt/app/service.jar
+      - ../bookMarkService/web/target/bookmark-web-1.0-SNAPSHOT.jar:/opt/app/service.jar
     working_dir: /opt/app
     command: 
       - /bin/bash
       - -c
       - |
         sleep 20 && \
+        ls -l && \
         java -jar -DisDev=false \
-        -DjwtSecret= \
+        -DjwtSecret=123456 \
         -Dmybatis.configuration.log-impl=org.apache.ibatis.logging.nologging.NoLoggingImpl \
         -Dspring.mail.host= \
         -Dspring.mail.username= \
         -Dspring.mail.password= \
         -Dspring.mail.port= \
-        -Dspring.datasource.druid.password= \
+        -Dspring.datasource.druid.password=123456 \
         -Dspring.datasource.druid.url=jdbc:mysql://bookmark-mysql:3306/bookmark?useUnicode=true\&characterEncoding=utf-8\&useSSL=false\&useJDBCCompliantTimezoneShift=true\&useLegacyDatetimeCode=false\&serverTimezone=UTC \
         -Dspring.redis.host=bookmark-redis \
         service.jar
