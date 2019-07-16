@@ -24,9 +24,9 @@ services:
       - ./timezone:/etc/timezone
     networks: 
       - bookmark
+    # redis未设置密码，如端口暴露可能会被攻击
     ports:
-      # redis未设置密码，如端口暴露可能会被攻击
-      # - 6380:6379
+     - 6380:6379
   bookmark-front:
     image: nginx
     container_name: bookmark-front
