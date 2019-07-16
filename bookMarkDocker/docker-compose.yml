@@ -66,7 +66,7 @@ services:
         -Dspring.mail.password= \
         -Dspring.mail.port= \
         -Dspring.datasource.druid.password= \
-        -Dspring.datasource.druid.url=jdbc:mysql://bookmark-mysql:3306/psn?useUnicode=true&characterEncoding=utf-8&useSSL=false \
+        -Dspring.datasource.druid.url=jdbc:mysql://bookmark-mysql:3306/bookmark?useUnicode=true&characterEncoding=utf-8&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC \
         -Dspring.redis.host=bookmark-redis \
         service.jar
 networks: 
