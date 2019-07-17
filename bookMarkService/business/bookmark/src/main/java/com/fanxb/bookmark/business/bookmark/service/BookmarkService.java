@@ -121,6 +121,19 @@ public class BookmarkService {
         return bookmark;
     }
 
+    /**
+     * Description: 编辑某个用户的某个书签
+     *
+     * @author fanxb
+     * @date 2019/7/17 14:42
+     * @param userId userId
+     * @param bookmark bookmark
+     */
+    public void updateOne(int userId,Bookmark bookmark){
+        bookmark.setUserId(userId);
+        bookmarkDao.editBookmark(bookmark);
+    }
+
 
     /**
      * Description: 处理html节点，解析出文件夹和书签

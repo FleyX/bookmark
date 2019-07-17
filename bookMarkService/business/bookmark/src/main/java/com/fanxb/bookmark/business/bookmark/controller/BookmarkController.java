@@ -65,6 +65,21 @@ public class BookmarkController {
         return Result.success(bookmark);
     }
 
+
+    /**
+     * Description: 编辑当前用户的一个书签节点
+     *
+     * @param bookmark bookmark
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2019/7/17 14:40
+     */
+    @PostMapping("/updateOne")
+    public Result editCurrentUserBookmark(@RequestBody Bookmark bookmark) {
+        bookmarkService.updateOne(UserContextHolder.get().getUserId(), bookmark);
+        return Result.success(null);
+    }
+
     /**
      * Description: 批量删除
      *

@@ -59,7 +59,16 @@ public interface BookmarkDao {
      */
     List<Bookmark> getListByUserId(int userId);
 
-    List<Bookmark> getListByUserIdAndPath(@Param("userId") int userId,@Param("path") String path);
+    /**
+     * Description: 根据userId和path查询path下的子节点
+     *
+     * @param userId userId
+     * @param path   path
+     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @author fanxb
+     * @date 2019/7/17 14:48
+     */
+    List<Bookmark> getListByUserIdAndPath(@Param("userId") int userId, @Param("path") String path);
 
     /**
      * Description: 删除某用户某个书签文件下所有数据
@@ -80,4 +89,13 @@ public interface BookmarkDao {
      * @date 2019/7/12 17:24
      */
     void deleteUserBookmark(@Param("userId") int userId, @Param("bookmarkIds") List<Integer> bookmarkIds);
+
+    /**
+     * Description: 编辑书签
+     *
+     * @author fanxb
+     * @date 2019/7/17 14:49
+     * @param bookmark bookmark
+     */
+    void editBookmark(Bookmark bookmark);
 }

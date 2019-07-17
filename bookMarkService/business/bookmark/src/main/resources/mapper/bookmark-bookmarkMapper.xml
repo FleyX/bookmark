@@ -75,5 +75,11 @@
         </foreach>
     </delete>
 
+    <update id="editBookmark" parameterType="com.fanxb.bookmark.common.entity.Bookmark">
+        update bookmark
+        set name = #{name}, url = #{url}
+        where bookmarkId = #{bookmarkId} and userId = #{userId}
+    </update>
+
 
 </mapper>
