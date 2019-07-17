@@ -3,7 +3,7 @@ import { Tree, Empty, Button } from "antd";
 import MainLayout from "../../../layout/MainLayout";
 import httpUtil from "../../../util/httpUtil";
 import styles from "./index.module.less";
-import { batchDelete, renderTreeNodes, onExpand, closeAll, onCheck } from "./function.js";
+import { batchDelete, renderTreeNodes, onExpand, closeAll, onCheck, onDragEnter, onDrop } from "./function.js";
 import AddModal from "./AddModal";
 
 export default class OverView extends React.Component {
@@ -15,9 +15,10 @@ export default class OverView extends React.Component {
       isLoading: true,
       checkedKeys: [],
       expandKeys: [],
-      //是否显示新增书签弹窗
+      //是否显示新增/编辑书签弹窗
       isShowModal: false,
-      currentAddFolder: null
+      currentAddFolder: null,
+      currentEditNode: null
     };
   }
 
@@ -53,7 +54,7 @@ export default class OverView extends React.Component {
    * @param {*} e
    */
   treeNodeSelect(key, e) {
-    if (e.nativeEvent.delegateTarget.name === "copy") {
+    if (e.nativeEvent.delegateTarget && e.nativeEvent.delegateTarget.name === "copy") {
       return;
     }
     const { expandKeys } = this.state;
@@ -81,6 +82,7 @@ export default class OverView extends React.Component {
         currentAddFolder.children.push(node);
         this.setState({ treeData: [...treeData] });
       }
+      this.setState({ currentAddFolder: null });
     }
   };
 
@@ -88,7 +90,7 @@ export default class OverView extends React.Component {
    * 关闭新增书签弹窗
    */
   closeAddModal = () => {
-    this.setState({ isShowModal: false });
+    this.setState({ isShowModal: false, currentAddFolder: null, currentEditNode: null });
   };
 
   /**
@@ -100,7 +102,7 @@ export default class OverView extends React.Component {
   };
 
   render() {
-    const { isLoading, isEdit, treeData, expandKeys, checkedKeys, isShowModal, currentAddFolder } = this.state;
+    const { isLoading, isEdit, treeData, expandKeys, checkedKeys, isShowModal, currentAddFolder, currentEditNode } = this.state;
     return (
       <MainLayout>
         <div className={styles.main}>
@@ -134,16 +136,23 @@ export default class OverView extends React.Component {
             expandedKeys={expandKeys}
             loadData={this.loadData}
             onExpand={onExpand.bind(this)}
-            defaultExpandParent
             checkable={isEdit}
             onSelect={this.treeNodeSelect.bind(this)}
-            onDoubleClick={this.copyUrl}
+            draggable
+            onDragEnter={onDragEnter.bind(this)}
+            onDrop={onDrop.bind(this)}
             blockNode
           >
             {renderTreeNodes.call(this, treeData)}
           </Tree>
           {isLoading === false && treeData.length === 0 ? <Empty description="还没有数据" /> : null}
-          <AddModal isShowModal={isShowModal} currentAddFolder={currentAddFolder} closeModal={this.closeAddModal} addToTree={this.addToTree} />
+          <AddModal
+            isShowModal={isShowModal}
+            currentAddFolder={currentAddFolder}
+            currentEditNode={currentEditNode}
+            closeModal={this.closeAddModal}
+            addToTree={this.addToTree}
+          />
         </div>
       </MainLayout>
     );

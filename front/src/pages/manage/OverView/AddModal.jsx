@@ -13,7 +13,37 @@ export default class AddModal extends React.Component {
     };
   }
 
-  addOne = () => {
+  submit = () => {
+    const { currentEditNode } = this.props;
+    if (currentEditNode == null) {
+      this.addOne();
+    } else {
+      this.editOne(currentEditNode);
+    }
+  };
+
+  /**
+   * 编辑一个节点
+   * @param {*} node
+   */
+  editOne(node) {
+    const { addName, addValue } = this.state;
+    const body = {
+      name: addName,
+      url: addValue
+    };
+    httpUtil.post("/bookmark/updateOne", body).then(() => {
+      message.success("编辑成功");
+      node.name = addName;
+      node.url = addValue;
+      this.close();
+    });
+  }
+
+  /**
+   * 新增一个节点
+   */
+  addOne() {
     const { currentAddFolder, addToTree, closeModal } = this.props;
     const path = currentAddFolder == null ? "" : currentAddFolder.path + "." + currentAddFolder.bookmarkId;
     if (this.state.addType === 2) {
@@ -40,7 +70,7 @@ export default class AddModal extends React.Component {
         closeModal();
       });
     }
-  };
+  }
 
   close = () => {
     const { closeModal } = this.props;
@@ -49,8 +79,9 @@ export default class AddModal extends React.Component {
   };
 
   render() {
-    const { isShowModal } = this.props;
+    const { isShowModal, currentEditNode } = this.props;
     const { addType, addName, addValue } = this.state;
+    const type = currentEditNode == null ? "add" : "edit";
     const formItemLayout = {
       labelCol: {
         xs: { span: 4 },
@@ -72,21 +103,23 @@ export default class AddModal extends React.Component {
       fileList: []
     };
     return (
-      <Modal destroyOnClose title="新增" visible={isShowModal} onCancel={this.close} footer={false}>
+      <Modal destroyOnClose title={type === "add" ? "新增" : "编辑"} visible={isShowModal} onCancel={this.close} footer={false}>
         <Form {...formItemLayout}>
-          <Form.Item label="类别">
-            <Radio.Group defaultValue={0} onChange={e => this.setState({ addType: e.target.value })}>
-              <Radio value={0}>书签</Radio>
-              <Radio value={1}>文件夹</Radio>
-              <Radio value={2}>上传书签html</Radio>
-            </Radio.Group>
-          </Form.Item>
-          {addType < 2 ? (
+          {type === "add" ? (
+            <Form.Item label="类别">
+              <Radio.Group defaultValue={0} onChange={e => this.setState({ addType: e.target.value })}>
+                <Radio value={0}>书签</Radio>
+                <Radio value={1}>文件夹</Radio>
+                <Radio value={2}>上传书签html</Radio>
+              </Radio.Group>
+            </Form.Item>
+          ) : null}
+          {addType < 2 || type === "edit" ? (
             <Form.Item label="名称">
               <Input type="text" onChange={e => this.setState({ addName: e.target.value })} value={addName} />
             </Form.Item>
           ) : null}
-          {addType === 0 ? (
+          {(addType === 0 && type === "add") || (type === "edit" && currentEditNode.type === 0) ? (
             <Form.Item label="URL">
               <Input type="text" value={addValue} onChange={e => this.setState({ addValue: e.target.value })} />
             </Form.Item>
@@ -100,7 +133,7 @@ export default class AddModal extends React.Component {
             </Upload>
           ) : null}
           <div style={{ textAlign: "center", paddingTop: "1em" }}>
-            <Button type="primary" onClick={this.addOne}>
+            <Button type="primary" onClick={this.submit}>
               提交
             </Button>
           </div>

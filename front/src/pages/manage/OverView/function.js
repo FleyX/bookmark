@@ -1,6 +1,6 @@
 import httpUtil from "../../../util/httpUtil";
 import React from "react";
-import { Modal, Button, Tooltip, Tree } from "antd";
+import { Modal, Button, Tooltip, Tree, message } from "antd";
 import styles from "./index.module.less";
 import IconFont from "../../../components/IconFont";
 const { TreeNode } = Tree;
@@ -45,6 +45,16 @@ export function onCheck(keys, data) {
 }
 
 /**
+ * 编辑一个节点
+ * @param {*} node 节点对象
+ * @param {*} e
+ */
+function editNode(node, e) {
+  e.stopPropagation();
+  this.setState({ isShowModal: true, currentEditNode: node });
+}
+
+/**
  * 渲染树节点中节点内容
  * @param {*} item
  */
@@ -66,6 +76,7 @@ export function renderNodeContent(item) {
         />
       ) : null}
       {item.type === 1 ? <Button size="small" type="primary" icon="plus" shape="circle" onClick={this.addOne.bind(this, item)} /> : null}
+      <Button size="small" type="primary" icon="edit" shape="circle" onClick={editNode.bind(this, item)} />
       <Button size="small" type="danger" icon="delete" shape="circle" onClick={deleteOne.bind(this, item)} />
     </div>
   );
@@ -178,4 +189,78 @@ function deleteTreeData(treeData, set) {
       deleteTreeData(item.children, set);
     }
   }
+}
+
+export function onDragEnter(info) {
+  // console.log(info);
+}
+
+/**
+ * 节点拖拽
+ * @param {*} info
+ */
+export function onDrop(info) {
+  const { treeData } = this.state;
+  const target = info.node.props.dataRef;
+  if (!info.dropToGap && target.type === "0") {
+    message.error("只能移动到文件夹中");
+    return;
+  }
+  const current = info.dragNode.props.dataRef;
+  const body = {
+    bookmarkId: current.bookmarkId,
+    sourcePath: current.path,
+    targetPath: "",
+    //-1 表示排在最后
+    sort: -1
+  };
+  const currentBelowList = current.path === "" ? treeData : getBelowList(treeData, current);
+  currentBelowList.splice(currentBelowList.indexOf(current), 1);
+  if (info.dropToGap) {
+    body.targetPath = target.path;
+    const targetBelowList = target.path === "" ? treeData : getBelowList(treeData, target);
+    const index = targetBelowList.indexOf(target);
+    if (info.dropPosition > index) {
+      body.sort = target.sort + 1;
+      insertToArray(current, index + 1, targetBelowList);
+    } else {
+      body.sort = target.sort;
+      insertToArray(current, index, targetBelowList);
+    }
+    current.sort = body.sort;
+  } else {
+    body.targetPath = target.path + "." + target.bookmarkId;
+    if (target.children) {
+      target.children.push(current);
+    }
+  }
+  this.setState({ treeData: [...treeData] });
+}
+
+/**
+ * 获取node所属list
+ * @param {*} tree 树结构
+ * @param {*} node node
+ */
+function getBelowList(treeList, node) {
+  for (let i in treeList) {
+    let item = treeList[i];
+    if (item.type === 1) {
+      if (item.path + "." + item.bookmarkId === node.path) {
+        return item.children;
+      } else if (item.children) {
+        return getBelowList(item.children, node);
+      }
+    }
+  }
+}
+
+function insertToArray(item, index, arr) {
+  const length = arr.length;
+  let i = length;
+  for (; i > index; i--) {
+    arr[i] = arr[i - 1];
+    arr[i].sort++;
+  }
+  arr[i] = item;
 }

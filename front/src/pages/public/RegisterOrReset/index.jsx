@@ -35,10 +35,10 @@ export default class Register extends React.Component {
     if (this.state.isCountDown) {
       return;
     }
+    let count = 60;
+    this.setState({ authCodeText: `${count}s后重试`, isCountDown: true });
     axios.get("/user/authCode?email=" + this.state.email).then(() => {
       message.success("发送成功，请注意查收（检查垃圾箱）");
-      let count = 60;
-      this.setState({ authCodeText: `${count}s后重试`, isCountDown: true });
       this.timer = setInterval(() => {
         count--;
         if (count === 0) {
