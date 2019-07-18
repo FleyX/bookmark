@@ -21,7 +21,7 @@ function getInitData() {
 const LoginStatusReducer = (state = getInitData(), action) => {
   switch (action.type) {
     case loginAction.CHANGE_LOGIN_INFO:
-      return { ...action.data };
+      return { ...state, ...action.data };
     default:
       return state;
   }
