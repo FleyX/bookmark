@@ -81,5 +81,23 @@
         where bookmarkId = #{bookmarkId} and userId = #{userId}
     </update>
 
+    <update id="sortPlus">
+        update bookmark
+        set sort = sort + 1
+        where userId = #{userId} and path = #{path} and sort &gt;= #{sort}
+    </update>
+
+    <update id="updateChildrenPath">
+        update bookmark
+        set path = replace(path, #{oldPath}, #{newPath})
+        where userId = #{userId} and path like concat(#{oldPath}, "%")
+    </update>
+
+    <update id="updatePathAndSort">
+        update bookmark
+        set path = #{path}, sort = #{sort}
+        where userId = #{userId} and bookmarkId = #{bookmarkId}
+    </update>
+
 
 </mapper>

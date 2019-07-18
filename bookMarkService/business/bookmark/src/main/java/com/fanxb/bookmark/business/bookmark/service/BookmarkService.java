@@ -1,6 +1,7 @@
 package com.fanxb.bookmark.business.bookmark.service;
 
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
+import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
 import com.fanxb.bookmark.common.entity.Bookmark;
 import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.UserContextHolder;
@@ -95,7 +96,9 @@ public class BookmarkService {
             bookmarkDao.deleteUserFolder(userId, item);
             bookmarkIdList.add(item);
         }
-        bookmarkDao.deleteUserBookmark(userId, bookmarkIdList);
+        if (bookmarkIdList.size() > 0) {
+            bookmarkDao.deleteUserBookmark(userId, bookmarkIdList);
+        }
     }
 
     /**
@@ -124,12 +127,12 @@ public class BookmarkService {
     /**
      * Description: 编辑某个用户的某个书签
      *
+     * @param userId   userId
+     * @param bookmark bookmark
      * @author fanxb
      * @date 2019/7/17 14:42
-     * @param userId userId
-     * @param bookmark bookmark
      */
-    public void updateOne(int userId,Bookmark bookmark){
+    public void updateOne(int userId, Bookmark bookmark) {
         bookmark.setUserId(userId);
         bookmarkDao.editBookmark(bookmark);
     }
@@ -191,6 +194,24 @@ public class BookmarkService {
             node.setBookmarkId(id);
             return true;
         }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void moveNode(int userId, MoveNodeBody body) {
+        if (body.getSort() == -1) {
+            Integer max = bookmarkDao.selectMaxSort(userId, body.getTargetPath());
+            body.setSort(max == null ? 1 : max);
+        } else {
+            //更新目标节点的sort
+            bookmarkDao.sortPlus(userId, body.getTargetPath(), body.getSort());
+        }
+        //如果目标位置和当前位置不在一个层级中需要更新子节点的path
+        if (!body.getTargetPath().equals(body.getSourcePath())) {
+            bookmarkDao.updateChildrenPath(userId, body.getSourcePath() + "." + body.getBookmarkId()
+                    , body.getTargetPath() + "." + body.getBookmarkId());
+        }
+        //更新被移动节点的path和sort
+        bookmarkDao.updatePathAndSort(userId, body.getBookmarkId(), body.getTargetPath(), body.getSort());
     }
 
 }

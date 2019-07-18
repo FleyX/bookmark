@@ -1,6 +1,7 @@
 package com.fanxb.bookmark.business.bookmark.controller;
 
 import com.fanxb.bookmark.business.bookmark.entity.BatchDeleteBody;
+import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
 import com.fanxb.bookmark.common.entity.Bookmark;
 import com.fanxb.bookmark.common.entity.Result;
@@ -91,6 +92,20 @@ public class BookmarkController {
     @PostMapping("/batchDelete")
     public Result batchDelete(@RequestBody BatchDeleteBody body) {
         bookmarkService.batchDelete(UserContextHolder.get().getUserId(), body.getFolderIdList(), body.getBookmarkIdList());
+        return Result.success(null);
+    }
+
+    /**
+     * Description: 移动一个节点
+     *
+     * @param body body
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2019/7/18 10:54
+     */
+    @PostMapping("/moveNode")
+    public Result moveNode(@RequestBody MoveNodeBody body) {
+        bookmarkService.moveNode(UserContextHolder.get().getUserId(), body);
         return Result.success(null);
     }
 

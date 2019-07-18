@@ -93,9 +93,45 @@ public interface BookmarkDao {
     /**
      * Description: 编辑书签
      *
+     * @param bookmark bookmark
      * @author fanxb
      * @date 2019/7/17 14:49
-     * @param bookmark bookmark
      */
     void editBookmark(Bookmark bookmark);
+
+    /**
+     * Description: path下sort>=某个值的sort自增1
+     *
+     * @param userId userId
+     * @param path   path
+     * @param sort   sort
+     * @author fanxb
+     * @date 2019/7/18 10:13
+     */
+    void sortPlus(@Param("userId") int userId, @Param("path") String path, @Param("sort") int sort);
+
+    /**
+     * Description: 更新某个路径下所有子节点的路径信息
+     *
+     * @param userId  userId
+     * @param oldPath oldPath
+     * @param newPath newPath
+     * @author fanxb
+     * @date 2019/7/18 10:35
+     */
+    void updateChildrenPath(@Param("userId") int userId, @Param("oldPath") String oldPath, @Param("newPath") String newPath);
+
+    /**
+     * Description: 更新某个书签的path，sort
+     *
+     * @param userId     userId
+     * @param bookmarkId bookmarkId
+     * @param path       path
+     * @param sort       sort
+     * @author fanxb
+     * @date 2019/7/18 10:37
+     */
+    void updatePathAndSort(@Param("userId") int userId, @Param("bookmarkId") int bookmarkId, @Param("path") String path, @Param("sort") int sort);
+
+
 }
