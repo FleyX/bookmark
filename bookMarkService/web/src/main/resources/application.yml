@@ -56,7 +56,7 @@ spring:
 
 mybatis:
   configuration:
-    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   # classpath后面加*，值里面的*才起作用
   mapper-locations: classpath*:mapper/*.xml
 debug: false
