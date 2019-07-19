@@ -31,8 +31,11 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
     container_name: bookmark-es
     volumes: 
+      - /etc/localtime:/etc/localtime
+      - ./timezone:/etc/timezone
       - ./es/data:/usr/share/elasticsearch/data
-      - ./es/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./es/ik:/usr/share/elasticsearch/plugins/ik
+      #- ./es/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     ports:
       - 9200:9200
       - 9300:9300
