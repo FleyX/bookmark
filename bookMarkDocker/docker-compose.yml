@@ -27,6 +27,17 @@ services:
     # redis未设置密码，如端口暴露可能会被攻击
     ports:
      - 6380:6379
+  bookmark-es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
+    container_name: bookmark-es
+    volumes: 
+      - ./es/data:/usr/share/elasticsearch/data
+      - ./es/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks: 
+      - bookmark
   bookmark-front:
     image: nginx
     container_name: bookmark-front
@@ -48,6 +59,7 @@ services:
     depends_on: 
       - bookmark-mysql
       - bookmark-redis
+      - bookmark-es
     networks: 
       - bookmark
     volumes: 
