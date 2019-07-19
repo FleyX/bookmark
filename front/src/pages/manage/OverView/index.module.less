@@ -18,12 +18,25 @@
     }
   }
 
-  .title {
+  .nodeContent {
     display: inline-block;
-    max-width: 70%;
+    align-items: center;
     margin-right: 1em;
     overflow-x: hidden;
     text-overflow: ellipsis;
+
+    .url {
+      display: inline-block;
+      min-width: 3em;
+    }
+  }
+
+  :global {
+    .ant-tree-title {
+      display: inline-flex;
+      align-items: center;
+      width: 100%;
+    }
   }
 
   .btns {

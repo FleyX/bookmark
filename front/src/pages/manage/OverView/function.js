@@ -1,6 +1,6 @@
 import httpUtil from "../../../util/httpUtil";
 import React from "react";
-import { Modal, Button, Tooltip, Tree, message } from "antd";
+import { Modal, Button,  Tree, message } from "antd";
 import styles from "./index.module.less";
 import IconFont from "../../../components/IconFont";
 const { TreeNode } = Tree;
@@ -32,12 +32,16 @@ export function renderNodeContent(item) {
     </div>
   );
   return (
-    <span style={{ display: "inline-block" }}>
-      <Tooltip placement="bottom" title={item.url}>
-        <span>{item.name}</span>
-      </Tooltip>
+    <React.Fragment>
+      {item.type === 0 ? (
+        <a href={item.url} className={styles.nodeContent}>
+          {item.name}
+        </a>
+      ) : (
+        <span className={styles.nodeContent}>{item.name}</span>
+      )}
       {isEdit ? btns : null}
-    </span>
+    </React.Fragment>
   );
 }
 
@@ -203,8 +207,8 @@ export function onDrop(info) {
   }
   httpUtil.post("/bookmark/moveNode", body).then(res => {
     message.success("移动完成");
+    updateTreeData([...treeData]);
   });
-  updateTreeData({ treeData: [...treeData] });
 }
 
 /**
@@ -242,7 +246,7 @@ function insertToArray(item, index, arr) {
 }
 
 /**
- * 更新节点的path信息
+ * 更新修改节点的子节点节点path信息
  * @param {*} children 孩子数组
  * @param {*} oldPath  旧path
  * @param {*} newPath 新path
