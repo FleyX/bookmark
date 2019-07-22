@@ -35,7 +35,7 @@ services:
       - ./timezone:/etc/timezone
       - ./es/data:/usr/share/elasticsearch/data
       - ./es/ik:/usr/share/elasticsearch/plugins/ik
-      #- ./es/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./es/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     ports:
       - 9200:9200
       - 9300:9300
