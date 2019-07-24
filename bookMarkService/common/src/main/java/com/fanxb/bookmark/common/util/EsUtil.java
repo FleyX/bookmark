@@ -1,15 +1,28 @@
 package com.fanxb.bookmark.common.util;
 
+import com.alibaba.fastjson.JSON;
+import com.fanxb.bookmark.common.constant.EsConstant;
+import com.fanxb.bookmark.common.entity.EsInsertEntity;
+import com.fanxb.bookmark.common.exception.CustomException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.lang.ref.ReferenceQueue;
+import java.net.Authenticator;
+import java.util.List;
 
 /**
  * 类功能简述：
@@ -19,34 +32,98 @@ import org.springframework.stereotype.Component;
  * @date 2019/7/19 16:07
  */
 @Component
+@Slf4j
 public class EsUtil {
 
+    @Value("${es.host}")
+    public String host;
+    @Value("${es.port}")
+    public int port;
+    @Value("${es.scheme}")
+    public String scheme;
 
-    public EsUtil() throws Exception {
-        RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(new HttpHost("10.82.17.91", 9200, "http")));
-        CreateIndexRequest request = new CreateIndexRequest("test-index");
-        request.settings(Settings.builder().put("index.number_of_shards", 3).put("index.number_of_replicas", 2));
-        XContentBuilder builder = XContentFactory.jsonBuilder();
-        builder.startObject();
-        {
-            builder.startObject("properties");
-            {
-                builder.startObject("column1");
-                {
-                    builder.field("type", "");
-                    builder.field("index", "not_analyzed");
-                }
-                builder.endObject();
+
+    public static RestHighLevelClient client = null;
+
+
+    @PostConstruct
+    public void init() {
+        try {
+            client = new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, scheme)));
+            if (this.indexExist(EsConstant.BOOKMARK_INDEX)) {
+                return;
             }
-            builder.endObject();
+            CreateIndexRequest request = new CreateIndexRequest(EsConstant.BOOKMARK_INDEX);
+            request.settings(Settings.builder().put("index.number_of_shards", 3).put("index.number_of_replicas", 2));
+            request.mapping(EsConstant.CREATE_BOOKMARK_INDEX, XContentType.JSON);
+            CreateIndexResponse res = client.indices().create(request, RequestOptions.DEFAULT);
+            if (!res.isAcknowledged()) {
+                throw new CustomException("初始化失败");
+            }
+        } catch (Exception e) {
+            log.error("初始化es失败", e);
+            System.exit(0);
         }
-        builder.endObject();
-        request.mapping(builder);
-        CreateIndexResponse res = client.indices().create(request, RequestOptions.DEFAULT);
-        System.out.println(res);
+
     }
+
+    /**
+     * Description: 判断某个index是否存在
+     *
+     * @param index index名
+     * @return boolean
+     * @author fanxb
+     * @date 2019/7/24 14:57
+     */
+    public boolean indexExist(String index) throws Exception {
+        GetIndexRequest request = new GetIndexRequest(index);
+        request.local(false);
+        request.humanReadable(true);
+        request.includeDefaults(false);
+        return client.indices().exists(request, RequestOptions.DEFAULT);
+    }
+
+    /**
+     * Description: 插入一条记录
+     *
+     * @param index index
+     * @param id    id
+     * @param o     o
+     * @author fanxb
+     * @date 2019/7/24 15:02
+     */
+    public void insertOne(String index, EsInsertEntity entity) {
+        IndexRequest request = new IndexRequest(index);
+        request.id(entity.getId());
+        request.source(JSON.toJSONString(entity.getData()), XContentType.JSON);
+        try {
+            client.index(request, RequestOptions.DEFAULT);
+        } catch (Exception e) {
+            throw new CustomException(e);
+        }
+    }
+
+    /**
+     * Description: 批量插入数据
+     *
+     * @param index index
+     * @param list  带插入列表
+     * @author fanxb
+     * @date 2019/7/24 17:38
+     */
+    public void insertBatch(String index, List<? extends EsInsertEntity> list) {
+        BulkRequest request = new BulkRequest();
+        list.forEach(item -> request.add(new IndexRequest(index).id(item.getId()).source(JSON.toJSONString(item.getData()))));
+        try {
+            client.bulk(request, RequestOptions.DEFAULT);
+        } catch (Exception e) {
+            throw new CustomException(e);
+        }
+    }
+
 
     public static void main(String[] args) throws Exception {
         EsUtil util = new EsUtil();
+        System.out.println(util.indexExist("bookmark"));
     }
 }
