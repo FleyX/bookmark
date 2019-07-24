@@ -1,9 +1,12 @@
 package com.fanxb.bookmark.business.bookmark.service;
 
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
+import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
+import com.fanxb.bookmark.common.constant.EsConstant;
 import com.fanxb.bookmark.common.entity.Bookmark;
 import com.fanxb.bookmark.common.exception.CustomException;
+import com.fanxb.bookmark.common.util.EsUtil;
 import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,6 +39,9 @@ public class BookmarkService {
     @Autowired
     private BookmarkDao bookmarkDao;
 
+    @Autowired
+    private EsUtil esUtil;
+
     /**
      * Description: 解析书签文件
      *
@@ -53,16 +60,78 @@ public class BookmarkService {
             sortBase = 0;
         }
         int count = 0;
+        // 將要插入es的书签数据放到list中,最后一次插入，尽量避免mysql回滚了，但是es插入了
+        List<BookmarkEs> insertEsList = new ArrayList<>();
         for (int i = 0, length = elements.size(); i < length; i++) {
             if (i == 0) {
                 Elements firstChildren = elements.get(0).child(1).children();
                 count = firstChildren.size();
                 for (int j = 0; j < count; j++) {
-                    dealBookmark(userId, firstChildren.get(j), path, sortBase + j);
+                    dealBookmark(userId, firstChildren.get(j), path, sortBase + j, insertEsList);
                 }
             } else {
-                dealBookmark(userId, elements.get(i), path, sortBase + count + i - 1);
+                dealBookmark(userId, elements.get(i), path, sortBase + count + i - 1, insertEsList);
             }
+        }
+    }
+
+    /**
+     * Description: 处理html节点，解析出文件夹和书签
+     *
+     * @param ele  待处理节点
+     * @param path 节点路径，不包含自身
+     * @param sort 当前层级中的排序序号
+     * @author fanxb
+     * @date 2019/7/8 14:49
+     */
+    private void dealBookmark(int userId, Element ele, String path, int sort, List<BookmarkEs> insertList) {
+        if (!DT.equalsIgnoreCase(ele.tagName())) {
+            return;
+        }
+        Element first = ele.child(0);
+        if (A.equalsIgnoreCase(first.tagName())) {
+            //说明为链接
+            Bookmark node = new Bookmark(userId, path, first.ownText(), first.attr("href"), first.attr("icon")
+                    , Long.valueOf(first.attr("add_date")) * 1000, sort);
+            //存入数据库
+            insertOne(node);
+            insertList.add(new BookmarkEs(node));
+        } else {
+            //说明为文件夹
+            Bookmark node = new Bookmark(userId, path, first.ownText(), Long.valueOf(first.attr("add_date")) * 1000, sort);
+            Integer sortBase = 0;
+            if (insertOne(node)) {
+                sortBase = bookmarkDao.selectMaxSort(node.getUserId(), path);
+                if (sortBase == null) {
+                    sortBase = 0;
+                }
+            }
+            String childPath = path + "." + node.getBookmarkId();
+            Elements children = ele.child(1).children();
+            for (int i = 0, size = children.size(); i < size; i++) {
+                dealBookmark(userId, children.get(i), childPath, sortBase + i + 1, insertList);
+            }
+            esUtil.insertBatch(EsConstant.BOOKMARK_INDEX, insertList);
+        }
+    }
+
+    /**
+     * Description: 插入一条书签，如果已经存在同名书签将跳过
+     *
+     * @param node node
+     * @return boolean 如果已经存在返回true，否则false
+     * @author fanxb
+     * @date 2019/7/8 17:25
+     */
+    private boolean insertOne(Bookmark node) {
+        //先根据name,userId,parentId获取此节点id
+        Integer id = bookmarkDao.selectIdByUserIdAndNameAndPath(node.getUserId(), node.getName(), node.getPath());
+        if (id == null) {
+            bookmarkDao.insertOne(node);
+            return false;
+        } else {
+            node.setBookmarkId(id);
+            return true;
         }
     }
 
@@ -109,6 +178,7 @@ public class BookmarkService {
      * @author fanxb
      * @date 2019/7/12 17:18
      */
+    @Transactional(rollbackFor = Exception.class)
     public Bookmark addOne(Bookmark bookmark) {
         int userId = UserContextHolder.get().getUserId();
         Integer sort = bookmarkDao.selectMaxSort(userId, bookmark.getPath());
@@ -121,6 +191,10 @@ public class BookmarkService {
         } catch (DuplicateKeyException e) {
             throw new CustomException("同级目录下不能存在相同名称的数据");
         }
+        //如果是书签，插入到es中
+        if (bookmark.getType() == 0) {
+            esUtil.insertOne(EsConstant.BOOKMARK_INDEX, new BookmarkEs(bookmark));
+        }
         return bookmark;
     }
 
@@ -132,69 +206,15 @@ public class BookmarkService {
      * @author fanxb
      * @date 2019/7/17 14:42
      */
+    @Transactional(rollbackFor = Exception.class)
     public void updateOne(int userId, Bookmark bookmark) {
         bookmark.setUserId(userId);
         bookmarkDao.editBookmark(bookmark);
-    }
-
-
-    /**
-     * Description: 处理html节点，解析出文件夹和书签
-     *
-     * @param ele  待处理节点
-     * @param path 节点路径，不包含自身
-     * @param sort 当前层级中的排序序号
-     * @author fanxb
-     * @date 2019/7/8 14:49
-     */
-    private void dealBookmark(int userId, Element ele, String path, int sort) {
-        if (!DT.equalsIgnoreCase(ele.tagName())) {
-            return;
-        }
-        Element first = ele.child(0);
-        if (A.equalsIgnoreCase(first.tagName())) {
-            //说明为链接
-            Bookmark node = new Bookmark(userId, path, first.ownText(), first.attr("href"), first.attr("icon")
-                    , Long.valueOf(first.attr("add_date")) * 1000, sort);
-            //存入数据库
-            insertOne(node);
-        } else {
-            //说明为文件夹
-            Bookmark node = new Bookmark(userId, path, first.ownText(), Long.valueOf(first.attr("add_date")) * 1000, sort);
-            Integer sortBase = 0;
-            if (insertOne(node)) {
-                sortBase = bookmarkDao.selectMaxSort(node.getUserId(), path);
-                if (sortBase == null) {
-                    sortBase = 0;
-                }
-            }
-            String childPath = path + "." + node.getBookmarkId();
-            Elements children = ele.child(1).children();
-            for (int i = 0, size = children.size(); i < size; i++) {
-                dealBookmark(userId, children.get(i), childPath, sortBase + i + 1);
-            }
+        if (bookmark.getType() == 0) {
+            esUtil.insertOne(EsConstant.BOOKMARK_INDEX, new BookmarkEs(bookmark));
         }
     }
 
-    /**
-     * Description: 插入一条书签，如果已经存在同名书签将跳过
-     *
-     * @param node node
-     * @return boolean 如果已经存在返回true，否则false
-     * @author fanxb
-     * @date 2019/7/8 17:25
-     */
-    private boolean insertOne(Bookmark node) {
-        //先根据name,userId,parentId获取此节点id
-        Integer id = bookmarkDao.selectIdByUserIdAndNameAndPath(node.getUserId(), node.getName(), node.getPath());
-        if (id == null) {
-            bookmarkDao.insertOne(node);
-            return false;
-        } else {
-            node.setBookmarkId(id);
-            return true;
-        }
-    }
 
     @Transactional(rollbackFor = Exception.class)
     public void moveNode(int userId, MoveNodeBody body) {

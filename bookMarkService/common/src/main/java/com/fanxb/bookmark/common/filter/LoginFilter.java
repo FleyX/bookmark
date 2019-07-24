@@ -2,7 +2,7 @@ package com.fanxb.bookmark.common.filter;
 
 import com.alibaba.fastjson.JSON;
 import com.auth0.jwt.interfaces.Claim;
-import com.fanxb.bookmark.common.Constant;
+import com.fanxb.bookmark.common.constant.Constant;
 import com.fanxb.bookmark.common.dao.UrlDao;
 import com.fanxb.bookmark.common.entity.Result;
 import com.fanxb.bookmark.common.entity.Url;

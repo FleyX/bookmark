@@ -4,7 +4,7 @@ import com.fanxb.bookmark.business.user.dao.UserDao;
 import com.fanxb.bookmark.business.user.entity.LoginBody;
 import com.fanxb.bookmark.business.user.entity.LoginRes;
 import com.fanxb.bookmark.business.user.entity.RegisterBody;
-import com.fanxb.bookmark.common.Constant;
+import com.fanxb.bookmark.common.constant.Constant;
 import com.fanxb.bookmark.common.entity.MailInfo;
 import com.fanxb.bookmark.common.entity.User;
 import com.fanxb.bookmark.common.exception.CustomException;
