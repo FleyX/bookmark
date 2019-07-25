@@ -32,7 +32,7 @@ class MainLayout extends React.Component {
     );
     if (userInfo !== null) {
       return (
-        <Dropdown overlay={menu} placement="bottomCenter">
+        <Dropdown overlay={menu} placement="bottomCenter" trigger={["hover", "click"]}>
           <span style={{ cursor: "pointer" }}>{userInfo.username}</span>
         </Dropdown>
       );
