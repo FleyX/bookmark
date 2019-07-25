@@ -22,6 +22,16 @@
     color: #969696 !important;
     background: white;
     padding: 2em;
+    @media screen {
+      width: 98%;
+      @media (min-width: 768px) {
+        width: 500px;
+      }
+
+      @media (max-width: 768px) {
+        width: 100%;
+      }
+    }
 
     .head {
       display: flex;

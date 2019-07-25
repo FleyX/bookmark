@@ -2,7 +2,6 @@
 
 .main {
   background-color: @mainBgColor;
-  min-width: 1366px;
 
   .header {
     display: flex;
@@ -12,8 +11,19 @@
   }
 
   .content {
-    margin: 0 10%;
+    margin: 0 auto;
     margin-top: 0.2rem;
     height: calc(100% - 0.8rem);
+
+    @media screen {
+      width: 98%;
+      @media (min-width: 768px) {
+        width: 80%;
+      }
+
+      @media (max-width: 768px) {
+        width: 98%;
+      }
+    }
   }
 }

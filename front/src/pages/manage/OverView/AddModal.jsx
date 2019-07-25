@@ -56,9 +56,12 @@ class AddModal extends React.Component {
    */
   editOne(node) {
     const { addName, addValue } = this.state;
+    const { bookmarkId, type } = this.props.currentEditNode;
     const body = {
+      bookmarkId,
       name: addName,
-      url: addValue
+      url: addValue,
+      type
     };
     httpUtil.post("/bookmark/updateOne", body).then(() => {
       message.success("编辑成功");

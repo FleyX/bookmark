@@ -1,0 +1,51 @@
+.main {
+  padding-bottom: 1em;
+  position: relative;
+
+  .resultList {
+    position: absolute;
+    background: white;
+    z-index: 1000;
+    width: 100%;
+    border: 1px solid black;
+    border-top: 0;
+
+    .item {
+      cursor: pointer;
+      padding: 0.1em 0.2em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      vertical-align: baseline;
+    }
+
+    // .item > span {
+    //   display: inline-block;
+    //   padding-right: 0.5em;
+    // }
+
+    // .item:first-child {
+    //   flex: 1;
+    // }
+
+    // .item:last-child {
+    //   flex: 2;
+    // }
+
+    .item:hover {
+      background: #f2f4f5;
+    }
+
+    .checked {
+      background: #f2f4f5;
+    }
+  }
+
+  :global {
+    .ant-input-affix-wrapper .ant-input {
+      // border: none;
+      // border-bottom: 1px solid white !important;
+      box-shadow: none;
+    }
+  }
+}

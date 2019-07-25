@@ -5,6 +5,7 @@ import httpUtil from "../../../util/httpUtil";
 import styles from "./index.module.less";
 import { batchDelete, renderTreeNodes, onDrop } from "./function.js";
 import AddModal from "./AddModal";
+import Search from "../../../components/Search";
 
 import * as action from "../../../redux/action/BookmarkTreeOverview";
 import { connect } from "react-redux";
@@ -80,6 +81,7 @@ class OverView extends React.Component {
     return (
       <MainLayout>
         <div className={styles.main}>
+          <Search />
           <div className={styles.header}>
             <div className={styles.left}>
               <span className={styles.myTree}>我的书签树</span>
