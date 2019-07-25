@@ -133,5 +133,15 @@ public interface BookmarkDao {
      */
     void updatePathAndSort(@Param("userId") int userId, @Param("bookmarkId") int bookmarkId, @Param("path") String path, @Param("sort") int sort);
 
+    /**
+     * Description: 获取某个文件夹下所有的节点id
+     *
+     * @param userId   userId
+     * @param folderId folderId
+     * @return java.util.List<java.lang.Integer>
+     * @author fanxb
+     * @date 2019/7/25 14:14
+     */
+    List<Integer> getChildrenBookmarkId(@Param("userId") int userId, @Param("folderId") int folderId);
 
 }

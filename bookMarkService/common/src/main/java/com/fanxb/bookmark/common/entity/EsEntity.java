@@ -10,15 +10,15 @@ import lombok.Data;
  * @date 2019/7/24 17:37
  */
 @Data
-public class EsInsertEntity<T> {
+public final class EsEntity<T> {
 
     private String id;
     private T data;
 
-    public EsInsertEntity() {
+    public EsEntity() {
     }
 
-    public EsInsertEntity(String id, T data) {
+    public EsEntity(String id, T data) {
         this.data = data;
         this.id = id;
     }

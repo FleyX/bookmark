@@ -17,12 +17,10 @@ public class EsConstant {
     /**
      * 创建bookmark index语句
      */
-    public static final String CREATE_BOOKMARK_INDEX = "{" +
-            "\"properties\": {\n" +
+    public static final String CREATE_BOOKMARK_INDEX = "{\n" +
+            "    \"properties\": {\n" +
             "      \"userId\":{\n" +
-            "        \"type\":\"integer\",\n" +
-            "        \"store\": true,\n" +
-            "        \"index\":false\n" +
+            "        \"type\":\"integer\"\n" +
             "      },\n" +
             "      \"name\":{\n" +
             "        \"type\":\"text\",\n" +
@@ -31,8 +29,10 @@ public class EsConstant {
             "      },\n" +
             "      \"url\":{\n" +
             "        \"type\":\"text\",\n" +
-            "        \"term_vector\": \"with_positions_offsets\"\n" +
+            "        \"index\": true,\n" +
+            "        \"analyzer\": \"ik_max_word\",\n" +
+            "        \"search_analyzer\": \"ik_smart\"\n" +
             "      }\n" +
-            "    }" +
-            "}";
+            "    }\n" +
+            "  }";
 }

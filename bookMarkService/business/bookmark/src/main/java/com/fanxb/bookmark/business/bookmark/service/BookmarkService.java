@@ -5,9 +5,13 @@ import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
 import com.fanxb.bookmark.common.constant.EsConstant;
 import com.fanxb.bookmark.common.entity.Bookmark;
+import com.fanxb.bookmark.common.entity.EsEntity;
 import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.EsUtil;
 import com.fanxb.bookmark.common.util.UserContextHolder;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -19,7 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 类功能简述：
@@ -61,7 +67,7 @@ public class BookmarkService {
         }
         int count = 0;
         // 將要插入es的书签数据放到list中,最后一次插入，尽量避免mysql回滚了，但是es插入了
-        List<BookmarkEs> insertEsList = new ArrayList<>();
+        List<EsEntity> insertEsList = new ArrayList<>();
         for (int i = 0, length = elements.size(); i < length; i++) {
             if (i == 0) {
                 Elements firstChildren = elements.get(0).child(1).children();
@@ -73,6 +79,7 @@ public class BookmarkService {
                 dealBookmark(userId, elements.get(i), path, sortBase + count + i - 1, insertEsList);
             }
         }
+        esUtil.insertBatch(EsConstant.BOOKMARK_INDEX, insertEsList);
     }
 
     /**
@@ -84,7 +91,7 @@ public class BookmarkService {
      * @author fanxb
      * @date 2019/7/8 14:49
      */
-    private void dealBookmark(int userId, Element ele, String path, int sort, List<BookmarkEs> insertList) {
+    private void dealBookmark(int userId, Element ele, String path, int sort, List<EsEntity> insertList) {
         if (!DT.equalsIgnoreCase(ele.tagName())) {
             return;
         }
@@ -95,7 +102,7 @@ public class BookmarkService {
                     , Long.valueOf(first.attr("add_date")) * 1000, sort);
             //存入数据库
             insertOne(node);
-            insertList.add(new BookmarkEs(node));
+            insertList.add(new EsEntity<>(node.getBookmarkId().toString(), new BookmarkEs(node)));
         } else {
             //说明为文件夹
             Bookmark node = new Bookmark(userId, path, first.ownText(), Long.valueOf(first.attr("add_date")) * 1000, sort);
@@ -111,7 +118,6 @@ public class BookmarkService {
             for (int i = 0, size = children.size(); i < size; i++) {
                 dealBookmark(userId, children.get(i), childPath, sortBase + i + 1, insertList);
             }
-            esUtil.insertBatch(EsConstant.BOOKMARK_INDEX, insertList);
         }
     }
 
@@ -161,13 +167,18 @@ public class BookmarkService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void batchDelete(int userId, List<Integer> folderIdList, List<Integer> bookmarkIdList) {
+        Set<Integer> set = new HashSet<>();
         for (Integer item : folderIdList) {
+            set.addAll(bookmarkDao.getChildrenBookmarkId(userId, item));
             bookmarkDao.deleteUserFolder(userId, item);
             bookmarkIdList.add(item);
         }
         if (bookmarkIdList.size() > 0) {
             bookmarkDao.deleteUserBookmark(userId, bookmarkIdList);
         }
+        set.addAll(bookmarkIdList);
+        //es 中批量删除
+        esUtil.deleteBatch(EsConstant.BOOKMARK_INDEX, set);
     }
 
     /**
@@ -193,7 +204,8 @@ public class BookmarkService {
         }
         //如果是书签，插入到es中
         if (bookmark.getType() == 0) {
-            esUtil.insertOne(EsConstant.BOOKMARK_INDEX, new BookmarkEs(bookmark));
+            esUtil.insertOrUpdateOne(EsConstant.BOOKMARK_INDEX,
+                    new EsEntity<>(bookmark.getBookmarkId().toString(), new BookmarkEs(bookmark)));
         }
         return bookmark;
     }
@@ -211,7 +223,8 @@ public class BookmarkService {
         bookmark.setUserId(userId);
         bookmarkDao.editBookmark(bookmark);
         if (bookmark.getType() == 0) {
-            esUtil.insertOne(EsConstant.BOOKMARK_INDEX, new BookmarkEs(bookmark));
+            esUtil.insertOrUpdateOne(EsConstant.BOOKMARK_INDEX,
+                    new EsEntity<>(bookmark.getBookmarkId().toString(), new BookmarkEs(bookmark)));
         }
     }
 
@@ -232,6 +245,25 @@ public class BookmarkService {
         }
         //更新被移动节点的path和sort
         bookmarkDao.updatePathAndSort(userId, body.getBookmarkId(), body.getTargetPath(), body.getSort());
+    }
+
+    /**
+     * Description: 根据context搜索
+     *
+     * @param userId  userId
+     * @param context context
+     * @author fanxb
+     * @date 2019/7/25 10:45
+     */
+    public List<BookmarkEs> searchUserBookmark(int userId, String context) {
+        BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
+        boolQueryBuilder.must(QueryBuilders.termQuery("userId", userId));
+        boolQueryBuilder.must(QueryBuilders.multiMatchQuery(context, "name", "url"));
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        builder.size(5);
+        builder.query(boolQueryBuilder);
+        List<BookmarkEs> list = esUtil.search(EsConstant.BOOKMARK_INDEX, builder, BookmarkEs.class);
+        return list;
     }
 
 }

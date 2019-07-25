@@ -2,12 +2,15 @@ package com.fanxb.bookmark.common.util;
 
 import com.alibaba.fastjson.JSON;
 import com.fanxb.bookmark.common.constant.EsConstant;
-import com.fanxb.bookmark.common.entity.EsInsertEntity;
+import com.fanxb.bookmark.common.entity.EsEntity;
 import com.fanxb.bookmark.common.exception.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -16,12 +19,14 @@ import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.lang.ref.ReferenceQueue;
-import java.net.Authenticator;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -84,15 +89,14 @@ public class EsUtil {
     }
 
     /**
-     * Description: 插入一条记录
+     * Description: 插入/更新一条记录
      *
-     * @param index index
-     * @param id    id
-     * @param o     o
+     * @param index  index
+     * @param entity 对象
      * @author fanxb
      * @date 2019/7/24 15:02
      */
-    public void insertOne(String index, EsInsertEntity entity) {
+    public void insertOrUpdateOne(String index, EsEntity entity) {
         IndexRequest request = new IndexRequest(index);
         request.id(entity.getId());
         request.source(JSON.toJSONString(entity.getData()), XContentType.JSON);
@@ -111,11 +115,56 @@ public class EsUtil {
      * @author fanxb
      * @date 2019/7/24 17:38
      */
-    public void insertBatch(String index, List<? extends EsInsertEntity> list) {
+    public void insertBatch(String index, List<EsEntity> list) {
         BulkRequest request = new BulkRequest();
-        list.forEach(item -> request.add(new IndexRequest(index).id(item.getId()).source(JSON.toJSONString(item.getData()))));
+        list.forEach(item -> request.add(new IndexRequest(index).id(item.getId())
+                .source(JSON.toJSONString(item.getData()), XContentType.JSON)));
         try {
             client.bulk(request, RequestOptions.DEFAULT);
+        } catch (Exception e) {
+            throw new CustomException(e);
+        }
+    }
+
+    /**
+     * Description: 批量删除
+     *
+     * @param index  index
+     * @param idList 待删除列表
+     * @author fanxb
+     * @date 2019/7/25 14:24
+     */
+    public <T> void deleteBatch(String index, Collection<T> idList) {
+        BulkRequest request = new BulkRequest();
+        idList.forEach(item -> request.add(new DeleteRequest(index, item.toString())));
+        try {
+            client.bulk(request, RequestOptions.DEFAULT);
+        } catch (Exception e) {
+            throw new CustomException(e);
+        }
+    }
+
+    /**
+     * Description: 搜索
+     *
+     * @param index   index
+     * @param builder 查询参数
+     * @param c       结果类对象
+     * @return java.util.ArrayList
+     * @author fanxb
+     * @date 2019/7/25 13:46
+     */
+    public <T> List<T> search(String index, SearchSourceBuilder builder, Class<T> c) {
+        SearchRequest request = new SearchRequest(index);
+        request.source(builder);
+        try {
+            SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+            SearchHit[] hits = response.getHits().getHits();
+            List<T> res = new ArrayList<>(hits.length);
+            for (SearchHit hit : hits) {
+                res.add(JSON.parseObject(hit.getSourceAsString(), c));
+            }
+            return res;
         } catch (Exception e) {
             throw new CustomException(e);
         }

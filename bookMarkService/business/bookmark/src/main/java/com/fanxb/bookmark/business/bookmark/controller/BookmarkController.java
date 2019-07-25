@@ -1,6 +1,7 @@
 package com.fanxb.bookmark.business.bookmark.controller;
 
 import com.fanxb.bookmark.business.bookmark.entity.BatchDeleteBody;
+import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
 import com.fanxb.bookmark.common.entity.Bookmark;
@@ -9,6 +10,8 @@ import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * 类功能简述：
@@ -107,6 +110,12 @@ public class BookmarkController {
     public Result moveNode(@RequestBody MoveNodeBody body) {
         bookmarkService.moveNode(UserContextHolder.get().getUserId(), body);
         return Result.success(null);
+    }
+
+    @GetMapping("/searchUserBookmark")
+    public Result searchUserBookmark(String content) {
+        List<BookmarkEs> res = bookmarkService.searchUserBookmark(UserContextHolder.get().getUserId(), content);
+        return Result.success(res);
     }
 
 }

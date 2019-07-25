@@ -68,6 +68,17 @@
                                  WHERE bookmarkId = #{folderId}) a);
     </delete>
 
+    <select id="getChildrenBookmarkId" resultType="integer">
+        select bookmarkId
+        from bookmark
+        where
+            userId = #{userId}
+            and path LIKE (SELECT a.path
+                           FROM (SELECT CONCAT(path, '.', '${folderId}', '%') AS path
+                                 FROM bookmark
+                                 WHERE bookmarkId = #{folderId}) a);
+    </select>
+
     <delete id="deleteUserBookmark">
         delete from bookmark where userId = #{userId} and bookmarkId in
         <foreach collection="bookmarkIds" item="item" open="(" close=")" separator=",">
