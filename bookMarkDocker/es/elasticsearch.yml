@@ -14,7 +14,7 @@ bootstrap.memory_lock: false
 # 设置为true来锁住内存不进行swapping。因为当jvm开始swapping时es的效率 会降低，所以要保证它不swap，可以把ES_MIN_MEM和ES_MAX_MEM两个环境变量设置成同一个值，并且保证机器有足够的内存分配给es。 同时也要允许elasticsearch的进程可以锁住内# # 存，linux下启动es之前可以通过`ulimit -l unlimited`命令设置。
 # 设置为true，导致报警告实际未锁定，进而推出进程
 
-#network.bind_host: 192.168.0.1
+network.bind_host: 0.0.0.0
 # 设置绑定的ip地址，可以是ipv4或ipv6的，默认为0.0.0.0，绑定这台机器的任何一个ip。
 
 #network.publish_host: 192.168.0.1
