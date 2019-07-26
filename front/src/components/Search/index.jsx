@@ -14,10 +14,24 @@ class Search extends React.Component {
     };
   }
 
+  componentWillUnmount() {
+    this.clearTimer();
+  }
+
   contentChange(e) {
     const content = e.target.value.trim();
     this.setState({ content });
-    this.search(content);
+    this.clearTimer();
+    this.timer = setTimeout(() => {
+      this.search(content);
+      this.clearTimer();
+    }, 300);
+  }
+
+  clearTimer() {
+    if (this.timer != null) {
+      clearTimeout(this.timer);
+    }
   }
 
   search(content) {
