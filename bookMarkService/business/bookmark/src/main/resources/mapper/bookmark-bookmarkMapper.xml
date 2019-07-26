@@ -110,5 +110,17 @@
         where userId = #{userId} and bookmarkId = #{bookmarkId}
     </update>
 
+    <select id="selectBookmarkEsByUserIdAndType" resultType="com.fanxb.bookmark.business.bookmark.entity.BookmarkEs">
+        select
+            userId,
+            bookmarkId,
+            name,
+            url
+        from bookmark
+        where userId = #{userId} and type = #{type}
+        order by bookmarkId
+        limit ${start}, ${size}
+    </select>
+
 
 </mapper>

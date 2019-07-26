@@ -9,8 +9,10 @@ import com.fanxb.bookmark.common.entity.EsEntity;
 import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.EsUtil;
 import com.fanxb.bookmark.common.util.UserContextHolder;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -35,6 +37,7 @@ import java.util.Set;
  * @date 2019/7/8 15:00
  */
 @Service
+@Slf4j
 public class BookmarkService {
     /**
      * chrome导出书签tag
@@ -245,6 +248,7 @@ public class BookmarkService {
         }
         //更新被移动节点的path和sort
         bookmarkDao.updatePathAndSort(userId, body.getBookmarkId(), body.getTargetPath(), body.getSort());
+        log.info("{},从{}移动到{},sort:{}", userId, body.getSourcePath(), body.getTargetPath(), body.getSort());
     }
 
     /**
@@ -262,8 +266,32 @@ public class BookmarkService {
         SearchSourceBuilder builder = new SearchSourceBuilder();
         builder.size(5);
         builder.query(boolQueryBuilder);
-        List<BookmarkEs> list = esUtil.search(EsConstant.BOOKMARK_INDEX, builder, BookmarkEs.class);
-        return list;
+        return esUtil.search(EsConstant.BOOKMARK_INDEX, builder, BookmarkEs.class);
     }
+
+    /**
+     * Description: 将某个用户的书签数据mysql同步到es中
+     *
+     * @author fanxb
+     * @date 2019/7/26 11:27
+     */
+    public void syncUserBookmark(int userId) {
+        //删除旧的数据
+        esUtil.deleteByQuery(EsConstant.BOOKMARK_INDEX, new TermQueryBuilder("userId", userId));
+        int index = 0;
+        int size = 500;
+        List<EsEntity> res = new ArrayList<>();
+        do {
+            res.clear();
+            bookmarkDao.selectBookmarkEsByUserIdAndType(userId, 0, index, size)
+                    .forEach(item -> res.add(new EsEntity<>(item.getBookmarkId().toString(), item)));
+            if (res.size() > 0) {
+                esUtil.insertBatch(EsConstant.BOOKMARK_INDEX, res);
+            }
+            index += size;
+        } while (res.size() == 500);
+
+    }
+
 
 }

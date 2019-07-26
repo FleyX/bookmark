@@ -118,4 +118,17 @@ public class BookmarkController {
         return Result.success(res);
     }
 
+    /**
+     * Description: 同步当前用户的书签到es中
+     *
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2019/7/26 15:33
+     */
+    @PostMapping("/syncBookmark")
+    public Result syncBookmark() {
+        bookmarkService.syncUserBookmark(UserContextHolder.get().getUserId());
+        return Result.success(null);
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.fanxb.bookmark.business.bookmark.dao;
 
+import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.common.entity.Bookmark;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -143,5 +144,18 @@ public interface BookmarkDao {
      * @date 2019/7/25 14:14
      */
     List<Integer> getChildrenBookmarkId(@Param("userId") int userId, @Param("folderId") int folderId);
+
+    /**
+     * Description: 根据用户id，类别，分页查找书签
+     *
+     * @author fanxb
+     * @date 2019/7/26 15:23
+     * @param userId userId
+     * @param type type
+     * @param start start
+     * @param  size size
+     * @return java.util.List<com.fanxb.bookmark.business.bookmark.entity.BookmarkEs>
+     */
+    List<BookmarkEs> selectBookmarkEsByUserIdAndType(@Param("userId") int userId, @Param("type") int type, @Param("start") int start, @Param("size") int size);
 
 }
