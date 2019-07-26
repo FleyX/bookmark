@@ -86,6 +86,7 @@ services:
         -Dspring.datasource.druid.password=123456 \
         -Dspring.datasource.druid.url=jdbc:mysql://bookmark-mysql:3306/bookmark?useUnicode=true\&characterEncoding=utf-8\&useSSL=false\&useJDBCCompliantTimezoneShift=true\&useLegacyDatetimeCode=false\&serverTimezone=UTC \
         -Dspring.redis.host=bookmark-redis \
+        -Des.host=bookmark-es \
         service.jar
 networks: 
   bookmark:
