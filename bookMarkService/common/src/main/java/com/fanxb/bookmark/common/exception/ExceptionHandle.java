@@ -20,12 +20,13 @@ public class ExceptionHandle {
 
     @ExceptionHandler(Exception.class)
     public Result handleException(Exception e) {
-        logger.error("捕获到错误:", e);
         CustomException ce;
         if (e instanceof CustomException) {
+            logger.error("捕获到自定义错误:{}", e.getMessage(), e);
             ce = (CustomException) e;
         } else {
-            ce = new CustomException(e);
+            logger.error("捕获到意外错误:{}", e.getMessage(), e);
+            ce = new CustomException("服务器异常");
         }
         return new Result(ce.getCode(), ce.getMessage(), null);
     }

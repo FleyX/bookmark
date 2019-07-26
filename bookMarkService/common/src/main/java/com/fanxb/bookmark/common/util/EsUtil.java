@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.fanxb.bookmark.common.constant.EsConstant;
 import com.fanxb.bookmark.common.entity.EsEntity;
 import com.fanxb.bookmark.common.exception.CustomException;
+import com.fanxb.bookmark.common.exception.EsException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
@@ -19,6 +21,8 @@ import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,6 +58,9 @@ public class EsUtil {
     @PostConstruct
     public void init() {
         try {
+            if (client != null) {
+                client.close();
+            }
             client = new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, scheme)));
             if (this.indexExist(EsConstant.BOOKMARK_INDEX)) {
                 return;
@@ -66,8 +73,7 @@ public class EsUtil {
                 throw new CustomException("初始化失败");
             }
         } catch (Exception e) {
-            log.error("初始化es失败", e);
-            System.exit(0);
+            log.error("注意初始化es失败", e);
         }
 
     }
@@ -103,7 +109,7 @@ public class EsUtil {
         try {
             client.index(request, RequestOptions.DEFAULT);
         } catch (Exception e) {
-            throw new CustomException(e);
+            throw new EsException(e);
         }
     }
 
@@ -122,7 +128,7 @@ public class EsUtil {
         try {
             client.bulk(request, RequestOptions.DEFAULT);
         } catch (Exception e) {
-            throw new CustomException(e);
+            throw new EsException(e);
         }
     }
 
@@ -140,7 +146,7 @@ public class EsUtil {
         try {
             client.bulk(request, RequestOptions.DEFAULT);
         } catch (Exception e) {
-            throw new CustomException(e);
+            throw new EsException(e);
         }
     }
 
@@ -166,7 +172,44 @@ public class EsUtil {
             }
             return res;
         } catch (Exception e) {
-            throw new CustomException(e);
+            throw new EsException(e);
+        }
+    }
+
+    /**
+     * Description: 删除index
+     *
+     * @param index index
+     * @return void
+     * @author fanxb
+     * @date 2019/7/26 11:30
+     */
+    public void deleteIndex(String index) {
+        try {
+            client.indices().delete(new DeleteIndexRequest(index), RequestOptions.DEFAULT);
+        } catch (Exception e) {
+            throw new EsException(e);
+        }
+    }
+
+    /**
+     * Description: delete by query
+     *
+     * @param index   index
+     * @param builder builder
+     * @author fanxb
+     * @date 2019/7/26 15:16
+     */
+    public void deleteByQuery(String index, QueryBuilder builder) {
+        DeleteByQueryRequest request = new DeleteByQueryRequest(index);
+        request.setQuery(builder);
+        //设置批量操作数量,最大为10000
+        request.setBatchSize(10000);
+        request.setConflicts("proceed");
+        try {
+            client.deleteByQuery(request, RequestOptions.DEFAULT);
+        } catch (Exception e) {
+            throw new EsException(e);
         }
     }
 
