@@ -3,7 +3,7 @@ import { Route, Switch, Redirect } from "react-router-dom";
 import { message } from "antd";
 import { withRouter } from "react-router-dom";
 import { Provider } from "react-redux";
-import Clipboard from "clipboard";
+import ClipboardJS from "clipboard";
 import store from "./redux";
 import NotFound from "./pages/public/notFound/NotFound";
 
@@ -21,7 +21,11 @@ class App extends Component {
 
   componentDidMount() {
     //初始化clipboard
-    let clipboard = new Clipboard(".copy-to-board");
+    let clipboard = new ClipboardJS(".copy-to-board", {
+      text: function(trigger) {
+        return window.copyUrl;
+      }
+    });
     clipboard.on("success", function(e) {
       message.success("复制成功");
       e.clearSelection();

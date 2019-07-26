@@ -1,46 +1,75 @@
 import httpUtil from "../../../util/httpUtil";
 import React from "react";
-import { Modal, Button,  Tree, message } from "antd";
+import { Modal, Button, Tree, message, Menu, Dropdown } from "antd";
 import styles from "./index.module.less";
 import IconFont from "../../../components/IconFont";
+import { stopTransfer } from "../../../util/eventUtil";
 const { TreeNode } = Tree;
+
+function menuVisible(item, visible) {
+  if (visible) {
+    window.copyUrl = item.url;
+  }
+  this.props.changeCurrentClickItem(item);
+}
+
+function menuClick(e) {
+  stopTransfer(e);
+  const { currentClickItem, addNode, editNode } = this.props;
+  switch (e.key) {
+    case "add":
+      addNode(currentClickItem);
+      break;
+    case "edit":
+      editNode(currentClickItem);
+      break;
+    case "delete":
+      deleteOne.call(this, currentClickItem);
+      break;
+    default:
+      break;
+  }
+}
 
 /**
  * 渲染树节点中节点内容
  * @param {*} item
  */
 export function renderNodeContent(item) {
-  const { isEdit, addNode, editNode } = this.props;
+  const { isEdit } = this.props;
   // 节点内容后面的操作按钮
-  const btns = (
-    <div className={styles.btns}>
+  const menu = (
+    <Menu onClick={menuClick.bind(this)}>
       {item.type === 0 ? (
-        <Button
-          size="small"
-          className="copy-to-board"
-          data-clipboard-text={item.url}
-          type="primary"
-          name="copy"
-          icon="copy"
-          shape="circle"
-          title="点击复制url"
-        />
-      ) : null}
-      {item.type === 1 ? <Button size="small" type="primary" icon="plus" shape="circle" onClick={addNode.bind(this, item)} /> : null}
-      <Button size="small" type="primary" icon="edit" shape="circle" onClick={editNode.bind(this, item)} />
-      <Button size="small" type="danger" icon="delete" shape="circle" onClick={deleteOne.bind(this, item)} />
-    </div>
+        <Menu.Item key="copyUrl">
+          <span className="copy-to-board">复制URL</span>
+        </Menu.Item>
+      ) : (
+        <Menu.Item key="add">
+          <span>新增</span>
+        </Menu.Item>
+      )}
+      <Menu.Item key="edit">编辑</Menu.Item>
+      <Menu.Item key="delete">删除</Menu.Item>
+    </Menu>
   );
   return (
     <React.Fragment>
-      {item.type === 0 ? (
-        <a href={item.url} className={styles.nodeContent}>
-          {item.name}
-        </a>
-      ) : (
-        <span className={styles.nodeContent}>{item.name}</span>
-      )}
-      {isEdit ? btns : null}
+      {/* 触发右键菜单 */}
+      <Dropdown overlay={menu} trigger={["contextMenu"]} onVisibleChange={menuVisible.bind(this, item)}>
+        {item.type === 0 ? (
+          <a href={item.url} className={styles.nodeContent}>
+            {item.name}
+          </a>
+        ) : (
+          <span className={styles.nodeContent}>{item.name}</span>
+        )}
+      </Dropdown>
+      {isEdit ? (
+        <Dropdown overlay={menu} trigger={["click"]} onVisibleChange={menuVisible.bind(this, item)}>
+          <Button size="small" onClick={stopTransfer.bind(this)} type="danger" icon="menu" shape="circle" />
+        </Dropdown>
+      ) : null}
     </React.Fragment>
   );
 }
@@ -84,8 +113,7 @@ export function renderTreeNodes(items) {
  * 删除一个
  * @param {*} e
  */
-export function deleteOne(item, e) {
-  e.stopPropagation();
+export function deleteOne(item) {
   if (item.type === 0) {
     deleteBookmark.call(this, [], [item.bookmarkId]);
   } else {

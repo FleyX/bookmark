@@ -7,6 +7,7 @@ const BookmarkTreeOverviewReducer = (state = info.getInitData(), action) => {
     case info.UPDATE_TREEDATA:
     case info.CHANGE_CHECKED_KEYS:
     case info.CHANGE_EXPANDED_KEYS:
+    case info.CHANGE_CURRENT_CLICK_ITEM:
     case info.ADD_NODE:
     case info.EDIT_NODE:
       return { ...state, ...action.data };

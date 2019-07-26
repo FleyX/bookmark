@@ -22,7 +22,8 @@ function mapDispatchToProps(dispatch) {
     editNode: (item, e) => dispatch(action.editNode(item, e)),
     changeIsInit: value => dispatch(action.changeIsInit(value)),
     changeCheckedKeys: (keys, nodes) => dispatch(action.changeCheckedKeys(keys, nodes)),
-    changeExpandedKeys: keys => dispatch(action.changeExpandedKeys(keys))
+    changeExpandedKeys: keys => dispatch(action.changeExpandedKeys(keys)),
+    changeCurrentClickItem: item => dispatch(action.changeCurrentClickItem(item))
   };
 }
 
@@ -60,9 +61,6 @@ class OverView extends React.Component {
    * @param {*} e
    */
   treeNodeSelect(key, e) {
-    if (e.nativeEvent.delegateTarget && e.nativeEvent.delegateTarget.name === "copy") {
-      return;
-    }
     const { expandedKeys, changeExpandedKeys } = this.props;
     const item = e.node.props.dataRef;
     if (item.type === 0) {
@@ -85,7 +83,7 @@ class OverView extends React.Component {
           <div className={styles.header}>
             <div className={styles.left}>
               <span className={styles.myTree}>我的书签树</span>
-              {isEdit ? <Button size="small" type="primary" icon="plus" shape="circle" onClick={addNode.bind(this, null)} /> : null}
+              <Button size="small" type="primary" icon="plus" shape="circle" onClick={addNode.bind(this, null)} />
               {expandedKeys.length > 0 ? (
                 <Button type="primary" size="small" onClick={changeExpandedKeys.bind(this, [])}>
                   收起

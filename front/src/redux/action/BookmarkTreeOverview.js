@@ -13,7 +13,9 @@ export function getInitData() {
     checkedKeys: [],
     checkedNodes: [],
     expandedKeys: [],
-    isInit: false
+    isInit: false,
+    //右键菜单触发项
+    currentClickItem: null
   };
 }
 
@@ -46,9 +48,7 @@ export const setIsEdit = isEdit => {
 //新增节点
 export const ADD_NODE = "addNode";
 
-export const addNode = (node, e) => {
-  console.log("add node");
-  e.stopPropagation();
+export const addNode = node => {
   return {
     type: ADD_NODE,
     data: {
@@ -61,8 +61,7 @@ export const addNode = (node, e) => {
 //编辑节点
 export const EDIT_NODE = "editNode";
 
-export const editNode = (node, e) => {
-  e.stopPropagation();
+export const editNode = node => {
   return {
     type: EDIT_NODE,
     data: {
@@ -95,7 +94,6 @@ export const changeCheckedKeys = (checkedKeys, e) => {
 //修改expandedKeys
 export const CHANGE_EXPANDED_KEYS = "changeExpandedKeys";
 export const changeExpandedKeys = expandedKeys => {
-  console.log(expandedKeys);
   return {
     type: CHANGE_EXPANDED_KEYS,
     data: { expandedKeys }
@@ -108,5 +106,13 @@ export const changeIsInit = isInit => {
   return {
     type: CHANGE_EXPANDED_KEYS,
     data: { isInit }
+  };
+};
+
+export const CHANGE_CURRENT_CLICK_ITEM = "changeCurrentClickItem";
+export const changeCurrentClickItem = currentClickItem => {
+  return {
+    type: CHANGE_CURRENT_CLICK_ITEM,
+    data: { currentClickItem }
   };
 };
