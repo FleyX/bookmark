@@ -19,6 +19,9 @@ public class EsConstant {
      */
     public static final String CREATE_BOOKMARK_INDEX = "{\n" +
             "    \"properties\": {\n" +
+            "      \"bookmarkId\":{\n" +
+            "        \"type\":\"integer\"\n" +
+            "      },\n" +
             "      \"userId\":{\n" +
             "        \"type\":\"integer\"\n" +
             "      },\n" +
