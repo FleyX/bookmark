@@ -14,7 +14,7 @@ services:
       - /etc/localtime:/etc/localtime
       - ./timezone:/etc/timezone
     environment: 
-      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_DATABASE=bookmark
   bookmark-redis:
     image: redis:3.2.10
@@ -57,7 +57,7 @@ services:
     ports: 
       - 8083:8080
   bookmark-service:
-    image: registry.cn-hangzhou.aliyuncs.com/fleyx/node-java-env:v1
+    image: registry.cn-hangzhou.aliyuncs.com/fleyx/node-java-env:v2
     container_name: bookmark-service
     depends_on: 
       - bookmark-mysql
@@ -77,13 +77,13 @@ services:
         sleep 20 && \
         ls -l && \
         java -jar -DisDev=false \
-        -DjwtSecret=123456 \
+        -DjwtSecret=${JWT_SECRET} \
         -Dmybatis.configuration.log-impl=org.apache.ibatis.logging.nologging.NoLoggingImpl \
-        -Dspring.mail.host= \
-        -Dspring.mail.username= \
-        -Dspring.mail.password= \
-        -Dspring.mail.port= \
-        -Dspring.datasource.druid.password=123456 \
+        -Dspring.mail.host=${SMTP_HOST} \
+        -Dspring.mail.username=${SMTP_USERNAME} \
+        -Dspring.mail.password=${SMTP_PASSWORD} \
+        -Dspring.mail.port=${SMTP_PORT} \
+        -Dspring.datasource.druid.password=${MYSQL_PASSWORD} \
         -Dspring.datasource.druid.url=jdbc:mysql://bookmark-mysql:3306/bookmark?useUnicode=true\&characterEncoding=utf-8\&useSSL=false\&useJDBCCompliantTimezoneShift=true\&useLegacyDatetimeCode=false\&serverTimezone=UTC \
         -Dspring.redis.host=bookmark-redis \
         -Des.host=bookmark-es \
