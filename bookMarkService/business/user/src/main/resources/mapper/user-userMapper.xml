@@ -34,5 +34,15 @@
         where email = #{email}
     </update>
 
+    <select id="selectByUserId" resultType="com.fanxb.bookmark.common.entity.User">
+        select
+            userId,
+            username,
+            email,
+            icon
+        from user
+        where userId = #{userId}
+    </select>
+
 
 </mapper>

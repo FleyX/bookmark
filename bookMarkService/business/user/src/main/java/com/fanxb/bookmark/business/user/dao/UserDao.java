@@ -53,4 +53,14 @@ public interface UserDao {
      * @date 2019/7/9 20:03
      */
     void resetPassword(@Param("password") String password,@Param("email") String email);
+
+    /**
+     * Description: 根据用户id查询用户信息
+     *
+     * @author fanxb
+     * @date 2019/7/30 16:08
+     * @param userId userId
+     * @return com.fanxb.bookmark.common.entity.User
+     */
+    User selectByUserId(int userId);
 }

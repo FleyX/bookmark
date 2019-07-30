@@ -4,6 +4,7 @@ import com.fanxb.bookmark.business.user.entity.LoginBody;
 import com.fanxb.bookmark.business.user.entity.RegisterBody;
 import com.fanxb.bookmark.business.user.service.UserService;
 import com.fanxb.bookmark.common.entity.Result;
+import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +49,18 @@ public class UserController {
     public Result register(@RequestBody RegisterBody body) {
         userService.register(body);
         return Result.success(null);
+    }
+
+    /**
+     * Description: 获取当前登录用户的基本信息
+     *
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2019/7/30 15:14
+     */
+    @GetMapping("/currentUserInfo")
+    public Result currentUserInfo() {
+        return Result.success(userService.getUserInfo(UserContextHolder.get().getUserId()));
     }
 
     /**

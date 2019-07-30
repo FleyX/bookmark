@@ -144,4 +144,16 @@ public class UserService {
         String newPassword = HashUtil.sha1(HashUtil.md5(body.getPassword()));
         userDao.resetPassword(newPassword, body.getEmail());
     }
+
+    /**
+     * Description: 根据userId获取用户信息
+     *
+     * @author fanxb
+     * @date 2019/7/30 15:57
+     * @param userId userId
+     * @return com.fanxb.bookmark.common.entity.User
+     */
+    public User getUserInfo(int userId){
+        return userDao.selectByUserId(userId);
+    }
 }
