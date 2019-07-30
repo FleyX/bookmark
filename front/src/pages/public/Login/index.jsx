@@ -5,7 +5,7 @@ import { Button, Input, message, Checkbox } from "antd";
 import IconFont from "../../../components/IconFont";
 import styles from "./index.module.less";
 import { connect } from "react-redux";
-import { changeLoginInfo, DATA_NAME } from "../../../redux/action/LoginInfoAction.js";
+import { changeToken, DATA_NAME } from "../../../redux/action/LoginInfoAction.js";
 import axios from "../../../util/httpUtil";
 import { LoginLayout, LOGIN_TYPE } from "../../../layout/LoginLayout";
 
@@ -15,7 +15,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    updateLoginInfo: (token, userInfo) => dispatch(changeLoginInfo(token, userInfo))
+    updateToken: token => dispatch(changeToken(token))
   };
 }
 
@@ -45,11 +45,8 @@ class Login extends Component {
         const token = res.token;
         delete res.token;
         localStorage.setItem("token", token);
-        localStorage.setItem("userInfo", JSON.stringify(res));
         window.token = token;
-        window.userInfo = res;
-        message.success("登录成功");
-        this.props.updateLoginInfo(token, res);
+        this.props.updateToken(token);
         if (this.query.redirect) {
           this.props.history.replace(decodeURIComponent(this.query.redirect));
         } else {

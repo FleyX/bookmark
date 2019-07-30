@@ -1,26 +1,10 @@
 import * as loginAction from "../action/LoginInfoAction.js";
 
-function getInitData() {
-  let token, userInfo;
-  try {
-    token = localStorage.getItem("token");
-    userInfo = JSON.parse(localStorage.getItem("userInfo"));
-  } catch (e) {
-    console.error(e);
-    token = null;
-    userInfo = null;
-  }
-  window.token = token;
-  window.userInfo = userInfo;
-  return {
-    token,
-    userInfo
-  };
-}
-
-const LoginStatusReducer = (state = getInitData(), action) => {
+const LoginStatusReducer = (state = loginAction.getInitData(), action) => {
   switch (action.type) {
-    case loginAction.CHANGE_LOGIN_INFO:
+    case loginAction.CHANGE_TOKEN:
+    case loginAction.CHANGE_USER_INFO:
+    case loginAction.LOGOUT:
       return { ...state, ...action.data };
     default:
       return state;

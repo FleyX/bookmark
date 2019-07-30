@@ -1,17 +1,19 @@
 import React from "react";
 import { Link, withRouter } from "react-router-dom";
 import { Menu, Dropdown, Divider } from "antd";
+import httpUtil from "../../util/httpUtil";
 import { connect } from "react-redux";
 import styles from "./index.module.less";
-import { changeLoginInfo, DATA_NAME } from "../../redux/action/LoginInfoAction";
+import * as infoAction from "../../redux/action/LoginInfoAction";
 
 function mapStateToProps(state) {
-  return state[DATA_NAME];
+  return state[infoAction.DATA_NAME];
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    updateLoginInfo: (token, userInfo) => dispatch(changeLoginInfo(token, userInfo))
+    logout: () => dispatch(infoAction.logout()),
+    changeUserInfo: userInfo => dispatch(infoAction.changeUserInfo(userInfo))
   };
 }
 
@@ -20,6 +22,10 @@ class MainLayout extends React.Component {
     super(props);
     console.log(props);
     this.state = {};
+  }
+
+  componentWillMount() {
+    httpUtil.get("/user/currentUserInfo").then(res => this.props.changeUserInfo(res));
   }
 
   renderUserArea() {
@@ -50,11 +56,7 @@ class MainLayout extends React.Component {
     const { history } = this.props;
     switch (e.key) {
       case "logout":
-        this.props.updateLoginInfo(null, null);
-        localStorage.removeItem("token");
-        localStorage.removeItem("userInfo");
-        delete window.token;
-        delete window.userInfo;
+        this.props.logout();
         history.replace("/");
         break;
       default:
