@@ -2,11 +2,11 @@
 base=$(cd "$(dirname "$0")";pwd)
 
 # 创建es存放数据文件夹并设置读写权限
-mkdir $path/es/data>/dev/null 2>&1
+mkdir $base/es/data>/dev/null 2>&1
 
-chmod 777 $path/es/data
+chmod 777 $base/es/data
 
-sysctl -w vm.max_map_count=262144
+sysctl -w vm.max_map_count=262144>/dev/null 2>&1
 
 # 用于前后端打包
 
