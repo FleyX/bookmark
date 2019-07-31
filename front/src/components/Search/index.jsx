@@ -148,7 +148,11 @@ class Search extends React.Component {
         {resultList.length > 0 ? (
           <div className={styles.resultList}>
             {resultList.map((item, index) => (
-              <div className={`${styles.item} ${index === currentIndex ? styles.checked : ""}`} key={item.bookmarkId} onClick={this.enter.bind(this)}>
+              <div
+                className={`${styles.item} ${index === currentIndex ? styles.checked : ""}`}
+                key={item.bookmarkId}
+                onClick={() => window.open(item.url)}
+              >
                 <span style={{ fontWeight: 600 }}>{item.name}&emsp;</span>
                 <span style={{ fontSize: "0.8em", fontWeight: 400 }}>{item.url}</span>
               </div>
