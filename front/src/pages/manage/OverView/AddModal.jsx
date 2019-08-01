@@ -19,13 +19,26 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
+const reg = {
+  name: {
+    reg: /^.{1,40}$/,
+    text: "名称字符数为1-40"
+  },
+  url: {
+    reg: /^.{1,500}$/,
+    text: "链接字符数为1-500"
+  }
+};
+
 class AddModal extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      addType: 0,
-      addName: "",
-      addValue: "",
+      addType: "bookmark",
+      name: "",
+      url: "",
+      nameHelp: "",
+      urlHelp: "",
       file: null
     };
   }
@@ -34,11 +47,28 @@ class AddModal extends React.Component {
     const { currentEditNode } = nextProps;
     if (currentEditNode != null) {
       this.type = "edit";
-      this.setState({ addType: currentEditNode.type, addName: currentEditNode.name, addValue: currentEditNode.url });
+      this.setState({ addType: currentEditNode.type === 0 ? "bookmark" : "folder", name: currentEditNode.name, url: currentEditNode.url });
     } else {
       this.type = "add";
-      this.setState({ addType: 0, addName: "", addValue: "", file: null });
+      this.setState({ addType: "bookmark", name: "", url: "", file: null });
     }
+    this.setState({ nameHelp: "", urlHelp: "" });
+  }
+
+  checkValue(key, value) {
+    const rule = reg[key];
+    if (rule.reg.test(value)) {
+      this.setState({ [key + "Help"]: "" });
+    } else {
+      this.setState({ [key + "Help"]: rule.text });
+    }
+  }
+
+  changeValue(e) {
+    const name = e.target.name;
+    const value = e.target.value.trim();
+    this.checkValue(name, value);
+    this.setState({ [name]: value });
   }
 
   submit = () => {
@@ -55,18 +85,18 @@ class AddModal extends React.Component {
    * @param {*} node
    */
   editOne(node) {
-    const { addName, addValue } = this.state;
+    const { name, url } = this.state;
     const { bookmarkId, type } = this.props.currentEditNode;
     const body = {
       bookmarkId,
-      name: addName,
-      url: addValue,
+      name: name,
+      url: url,
       type
     };
     httpUtil.post("/bookmark/updateOne", body).then(() => {
       message.success("编辑成功");
-      node.name = addName;
-      node.url = addValue;
+      node.name = name;
+      node.url = url;
       this.props.closeModal();
     });
   }
@@ -77,10 +107,15 @@ class AddModal extends React.Component {
   addOne() {
     const { currentAddFolder, updateTreeData, closeModal, treeData } = this.props;
     const path = currentAddFolder == null ? "" : currentAddFolder.path + "." + currentAddFolder.bookmarkId;
-    if (this.state.addType === 2) {
+    const { name, url, file, addType } = this.state;
+    if (addType === "file") {
+      if (file == null) {
+        message.error("请先选择文件");
+        return;
+      }
       const form = new FormData();
       form.append("path", path);
-      form.append("file", this.state.file.originFileObj);
+      form.append("file", file.originFileObj);
       httpUtil
         .put("/bookmark/uploadBookmarkFile", form, {
           headers: { "Content-Type": "multipart/form-data" }
@@ -90,10 +125,10 @@ class AddModal extends React.Component {
         });
     } else {
       let body = {
-        type: this.state.addType,
+        type: this.state.addType === "bookmark" ? 0 : 1,
         path,
-        name: this.state.addName,
-        url: this.state.addValue
+        name,
+        url
       };
       httpUtil.put("/bookmark", body).then(res => {
         // addToTree(res);
@@ -112,9 +147,34 @@ class AddModal extends React.Component {
     }
   }
 
+  renderFileUpload() {
+    const uploadProps = {
+      accept: ".html,.htm",
+      onChange: e => {
+        this.setState({ file: e.fileList[0] });
+      },
+      beforeUpload: file => {
+        return false;
+      },
+      fileList: []
+    };
+    const { file } = this.state;
+    return (
+      <div style={{ textAlign: "center" }}>
+        <Upload {...uploadProps} style={{ width: "100%" }}>
+          <Button type="primary">
+            <Icon type="upload" />
+            选择书签文件(支持chrome,firefox)
+          </Button>
+          <div>{file ? file.name : ""}</div>
+        </Upload>
+      </div>
+    );
+  }
+
   render() {
     const { isShowModal, currentEditNode, closeModal } = this.props;
-    const { addType, addName, addValue } = this.state;
+    const { addType, name, url, nameHelp, urlHelp } = this.state;
     const type = currentEditNode == null ? "add" : "edit";
     const formItemLayout = {
       labelCol: {
@@ -126,46 +186,29 @@ class AddModal extends React.Component {
         sm: { span: 20 }
       }
     };
-    const uploadProps = {
-      accept: ".html,.htm",
-      onChange: e => {
-        this.setState({ file: e.fileList[0] });
-      },
-      beforeUpload: file => {
-        return false;
-      },
-      fileList: []
-    };
     return (
       <Modal destroyOnClose title={type === "add" ? "新增" : "编辑"} visible={isShowModal} onCancel={closeModal} footer={false}>
         <Form {...formItemLayout}>
           {type === "add" ? (
             <Form.Item label="类别">
-              <Radio.Group defaultValue={0} onChange={e => this.setState({ addType: e.target.value })}>
-                <Radio value={0}>书签</Radio>
-                <Radio value={1}>文件夹</Radio>
-                <Radio value={2}>上传书签html</Radio>
+              <Radio.Group defaultValue="bookmark" onChange={e => this.setState({ addType: e.target.value })}>
+                <Radio value="bookmark">书签</Radio>
+                <Radio value="folder">文件夹</Radio>
+                <Radio value="file">上传书签html</Radio>
               </Radio.Group>
             </Form.Item>
           ) : null}
-          {addType < 2 ? (
-            <Form.Item label="名称">
-              <Input type="text" onChange={e => this.setState({ addName: e.target.value })} value={addName} />
+          {addType === "bookmark" || addType === "folder" ? (
+            <Form.Item label="名称" validateStatus={nameHelp === "" ? "success" : "error"} help={nameHelp}>
+              <Input type="text" name="name" onChange={this.changeValue.bind(this)} value={name} />
             </Form.Item>
           ) : null}
-          {addType === 0 ? (
-            <Form.Item label="URL">
-              <Input type="text" value={addValue} onChange={e => this.setState({ addValue: e.target.value })} />
+          {addType === "bookmark" ? (
+            <Form.Item label="URL" validateStatus={urlHelp === "" ? "success" : "error"} help={urlHelp}>
+              <Input type="text" name="url" value={url} onChange={this.changeValue.bind(this)} />
             </Form.Item>
           ) : null}
-          {addType === 2 ? (
-            <Upload {...uploadProps}>
-              <Button type="primary">
-                <Icon type="upload" />
-                {this.state.file == null ? "选择文件" : this.state.file.name.substr(0, 20)}
-              </Button>
-            </Upload>
-          ) : null}
+          {addType === "file" ? this.renderFileUpload() : null}
           <div style={{ textAlign: "center", paddingTop: "1em" }}>
             <Button type="primary" onClick={this.submit}>
               提交
