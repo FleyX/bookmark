@@ -25,20 +25,51 @@ class Login extends Component {
     this.state = {
       str: "",
       password: "",
-      rememberMe: false
+      rememberMe: false,
+      errorText: ""
     };
     this.query = queryString.parse(window.location.search);
   }
 
-  valueChange = e => {
+  checkStr(value) {
+    if (value.length === 0) {
+      this.setState({ errorText: "用户名或邮箱为空" });
+      return false;
+    } else {
+      this.setState({ errorText: "" });
+      return true;
+    }
+  }
+
+  checkPassword(value) {
+    if (/^(?=.*?\d+.*?)(?=.*?[a-zA-Z]+.*?)[\da-zA-Z]{6,20}$/.test(value)) {
+      this.setState({ errorText: "" });
+      return true;
+    } else {
+      this.setState({ errorText: "密码为6-20位数字密码组合" });
+      return false;
+    }
+  }
+
+  setValue(e) {
     if (e.target.name === "rememberMe") {
       this.setState({ rememberMe: e.target.checked });
     } else {
-      this.setState({ [e.target.name]: e.target.value });
+      const value = e.target.value.trim();
+      if (e.target.name === "str") {
+        this.checkStr(value);
+      } else {
+        this.checkPassword(value);
+      }
+      this.setState({ [e.target.name]: value });
     }
-  };
+  }
 
   submit = () => {
+    const { str, password } = this.state;
+    if (!(this.checkStr(str) && this.checkPassword(password))) {
+      return;
+    }
     axios
       .post("/user/login", this.state)
       .then(res => {
@@ -59,30 +90,31 @@ class Login extends Component {
   };
 
   render() {
-    const { str, password, rememberMe } = this.state;
+    const { str, password, rememberMe, errorText } = this.state;
     return (
       <LoginLayout type={LOGIN_TYPE}>
         <div className={styles.main}>
+          <div className={styles.errorText}>{errorText}</div>
           <Input
             type="text"
             size="large"
             name="str"
             value={str}
-            onChange={this.valueChange}
+            onChange={this.setValue.bind(this)}
             addonBefore={<IconFont type="icon-mail" style={{ fontSize: "0.3rem" }} />}
             placeholder="邮箱或者用户名"
           />
           <Input.Password
             type="password"
             size="large"
-            name="password"
             value={password}
-            onChange={this.valueChange}
+            name="password"
+            onChange={this.setValue.bind(this)}
             addonBefore={<IconFont type="icon-password" style={{ fontSize: "0.3rem" }} />}
             placeholder="密码"
           />
           <div className={styles.action}>
-            <Checkbox checked={rememberMe} name="rememberMe" onChange={this.valueChange}>
+            <Checkbox checked={rememberMe} name="rememberMe" onChange={this.setValue.bind(this)}>
               记住我
             </Checkbox>
             <Link to="/public/resetPassword">忘记密码</Link>

@@ -5,6 +5,25 @@ import { LoginLayout, REGISTER_TYPE, RESET_PASSWORD_TYPE } from "../../../layout
 import styles from "./index.module.less";
 import axios from "../../../util/httpUtil";
 
+const pattern = {
+  username: {
+    pattern: /^[\da-zA-Z]{1,10}$/,
+    text: "用户名为1-10位的数字或者字母的组合"
+  },
+  email: {
+    pattern: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+    text: "请输入合法的邮箱"
+  },
+  password: {
+    pattern: /^(?=.*?\d+.*?)(?=.*?[a-zA-Z]+.*?)[\da-zA-Z]{6,20}$/,
+    text: "密码为6-20位数字字母组合"
+  },
+  authCode: {
+    pattern: /^[\d]{6,6}$/,
+    text: "验证码为6位数字"
+  }
+};
+
 export default class Register extends React.Component {
   constructor(props) {
     super(props);
@@ -18,7 +37,8 @@ export default class Register extends React.Component {
       repassword: "",
       authCode: "",
       authCodeText: "获取验证码",
-      isCountDown: false
+      isCountDown: false,
+      errorText: ""
     };
   }
 
@@ -37,34 +57,70 @@ export default class Register extends React.Component {
     }
     let count = 60;
     this.setState({ authCodeText: `${count}s后重试`, isCountDown: true });
+    this.timer = setInterval(() => {
+      count--;
+      if (count === 0) {
+        this.setState({ isCountDown: false, authCodeText: "获取验证码" });
+        clearInterval(this.timer);
+        return;
+      }
+      this.setState({ authCodeText: `${count}s后重试` });
+    }, 1000);
     axios.get("/user/authCode?email=" + this.state.email).then(() => {
       message.success("发送成功，请注意查收（检查垃圾箱）");
-      this.timer = setInterval(() => {
-        count--;
-        if (count === 0) {
-          this.setState({ isCountDown: false, authCodeText: "获取验证码" });
-          clearInterval(this.timer);
-          return;
-        }
-        this.setState({ authCodeText: `${count}s后重试` });
-      }, 1000);
     });
   };
 
   changeData = e => {
-    this.setState({ [e.target.name]: e.target.value });
+    const name = e.target.name;
+    const value = e.target.value.trim();
+    this.setState({ [name]: value });
+    this.checkParam(name, value);
   };
+
+  /**
+   * 字段校验
+   * @param {*} key key
+   * @param {*} value 值
+   */
+  checkParam(key, value) {
+    const { password } = this.state;
+    if (key === "repassword") {
+      if (password !== value) {
+        this.setState({ errorText: "两次密码不一致" });
+        return false;
+      } else {
+        this.setState({ errorText: "" });
+        return true;
+      }
+    }
+    const rule = pattern[key];
+    if (rule.pattern.test(value)) {
+      this.setState({ errorText: "" });
+      return true;
+    } else {
+      this.setState({ errorText: rule.text });
+      return false;
+    }
+  }
 
   /**
    * 提交表单
    */
   submit = () => {
     const { current, username, email, password, repassword, authCode } = this.state;
-    if (password !== repassword) {
-      message.error("两次密码不一致");
+    let form = { username, email, password, authCode };
+    if (current === REGISTER_TYPE && !this.checkParam("username", username)) {
       return;
     }
-    let form = { username, email, password, authCode };
+    const isOk =
+      this.checkParam("email", email) &&
+      this.checkParam("password", password) &&
+      this.checkParam("repassword", repassword) &&
+      this.checkParam("authCode", authCode);
+    if (!isOk) {
+      return;
+    }
     if (current === REGISTER_TYPE) {
       axios
         .put("/user", form)
@@ -87,10 +143,11 @@ export default class Register extends React.Component {
   };
 
   render() {
-    const { current, username, email, password, repassword, authCode, authCodeText, isCountDown } = this.state;
+    const { current, username, email, password, repassword, authCode, authCodeText, isCountDown, errorText } = this.state;
     return (
       <LoginLayout type={current}>
         <div className={styles.main}>
+          <div className={styles.errorText}>{errorText}</div>
           {current === REGISTER_TYPE ? (
             <Input
               type="text"
