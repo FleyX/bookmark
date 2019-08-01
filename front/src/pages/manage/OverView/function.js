@@ -187,7 +187,7 @@ function deleteTreeData(treeData, set) {
  * @param {*} info
  */
 export function onDrop(info) {
-  const { treeData, updateTreeData } = this.props;
+  const { treeData, updateTreeData, loadedKeys, changeLoadedKeys } = this.props;
   const target = info.node.props.dataRef;
   if (!info.dropToGap && target.type === 0) {
     message.error("无法移动到书签内部");
@@ -222,6 +222,10 @@ export function onDrop(info) {
       const length = target.children.length;
       body.sort = length > 0 ? target.children[length - 1].sort + 1 : 1;
       target.children.push(current);
+    } else if (current.type === 1 && current.children) {
+      //目标未加载且当前节点为已经展开的目录情况下需要把当前节点从已加载列表中移除，否则在目标节点中展开时会不显示当前节点的子节点
+      loadedKeys.splice(loadedKeys.indexOf(current.bookmarkId.toString()), 1);
+      changeLoadedKeys(loadedKeys);
     }
   }
   if (body.sort !== -1) {

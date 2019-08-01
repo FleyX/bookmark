@@ -23,7 +23,8 @@ function mapDispatchToProps(dispatch) {
     changeIsInit: value => dispatch(action.changeIsInit(value)),
     changeCheckedKeys: (keys, nodes) => dispatch(action.changeCheckedKeys(keys, nodes)),
     changeExpandedKeys: keys => dispatch(action.changeExpandedKeys(keys)),
-    changeCurrentClickItem: item => dispatch(action.changeCurrentClickItem(item))
+    changeCurrentClickItem: item => dispatch(action.changeCurrentClickItem(item)),
+    changeLoadedKeys: keys => dispatch(action.changeLoadedKeys(keys))
   };
 }
 
@@ -44,17 +45,20 @@ class OverView extends React.Component {
   /**
    * 异步加载
    */
-  loadData = e =>
-    new Promise(resolve => {
+  loadData = e => {
+    const { loadedKeys, treeData } = this.props;
+    return new Promise(resolve => {
       const item = e.props.dataRef;
       const newPath = item.path + "." + item.bookmarkId;
       httpUtil.get("/bookmark/currentUser/path?path=" + newPath).then(res => {
         item.children = res;
-        this.props.updateTreeData([...this.props.treeData]);
+        this.props.updateTreeData([...treeData]);
+        loadedKeys.push(item.bookmarkId.toString());
+        this.props.changeLoadedKeys(loadedKeys);
         resolve();
       });
     });
-
+  };
   /**
    * 节点选择
    * @param {*} key
@@ -74,7 +78,7 @@ class OverView extends React.Component {
   }
 
   render() {
-    const { isEdit, setIsEdit, treeData, addNode, isInit, expandedKeys, checkedKeys } = this.props;
+    const { isEdit, setIsEdit, treeData, addNode, isInit, expandedKeys, checkedKeys, loadedKeys } = this.props;
     const { changeExpandedKeys } = this.props;
     return (
       <MainLayout>
@@ -105,6 +109,7 @@ class OverView extends React.Component {
           </div>
           <Tree
             showIcon
+            loadedKeys={loadedKeys}
             checkedKeys={checkedKeys}
             onCheck={this.props.changeCheckedKeys}
             expandedKeys={expandedKeys}

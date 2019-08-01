@@ -15,7 +15,9 @@ export function getInitData() {
     expandedKeys: [],
     isInit: false,
     //右键菜单触发项
-    currentClickItem: null
+    currentClickItem: null,
+    //已经加载了的节点列表
+    loadedKeys: []
   };
 }
 
@@ -109,10 +111,20 @@ export const changeIsInit = isInit => {
   };
 };
 
+// 修改当前右键点击的节点
 export const CHANGE_CURRENT_CLICK_ITEM = "changeCurrentClickItem";
 export const changeCurrentClickItem = currentClickItem => {
   return {
     type: CHANGE_CURRENT_CLICK_ITEM,
     data: { currentClickItem }
+  };
+};
+
+// 修改已经加载的节点
+export const CHANGE_LOADED_KEYS = "changeLoadedKeys";
+export const changeLoadedKeys = loadedKeys => {
+  return {
+    type: CHANGE_LOADED_KEYS,
+    data: { loadedKeys }
   };
 };
