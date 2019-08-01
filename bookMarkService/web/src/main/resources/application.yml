@@ -29,7 +29,7 @@ spring:
     lettuce:
       pool:
         max-active: 20
-        max-wait: 1000ms
+        max-wait: 500ms
         max-idle: 20
         min-idle: 2
   datasource:

@@ -7,7 +7,6 @@ import com.fanxb.bookmark.business.user.entity.RegisterBody;
 import com.fanxb.bookmark.common.constant.Constant;
 import com.fanxb.bookmark.common.entity.MailInfo;
 import com.fanxb.bookmark.common.entity.User;
-import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.exception.FormDataException;
 import com.fanxb.bookmark.common.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,8 +70,8 @@ public class UserService {
     public void register(RegisterBody body) {
         String codeKey = Constant.authCodeKey(body.getEmail());
         String realCode = RedisUtil.get(codeKey, String.class);
-        if ((!StringUtil.isEmpty(realCode)) && (!realCode.equals(body.getAuthCode()))) {
-            throw new CustomException("验证码错误");
+        if (StringUtil.isEmpty(realCode) || (!realCode.equals(body.getAuthCode()))) {
+            throw new FormDataException("验证码错误");
         }
         RedisUtil.delete(codeKey);
         User user = userDao.selectByUsernameOrEmail(body.getUsername(), body.getEmail());
@@ -148,12 +147,12 @@ public class UserService {
     /**
      * Description: 根据userId获取用户信息
      *
-     * @author fanxb
-     * @date 2019/7/30 15:57
      * @param userId userId
      * @return com.fanxb.bookmark.common.entity.User
+     * @author fanxb
+     * @date 2019/7/30 15:57
      */
-    public User getUserInfo(int userId){
+    public User getUserInfo(int userId) {
         return userDao.selectByUserId(userId);
     }
 }

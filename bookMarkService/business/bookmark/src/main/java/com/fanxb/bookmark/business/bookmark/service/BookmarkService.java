@@ -6,7 +6,7 @@ import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
 import com.fanxb.bookmark.common.constant.EsConstant;
 import com.fanxb.bookmark.common.entity.Bookmark;
 import com.fanxb.bookmark.common.entity.EsEntity;
-import com.fanxb.bookmark.common.exception.CustomException;
+import com.fanxb.bookmark.common.exception.FormDataException;
 import com.fanxb.bookmark.common.util.EsUtil;
 import com.fanxb.bookmark.common.util.UserContextHolder;
 import lombok.extern.slf4j.Slf4j;
@@ -203,7 +203,7 @@ public class BookmarkService {
         try {
             bookmarkDao.insertOne(bookmark);
         } catch (DuplicateKeyException e) {
-            throw new CustomException("同级目录下不能存在相同名称的数据");
+            throw new FormDataException("同级目录下不能存在相同名称的数据");
         }
         //如果是书签，插入到es中
         if (bookmark.getType() == 0) {
