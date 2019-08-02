@@ -201,6 +201,7 @@ export function onDrop(info) {
     //-1 表示排在最后
     sort: -1
   };
+  //从原来所属的节点列表中删除当前节点
   const currentBelowList = current.path === "" ? treeData : getBelowList(treeData, current);
   currentBelowList.splice(currentBelowList.indexOf(current), 1);
   if (info.dropToGap) {
@@ -215,7 +216,7 @@ export function onDrop(info) {
       insertToArray(current, index, targetBelowList);
     }
   } else {
-    //移动该一个文件夹内，该文件夹可能还未加载
+    //移动到一个文件夹内，该文件夹可能还未加载
     body.targetPath = target.path + "." + target.bookmarkId;
     //存在children说明已经加载
     if (target.children) {
@@ -229,22 +230,28 @@ export function onDrop(info) {
     }
   }
   if (body.sort !== -1) {
-    //说明目标位置已经加载，需要更新当前节点信息
+    //说明目标节点已经加载，需要更新当前节点信息
     current.path = body.targetPath;
     current.sort = body.sort;
+    //如果当前节点和目标节点不在一个层级中，需要更新当前子节点的path信息
+    if (body.sourcePath !== body.targetPath) {
+      updateChildrenPath(current.children, body.sourcePath + "." + body.bookmarkId, body.targetPath + "." + body.bookmarkId);
+    }
   }
-  //如果移动的目标和当前位置不在同一个层级需要更新子节点path信息
-  if (body.sourcePath !== body.targetPath) {
-    updateChildrenPath(current.children, body.sourcePath + "." + body.bookmarkId, body.targetPath + "." + body.bookmarkId);
-  }
-  httpUtil.post("/bookmark/moveNode", body).then(res => {
-    message.success("移动完成");
-    updateTreeData([...treeData]);
-  });
+  httpUtil
+    .post("/bookmark/moveNode", body)
+    .then(res => {
+      message.success("移动完成");
+      updateTreeData([...treeData]);
+    })
+    .catch(() => {
+      message.error("后台移动失败，将于2s后刷新页面，以免前后台数据不一致");
+      setTimeout(window.location.reload, 2000);
+    });
 }
 
 /**
- * 获取node所属list
+ * 递归获取node所属list
  * @param {*} tree 树结构
  * @param {*} node node
  */
@@ -255,7 +262,9 @@ function getBelowList(treeList, node) {
       if (item.path + "." + item.bookmarkId === node.path) {
         return item.children;
       } else if (item.children) {
-        return getBelowList(item.children, node);
+        let res = getBelowList(item.children, node);
+        //如果找到了,那么返回
+        if (res) return res;
       }
     }
   }
