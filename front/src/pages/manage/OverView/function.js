@@ -193,6 +193,7 @@ export function onDrop(info) {
     message.error("无法移动到书签内部");
     return;
   }
+  this.setState({ isLoading: true });
   const current = info.dragNode.props.dataRef;
   const body = {
     bookmarkId: current.bookmarkId,
@@ -243,8 +244,10 @@ export function onDrop(info) {
     .then(res => {
       message.success("移动完成");
       updateTreeData([...treeData]);
+      this.setState({ isLoading: false });
     })
     .catch(() => {
+      this.setState({ isLoading: false });
       message.error("后台移动失败，将于2s后刷新页面，以免前后台数据不一致");
       setTimeout(window.location.reload, 2000);
     });

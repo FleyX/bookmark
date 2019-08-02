@@ -39,7 +39,8 @@ class AddModal extends React.Component {
       url: "",
       nameHelp: "",
       urlHelp: "",
-      file: null
+      file: null,
+      isLoading: false
     };
   }
 
@@ -59,8 +60,10 @@ class AddModal extends React.Component {
     const rule = reg[key];
     if (rule.reg.test(value)) {
       this.setState({ [key + "Help"]: "" });
+      return true;
     } else {
       this.setState({ [key + "Help"]: rule.text });
+      return false;
     }
   }
 
@@ -93,12 +96,21 @@ class AddModal extends React.Component {
       url: url,
       type
     };
-    httpUtil.post("/bookmark/updateOne", body).then(() => {
-      message.success("编辑成功");
-      node.name = name;
-      node.url = url;
-      this.props.closeModal();
-    });
+    let isOk = this.checkValue("name", name) && (type === 0 ? this.checkValue("url", url) : true);
+    if (!isOk) {
+      return;
+    }
+    this.setState({ isLoading: true });
+    httpUtil
+      .post("/bookmark/updateOne", body)
+      .then(() => {
+        message.success("编辑成功");
+        node.name = name;
+        node.url = url;
+        this.setState({ isLoading: false });
+        this.props.closeModal();
+      })
+      .catch(() => this.setState({ isLoading: false }));
   }
 
   /**
@@ -113,6 +125,7 @@ class AddModal extends React.Component {
         message.error("请先选择文件");
         return;
       }
+      this.setState({ isLoading: true });
       const form = new FormData();
       form.append("path", path);
       form.append("file", file.originFileObj);
@@ -121,8 +134,10 @@ class AddModal extends React.Component {
           headers: { "Content-Type": "multipart/form-data" }
         })
         .then(res => {
+          this.setState({ isLoading: false });
           window.location.reload();
-        });
+        })
+        .catch(res => this.setState({ isLoading: false }));
     } else {
       let body = {
         type: this.state.addType === "bookmark" ? 0 : 1,
@@ -130,20 +145,29 @@ class AddModal extends React.Component {
         name,
         url
       };
-      httpUtil.put("/bookmark", body).then(res => {
-        // addToTree(res);
-        message.success("加入成功");
-        if (currentAddFolder === null) {
-          treeData.push(res);
-        } else {
-          //存在children说明该子节点的孩子数据已经加载，需要重新将新的子书签加入进去
-          if (currentAddFolder.children) {
-            currentAddFolder.children.push(res);
+      let isOk = this.checkValue("name", name) && (body.type === 0 ? this.checkValue("url", url) : true);
+      if (!isOk) {
+        return;
+      }
+      this.state({ isLoading: true });
+      httpUtil
+        .put("/bookmark", body)
+        .then(res => {
+          // addToTree(res);
+          message.success("加入成功");
+          if (currentAddFolder === null) {
+            treeData.push(res);
+          } else {
+            //存在children说明该子节点的孩子数据已经加载，需要重新将新的子书签加入进去
+            if (currentAddFolder.children) {
+              currentAddFolder.children.push(res);
+            }
           }
-        }
-        updateTreeData(treeData);
-        closeModal();
-      });
+          updateTreeData(treeData);
+          closeModal();
+          this.state({ isLoading: false });
+        })
+        .catch(() => this.setState({ isLoading: false }));
     }
   }
 
@@ -174,7 +198,7 @@ class AddModal extends React.Component {
 
   render() {
     const { isShowModal, currentEditNode, closeModal } = this.props;
-    const { addType, name, url, nameHelp, urlHelp } = this.state;
+    const { addType, name, url, nameHelp, urlHelp, isLoading } = this.state;
     const type = currentEditNode == null ? "add" : "edit";
     const formItemLayout = {
       labelCol: {
@@ -210,7 +234,7 @@ class AddModal extends React.Component {
           ) : null}
           {addType === "file" ? this.renderFileUpload() : null}
           <div style={{ textAlign: "center", paddingTop: "1em" }}>
-            <Button type="primary" onClick={this.submit}>
+            <Button type="primary" onClick={this.submit} loading={isLoading}>
               提交
             </Button>
           </div>

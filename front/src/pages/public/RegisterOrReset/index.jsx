@@ -38,7 +38,8 @@ export default class Register extends React.Component {
       authCode: "",
       authCodeText: "获取验证码",
       isCountDown: false,
-      errorText: ""
+      errorText: "",
+      isLoading: false
     };
   }
 
@@ -121,23 +122,31 @@ export default class Register extends React.Component {
     if (!isOk) {
       return;
     }
+    this.setState({ isLoading: true });
     if (current === REGISTER_TYPE) {
-      axios.put("/user", form).then(() => {
-        message.success("注册成功");
-        setTimeout(() => this.props.history.replace("/public/login"), 500);
-      });
+      axios
+        .put("/user", form)
+        .then(() => {
+          message.success("注册成功");
+          this.setState({ isLoading: false });
+          setTimeout(() => this.props.history.replace("/public/login"), 500);
+        })
+        .catch(() => this.setState({ isLoading: false }));
     } else {
       delete form.username;
-      axios.post("/user/resetPassword", form).then(() => {
-        message.success("操作成功");
-        console.log(this.location);
-        setTimeout(() => this.props.history.replace("/public/login"), 500);
-      });
+      axios
+        .post("/user/resetPassword", form)
+        .then(() => {
+          message.success("操作成功");
+          this.setState({ isLoading: false });
+          setTimeout(() => this.props.history.replace("/public/login"), 500);
+        })
+        .catch(() => this.setState({ isLoading: false }));
     }
   };
 
   render() {
-    const { current, username, email, password, repassword, authCode, authCodeText, isCountDown, errorText } = this.state;
+    const { current, username, email, password, repassword, authCode, authCodeText, isCountDown, errorText, isLoading } = this.state;
     return (
       <LoginLayout type={current}>
         <div className={styles.main}>
@@ -194,7 +203,7 @@ export default class Register extends React.Component {
             }
             placeholder="验证码"
           />
-          <Button type="primary" className={styles.submit} onClick={this.submit} block>
+          <Button type="primary" className={styles.submit} onClick={this.submit} block loading={isLoading}>
             {current === REGISTER_TYPE ? "注册" : "重置密码"}
           </Button>
         </div>

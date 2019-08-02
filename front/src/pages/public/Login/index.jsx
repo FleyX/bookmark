@@ -26,7 +26,8 @@ class Login extends Component {
       str: "",
       password: "",
       rememberMe: false,
-      errorText: ""
+      errorText: "",
+      isLoading: false
     };
     this.query = queryString.parse(window.location.search);
   }
@@ -70,22 +71,27 @@ class Login extends Component {
     if (!(this.checkStr(str) && this.checkPassword(password))) {
       return;
     }
-    axios.post("/user/login", this.state).then(res => {
-      const token = res.token;
-      delete res.token;
-      localStorage.setItem("token", token);
-      window.token = token;
-      this.props.updateToken(token);
-      if (this.query.redirect) {
-        this.props.history.replace(decodeURIComponent(this.query.redirect));
-      } else {
-        this.props.history.replace("/");
-      }
-    });
+    this.setState({ isLoading: true });
+    axios
+      .post("/user/login", this.state)
+      .then(res => {
+        this.setState({ isLoading: false });
+        const token = res.token;
+        delete res.token;
+        localStorage.setItem("token", token);
+        window.token = token;
+        this.props.updateToken(token);
+        if (this.query.redirect) {
+          this.props.history.replace(decodeURIComponent(this.query.redirect));
+        } else {
+          this.props.history.replace("/");
+        }
+      })
+      .catch(() => this.setState({ isLoading: false }));
   };
 
   render() {
-    const { str, password, rememberMe, errorText } = this.state;
+    const { str, password, rememberMe, errorText, isLoading } = this.state;
     return (
       <LoginLayout type={LOGIN_TYPE}>
         <div className={styles.main}>
@@ -114,7 +120,7 @@ class Login extends Component {
             </Checkbox>
             <Link to="/public/resetPassword">忘记密码</Link>
           </div>
-          <Button type="primary" onClick={this.submit} block>
+          <Button type="primary" onClick={this.submit} block loading={isLoading}>
             登录
           </Button>
         </div>
