@@ -149,7 +149,7 @@ class AddModal extends React.Component {
       if (!isOk) {
         return;
       }
-      this.state({ isLoading: true });
+      this.setState({ isLoading: true });
       httpUtil
         .put("/bookmark", body)
         .then(res => {
@@ -165,7 +165,7 @@ class AddModal extends React.Component {
           }
           updateTreeData(treeData);
           closeModal();
-          this.state({ isLoading: false });
+          this.setState({ isLoading: false });
         })
         .catch(() => this.setState({ isLoading: false }));
     }
