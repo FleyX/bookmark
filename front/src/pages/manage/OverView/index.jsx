@@ -1,5 +1,5 @@
 import React from "react";
-import { Tree, Empty, Button } from "antd";
+import { Tree, Empty, Button, Spin } from "antd";
 import MainLayout from "../../../layout/MainLayout";
 import httpUtil from "../../../util/httpUtil";
 import styles from "./index.module.less";
@@ -16,6 +16,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
+    refresh: () => dispatch(action.refresh()),
     updateTreeData: treeData => dispatch(action.updateTreeData(treeData)),
     setIsEdit: isEdit => dispatch(action.setIsEdit(isEdit)),
     addNode: (item, e) => dispatch(action.addNode(item, e)),
@@ -29,10 +30,19 @@ function mapDispatchToProps(dispatch) {
 }
 
 class OverView extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      //书签树节点是否显示loading
+      isLoading: false
+    };
+  }
+
   /**
    * 初始化第一级书签
    */
   componentDidMount() {
+    this.props.refresh();
     httpUtil
       .get("/bookmark/currentUser/path?path=")
       .then(res => {
@@ -79,6 +89,7 @@ class OverView extends React.Component {
 
   render() {
     const { isEdit, setIsEdit, treeData, addNode, isInit, expandedKeys, checkedKeys, loadedKeys } = this.props;
+    const { isLoading } = this.state;
     const { changeExpandedKeys } = this.props;
     return (
       <MainLayout>
@@ -107,23 +118,25 @@ class OverView extends React.Component {
               </Button>
             </div>
           </div>
-          <Tree
-            showIcon
-            loadedKeys={loadedKeys}
-            checkedKeys={checkedKeys}
-            onCheck={this.props.changeCheckedKeys}
-            expandedKeys={expandedKeys}
-            loadData={this.loadData}
-            onExpand={this.props.changeExpandedKeys}
-            checkable={isEdit}
-            onSelect={this.treeNodeSelect.bind(this)}
-            draggable
-            onDrop={onDrop.bind(this)}
-            blockNode
-          >
-            {renderTreeNodes.call(this, treeData)}
-          </Tree>
-          {isInit && treeData.length === 0 ? <Empty description="还没有数据" /> : null}
+          <Spin spinning={isLoading} delay={200}>
+            <Tree
+              showIcon
+              loadedKeys={loadedKeys}
+              checkedKeys={checkedKeys}
+              onCheck={this.props.changeCheckedKeys}
+              expandedKeys={expandedKeys}
+              loadData={this.loadData}
+              onExpand={this.props.changeExpandedKeys}
+              checkable={isEdit}
+              onSelect={this.treeNodeSelect.bind(this)}
+              draggable
+              onDrop={onDrop.bind(this)}
+              blockNode
+            >
+              {renderTreeNodes.call(this, treeData)}
+            </Tree>
+            {isInit && treeData.length === 0 ? <Empty description="还没有数据" /> : null}
+          </Spin>
           <AddModal />
         </div>
       </MainLayout>

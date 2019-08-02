@@ -21,6 +21,14 @@ export function getInitData() {
   };
 }
 
+export const REFRESH = "refresh";
+export const refresh = () => {
+  return {
+    type: REFRESH,
+    data: getInitData()
+  };
+};
+
 //定义修改modal是否显示 type
 export const CLOSE_MODAL = "closeModal";
 
