@@ -1,4 +1,4 @@
-import { notification } from "antd";
+import { notification, message } from "antd";
 import axios from "axios";
 
 //定义http实例
@@ -25,6 +25,7 @@ instance.interceptors.response.use(
     if (data.code === 1) {
       return data.data;
     } else if (data.code === -2) {
+      message.error(data.message);
       return Promise.reject(data.message);
     } else {
       showError(data);

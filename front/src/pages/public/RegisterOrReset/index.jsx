@@ -122,23 +122,17 @@ export default class Register extends React.Component {
       return;
     }
     if (current === REGISTER_TYPE) {
-      axios
-        .put("/user", form)
-        .then(() => {
-          message.success("注册成功");
-          setTimeout(() => this.props.history.replace("/public/login"), 500);
-        })
-        .catch(error => message.error(error));
+      axios.put("/user", form).then(() => {
+        message.success("注册成功");
+        setTimeout(() => this.props.history.replace("/public/login"), 500);
+      });
     } else {
       delete form.username;
-      axios
-        .post("/user/resetPassword", form)
-        .then(() => {
-          message.success("操作成功");
-          console.log(this.location);
-          setTimeout(() => this.props.history.replace("/public/login"), 500);
-        })
-        .catch(error => message.error(error));
+      axios.post("/user/resetPassword", form).then(() => {
+        message.success("操作成功");
+        console.log(this.location);
+        setTimeout(() => this.props.history.replace("/public/login"), 500);
+      });
     }
   };
 

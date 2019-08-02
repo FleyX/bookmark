@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import queryString from "query-string";
-import { Button, Input, message, Checkbox } from "antd";
+import { Button, Input, Checkbox } from "antd";
 import IconFont from "../../../components/IconFont";
 import styles from "./index.module.less";
 import { connect } from "react-redux";
@@ -70,23 +70,18 @@ class Login extends Component {
     if (!(this.checkStr(str) && this.checkPassword(password))) {
       return;
     }
-    axios
-      .post("/user/login", this.state)
-      .then(res => {
-        const token = res.token;
-        delete res.token;
-        localStorage.setItem("token", token);
-        window.token = token;
-        this.props.updateToken(token);
-        if (this.query.redirect) {
-          this.props.history.replace(decodeURIComponent(this.query.redirect));
-        } else {
-          this.props.history.replace("/");
-        }
-      })
-      .catch(error => {
-        message.error(error);
-      });
+    axios.post("/user/login", this.state).then(res => {
+      const token = res.token;
+      delete res.token;
+      localStorage.setItem("token", token);
+      window.token = token;
+      this.props.updateToken(token);
+      if (this.query.redirect) {
+        this.props.history.replace(decodeURIComponent(this.query.redirect));
+      } else {
+        this.props.history.replace("/");
+      }
+    });
   };
 
   render() {
