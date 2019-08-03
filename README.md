@@ -2,6 +2,8 @@
 
 demo 地址:[ali.tapme.top:8083](http://ali.tapme.top:8083)
 
+web端已经完成。
+
 # 缘由
 
 1. 主要用的是 chrome，但是有时候需要用其他的浏览器：Firefox，ie 等。然后这些浏览器上没有书签，想进个网站还得打开 chrome 复制 url，太麻烦。
@@ -12,7 +14,7 @@ demo 地址:[ali.tapme.top:8083](http://ali.tapme.top:8083)
 
 所以有了这样这样一个项目，建立一个和平台无关的书签管理器，可在任意平台使用。
 
-计划开发顺序如下：web 端->chrome 插件->firfox 插件->web 端兼容手机等小屏幕。
+计划开发顺序如下：web 端->chrome 插件->firfox 插件。
 
 最终目的就是所有浏览器(不包含 ie10 及以下等远古浏览器)中都能便捷的使用书签。
 
