@@ -50,9 +50,10 @@ spring:
       mail:
         smtp:
           auth: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
           starttls:
             enable: true
-            required: true
 
 mybatis:
   configuration:
