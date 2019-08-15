@@ -67,7 +67,7 @@ export function renderNodeContent(item) {
       </Dropdown>
       {isEdit ? (
         <Dropdown overlay={menu} trigger={["click"]} onVisibleChange={menuVisible.bind(this, item)}>
-          <Button size="small" onClick={stopTransfer.bind(this)} type="danger" icon="menu" shape="circle" />
+          <Button size="small" onClick={stopTransfer.bind(this)} type="primary" icon="menu" shape="circle" />
         </Dropdown>
       ) : null}
     </React.Fragment>
