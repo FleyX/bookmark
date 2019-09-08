@@ -104,6 +104,7 @@ class OverView extends React.Component {
                   收起
                 </Button>
               ) : null}
+              <a className={styles.help} href="https://github.com/FleyX/bookmark/blob/master/README.md">使用帮助</a>
             </div>
             <div className={styles.right}>
               {isEdit ? (

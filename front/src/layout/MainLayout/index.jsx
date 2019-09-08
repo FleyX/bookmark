@@ -55,6 +55,9 @@ class MainLayout extends React.Component {
   onClick = e => {
     const { history } = this.props;
     switch (e.key) {
+      case "personSpace":
+        history.push("/userSpace");
+        break;
       case "logout":
         this.props.logout();
         history.replace("/");
@@ -68,7 +71,9 @@ class MainLayout extends React.Component {
     return (
       <div className={"fullScreen " + styles.main}>
         <div className={styles.header}>
-          <img style={{ width: "1.5rem" }} src="/img/bookmarkLogo.png" alt="logo" />
+          <a href="/">
+            <img style={{ width: "1.5rem" }} src="/img/bookmarkLogo.png" alt="logo" />
+          </a>
           {this.renderUserArea()}
         </div>
         <Divider style={{ margin: 0 }} />

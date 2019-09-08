@@ -1,5 +1,9 @@
+@import "../../../global.less";
+
 .main {
-  min-height: 100%;
+  // min-height: 100%;
+  background-color: @mainContentColor;
+  padding: 20px;
 
   .header {
     display: flex;
@@ -14,6 +18,11 @@
         font-size: 1.3em;
         line-height: 1.3em;
         font-weight: 600;
+      }
+
+      .help {
+        font-size: 0.6em;
+        align-self: flex-end;
       }
     }
   }
