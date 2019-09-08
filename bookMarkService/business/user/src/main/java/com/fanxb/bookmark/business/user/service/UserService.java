@@ -11,6 +11,7 @@ import com.fanxb.bookmark.common.exception.FormDataException;
 import com.fanxb.bookmark.common.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -154,5 +155,14 @@ public class UserService {
      */
     public User getUserInfo(int userId) {
         return userDao.selectByUserId(userId);
+    }
+
+    /**
+     * 修改用户头像
+     * @param file file
+     * @return 修改后的路径
+     */
+    public String updateIcon(MultipartFile file){
+        return "asdf";
     }
 }

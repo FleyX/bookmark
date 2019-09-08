@@ -8,6 +8,7 @@ import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 类功能简述：
@@ -61,6 +62,17 @@ public class UserController {
     @GetMapping("/currentUserInfo")
     public Result currentUserInfo() {
         return Result.success(userService.getUserInfo(UserContextHolder.get().getUserId()));
+    }
+
+
+    /**
+     * 修改用户头像
+     *
+     * @param file 头像文件
+     */
+    @PostMapping("/icon")
+    public Result pushIcon(@RequestParam("file") MultipartFile file) {
+        return Result.success(userService.updateIcon(file));
     }
 
     /**

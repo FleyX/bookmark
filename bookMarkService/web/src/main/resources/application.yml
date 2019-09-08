@@ -66,3 +66,6 @@ es:
   host: localhost
   port: 9200
   scheme: http
+
+# 默认文件上传基路径
+fileSavePath: ./
