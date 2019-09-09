@@ -71,7 +71,7 @@ public class UserController {
      * @param file 头像文件
      */
     @PostMapping("/icon")
-    public Result pushIcon(@RequestParam("file") MultipartFile file) {
+    public Result pushIcon(@RequestParam("file") MultipartFile file) throws Exception {
         return Result.success(userService.updateIcon(file));
     }
 

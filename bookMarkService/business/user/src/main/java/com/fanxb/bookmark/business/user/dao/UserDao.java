@@ -2,6 +2,7 @@ package com.fanxb.bookmark.business.user.dao;
 
 import com.fanxb.bookmark.common.entity.User;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 
 /**
@@ -48,19 +49,30 @@ public interface UserDao {
      * Description: 更新一个参数
      *
      * @param password 新密码
-     * @param email  邮箱
+     * @param email    邮箱
      * @author fanxb
      * @date 2019/7/9 20:03
      */
-    void resetPassword(@Param("password") String password,@Param("email") String email);
+    void resetPassword(@Param("password") String password, @Param("email") String email);
 
     /**
      * Description: 根据用户id查询用户信息
      *
-     * @author fanxb
-     * @date 2019/7/30 16:08
      * @param userId userId
      * @return com.fanxb.bookmark.common.entity.User
+     * @author fanxb
+     * @date 2019/7/30 16:08
      */
     User selectByUserId(int userId);
+
+    /**
+     * Description: 更新用户icon
+     *
+     * @param userId userId
+     * @param icon   icon
+     * @author fanxb
+     * @date 2019/9/9 13:57
+     */
+    @Update("update user set icon=#{icon} where userId=#{userId}")
+    void updateUserIcon(@Param("userId") int userId, @Param("icon") String icon);
 }

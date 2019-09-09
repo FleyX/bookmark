@@ -54,4 +54,15 @@ public class Constant {
     public void setJwtSecret(String jwtSecret) {
         Constant.jwtSecret = jwtSecret;
     }
+
+    /**
+     * 文件存储基路径
+     */
+    public static String fileSavePath = "./";
+
+    @Value("${fileSavePath}")
+    public void setFileSavePath(String path) {
+        fileSavePath = path;
+    }
+
 }

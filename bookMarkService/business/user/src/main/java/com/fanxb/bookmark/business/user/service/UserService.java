@@ -1,10 +1,12 @@
 package com.fanxb.bookmark.business.user.service;
 
+import com.fanxb.bookmark.business.user.constant.FileConstant;
 import com.fanxb.bookmark.business.user.dao.UserDao;
 import com.fanxb.bookmark.business.user.entity.LoginBody;
 import com.fanxb.bookmark.business.user.entity.LoginRes;
 import com.fanxb.bookmark.business.user.entity.RegisterBody;
 import com.fanxb.bookmark.common.constant.Constant;
+import com.fanxb.bookmark.common.constant.NumberConstant;
 import com.fanxb.bookmark.common.entity.MailInfo;
 import com.fanxb.bookmark.common.entity.User;
 import com.fanxb.bookmark.common.exception.FormDataException;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +38,11 @@ public class UserService {
      * 长期jwt失效时间
      */
     private static final long LONG_EXPIRE_TIME = 30L * TimeUtil.DAY_MS;
+
+    /**
+     * 头像文件大小限制 单位：KB
+     */
+    private static final int ICON_SIZE = 200;
 
     @Autowired
     private UserDao userDao;
@@ -159,10 +167,19 @@ public class UserService {
 
     /**
      * 修改用户头像
+     *
      * @param file file
-     * @return 修改后的路径
+     * @return 访问路径
      */
-    public String updateIcon(MultipartFile file){
-        return "asdf";
+    public String updateIcon(MultipartFile file) throws Exception {
+        if (file.getSize() / NumberConstant.K_SIZE > ICON_SIZE) {
+            throw new FormDataException("文件大小超过限制");
+        }
+        int userId = UserContextHolder.get().getUserId();
+        String fileName = file.getOriginalFilename();
+        String path = Paths.get(FileConstant.iconPath, userId + fileName.substring(fileName.lastIndexOf("."))).toString();
+        file.transferTo(Paths.get(Constant.fileSavePath, path));
+        userDao.updateUserIcon(userId, path);
+        return path;
     }
 }
