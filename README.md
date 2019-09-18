@@ -2,6 +2,8 @@
 
 demo 地址:[bm.tapme.top](https://bm.tapme.top)
 
+长城宽带用户请访问[ali.tapme.top:8083](http://ali.tapme.top:8083)
+
 web端已经完成。
 
 # 缘由
