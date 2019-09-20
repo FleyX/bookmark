@@ -1,10 +1,12 @@
 package com.fanxb.bookmark.common.util;
 
 import com.fanxb.bookmark.common.entity.MailInfo;
+import com.fanxb.bookmark.common.exception.CustomException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
  * Time: 16:08
  */
 @Component
+@Slf4j
 public class MailUtil {
     private static JavaMailSender mailSender;
 
@@ -25,17 +28,29 @@ public class MailUtil {
     }
 
     @Value("${spring.mail.username}")
-    public void setFrom(String from){
+    public void setFrom(String from) {
         MailUtil.from = from;
     }
 
+    public static void sendMail(MailInfo info, boolean isHtml) {
+        try {
 
-    public static void sendTextMail(MailInfo info){
-        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-        simpleMailMessage.setFrom(from);
-        simpleMailMessage.setTo(info.getReceiver());
-        simpleMailMessage.setSubject(info.getSubject());
-        simpleMailMessage.setText(info.getContent());
-        mailSender.send(simpleMailMessage);
+            MimeMessageHelper helper = new MimeMessageHelper(mailSender.createMimeMessage());
+            helper.setFrom(from);
+            helper.setTo(info.getReceiver());
+            helper.setSubject(info.getSubject());
+            helper.setText(info.getContent(), isHtml);
+            mailSender.send(helper.getMimeMessage());
+        } catch (Exception e) {
+            throw new CustomException("发送邮件失败:" + e.getMessage(), e);
+        }
+
     }
+
+
+    public static void sendTextMail(MailInfo info) {
+        sendMail(info, false);
+    }
+
+
 }

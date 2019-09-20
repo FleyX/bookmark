@@ -35,11 +35,7 @@
     </update>
 
     <select id="selectByUserId" resultType="com.fanxb.bookmark.common.entity.User">
-        select
-            userId,
-            username,
-            email,
-            icon
+        select *
         from user
         where userId = #{userId}
     </select>

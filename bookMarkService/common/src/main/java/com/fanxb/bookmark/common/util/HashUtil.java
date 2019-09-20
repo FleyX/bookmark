@@ -14,6 +14,21 @@ import java.security.MessageDigest;
 public class HashUtil {
 
     /**
+     * Description: 生成密码
+     *
+     * @param pass 明文
+     * @return java.lang.String
+     * @author fanxb
+     * @date 2019/9/20 14:34
+     */
+    public static String getPassword(String pass) {
+        if (StringUtil.isEmpty(pass)) {
+            return "";
+        }
+        return HashUtil.sha1(HashUtil.md5(pass));
+    }
+
+    /**
      * Description: md5 签名字符串
      *
      * @param str 16进制字符串
@@ -80,7 +95,7 @@ public class HashUtil {
         return builder.toString();
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         System.out.println(md5("abc"));
         System.out.println(sha1("abc"));
     }

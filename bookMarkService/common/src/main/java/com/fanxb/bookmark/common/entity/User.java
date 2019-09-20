@@ -1,5 +1,6 @@
 package com.fanxb.bookmark.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 /**
@@ -16,6 +17,7 @@ public class User {
     private String username;
     private String email;
     private String icon;
+    @JsonIgnore
     private String password;
     private long createTime;
     private long lastLoginTime;

@@ -149,7 +149,7 @@ public class UserService {
             throw new FormDataException("验证码错误");
         }
         RedisUtil.delete(codeKey);
-        String newPassword = HashUtil.sha1(HashUtil.md5(body.getPassword()));
+        String newPassword = HashUtil.getPassword(body.getPassword());
         userDao.resetPassword(newPassword, body.getEmail());
     }
 

@@ -19,10 +19,6 @@ public class Constant {
      */
     public static final String JWT_KEY = "jwt-token";
 
-    /**
-     * jwt 过期时间，ms
-     */
-    public static int JWT_EXPIRE_TIME = 60 * 60 * 60 * 1000;
 
     /**
      * 验证码过期时间

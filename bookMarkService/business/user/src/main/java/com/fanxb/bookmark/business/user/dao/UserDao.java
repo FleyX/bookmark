@@ -75,4 +75,26 @@ public interface UserDao {
      */
     @Update("update user set icon=#{icon} where userId=#{userId}")
     void updateUserIcon(@Param("userId") int userId, @Param("icon") String icon);
+
+    /**
+     * Description: 根据用户id修改密码
+     *
+     * @param userId  userId
+     * @param newPass newPass
+     * @author fanxb
+     * @date 2019/9/20 14:39
+     */
+    @Update("update user set password=#{password} where userId=#{userId}")
+    void updatePasswordByUserId(@Param("userId") int userId, @Param("password") String newPass);
+
+    /**
+     * Description: 根据用户id修改用户名
+     *
+     * @author fanxb
+     * @date 2019/9/20 16:22
+     * @param userId userId
+     * @param username username
+     */
+    @Update("update user set username=#{username} where userId=#{userId}")
+    void updateUsernameByUserId(@Param("userId") int userId, @Param("username") String username);
 }
