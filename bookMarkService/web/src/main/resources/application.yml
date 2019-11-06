@@ -69,3 +69,6 @@ es:
 
 # 默认文件上传基路径
 fileSavePath: ./
+
+# 服务部署地址
+serviceAddress: http://localhost

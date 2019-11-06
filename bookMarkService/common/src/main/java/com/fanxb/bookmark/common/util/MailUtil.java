@@ -32,6 +32,14 @@ public class MailUtil {
         MailUtil.from = from;
     }
 
+    /**
+     * 功能描述: 发送邮件
+     *
+     * @param info   邮件体
+     * @param isHtml 是否为html邮件
+     * @author fanxb
+     * @date 2019/9/26 16:30
+     */
     public static void sendMail(MailInfo info, boolean isHtml) {
         try {
 

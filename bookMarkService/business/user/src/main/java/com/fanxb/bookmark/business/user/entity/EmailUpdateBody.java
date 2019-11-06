@@ -19,6 +19,4 @@ public class EmailUpdateBody {
     private String oldPass;
     @Email
     private String newEmail;
-
-    private String code;
 }

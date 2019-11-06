@@ -61,4 +61,15 @@ public class Constant {
         fileSavePath = path;
     }
 
+
+    /**
+     * 服务部署地址
+     */
+    public static String serviceAddress = "http://localhost";
+
+    @Value("${serviceAddress}")
+    public void setServiceAddress(String address) {
+        serviceAddress = address;
+    }
+
 }

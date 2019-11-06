@@ -78,7 +78,7 @@ public class UserController {
     /**
      * Description: 用户登录
      *
-     * @param user 登录表单
+     * @param body 登录表单
      * @return com.fanxb.bookmark.common.entity.Result
      * @author fanxb
      * @date 2019/7/6 16:35

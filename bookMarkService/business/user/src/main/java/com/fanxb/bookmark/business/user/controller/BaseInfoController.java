@@ -56,20 +56,20 @@ public class BaseInfoController {
     @PostMapping("/username")
     public Result updateUsername(@Validated @RequestBody UsernameBody body) {
         this.baseInfoService.updateUsername(body.getUsername());
-        return null;
+        return Result.success(null);
     }
 
     /**
-     * Description: 修改邮箱，需要先确认密码,获取checkId，然后还需确认新邮箱
+     * Description: 修改邮箱，还需校验新邮箱
      *
-     * @param email   新的邮箱地址
-     * @param checkId 确认id
+     * @param body body
      * @return com.fanxb.bookmark.common.entity.Result
      * @author fanxb
      * @date 2019/9/18 15:41
      */
     @PostMapping("/email")
     public Result updateEmail(@Validated @RequestBody EmailUpdateBody body) {
-        return null;
+        baseInfoService.updateEmail(body);
+        return Result.success(null);
     }
 }
