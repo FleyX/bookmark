@@ -84,7 +84,6 @@ services:
         -Dspring.mail.host=${SMTP_HOST} \
         -Dspring.mail.username=${SMTP_USERNAME} \
         -Dspring.mail.password=${SMTP_PASSWORD} \
-        -Dspring.mail.port=${SMTP_PORT} \
         -Dspring.datasource.druid.password=${MYSQL_PASSWORD} \
         -Dspring.datasource.druid.url=jdbc:mysql://bookmark-mysql:3306/bookmark?useUnicode=true\&characterEncoding=utf-8\&useSSL=false\&useJDBCCompliantTimezoneShift=true\&useLegacyDatetimeCode=false\&serverTimezone=UTC \
         -Dspring.redis.host=bookmark-redis \
