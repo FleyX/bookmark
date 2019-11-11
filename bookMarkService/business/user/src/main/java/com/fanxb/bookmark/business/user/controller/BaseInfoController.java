@@ -7,10 +7,7 @@ import com.fanxb.bookmark.business.user.service.BaseInfoService;
 import com.fanxb.bookmark.common.entity.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -32,8 +29,7 @@ public class BaseInfoController {
     /**
      * Description: 修改密码
      *
-     * @param oldPass 旧密码
-     * @param newPass 新密码
+     * @param body body
      * @return com.fanxb.bookmark.common.entity.Result
      * @author fanxb
      * @date 2019/9/18 15:49
@@ -70,6 +66,20 @@ public class BaseInfoController {
     @PostMapping("/email")
     public Result updateEmail(@Validated @RequestBody EmailUpdateBody body) {
         baseInfoService.updateEmail(body);
+        return Result.success(null);
+    }
+
+    /**
+     * 功能描述: 校验邮箱
+     *
+     * @param secret secret
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2019/11/11 23:27
+     */
+    @GetMapping("/verifyEmail")
+    public Result verifyEmail(String secret) {
+        baseInfoService.verifyEmail(secret);
         return Result.success(null);
     }
 }

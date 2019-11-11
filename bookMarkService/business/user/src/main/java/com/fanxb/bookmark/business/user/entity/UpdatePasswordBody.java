@@ -15,8 +15,8 @@ import javax.validation.constraints.Pattern;
 @Data
 public class UpdatePasswordBody {
 
-    @Pattern(regexp = ValidatedConstant.PASSWORD_MESSAGE, message = ValidatedConstant.PASSWORD_MESSAGE)
+    @Pattern(regexp = ValidatedConstant.PASSWORD_REG, message = ValidatedConstant.PASSWORD_MESSAGE)
     private String oldPass;
-    @Pattern(regexp = ValidatedConstant.PASSWORD_MESSAGE, message = ValidatedConstant.PASSWORD_MESSAGE)
+    @Pattern(regexp = ValidatedConstant.PASSWORD_REG, message = ValidatedConstant.PASSWORD_MESSAGE)
     private String newPass;
 }

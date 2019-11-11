@@ -90,11 +90,26 @@ public interface UserDao {
     /**
      * Description: 根据用户id修改用户名
      *
+     * @param userId   userId
+     * @param username username
      * @author fanxb
      * @date 2019/9/20 16:22
-     * @param userId userId
-     * @param username username
      */
     @Update("update user set username=#{username} where userId=#{userId}")
     void updateUsernameByUserId(@Param("userId") int userId, @Param("username") String username);
+
+    /**
+     * 更新用户新邮箱
+     * @param userId userId
+     * @param newPassword userId
+     */
+    @Update("update user set newEmail=#{newPassword} where userId= #{userId}")
+    void updateNewEmailByUserId(@Param("userId") int userId, @Param("newPassword") String newPassword);
+
+    /**
+     * 新邮箱校验成功，更新邮箱
+     * @param userId userId
+     */
+    @Update("update user set email=newEmail,newEmail='' where userId=#{userId}")
+    void updateEmailByUserId(int userId);
 }

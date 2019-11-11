@@ -4,6 +4,7 @@ import com.fanxb.bookmark.business.user.constant.ValidatedConstant;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 /**
@@ -15,8 +16,10 @@ import javax.validation.constraints.Pattern;
  */
 @Data
 public class EmailUpdateBody {
-    @Pattern(regexp = ValidatedConstant.PASSWORD_REG, message = ValidatedConstant.PASSWORD_MESSAGE)
-    private String oldPass;
-    @Email
+//    @Pattern(regexp = ValidatedConstant.PASSWORD_REG, message = ValidatedConstant.PASSWORD_MESSAGE)
+//    private String oldPass;
+    @NotNull(message = "参数不为空")
+    private String actionId;
+    @Email(message = "请输入有效邮箱地址")
     private String newEmail;
 }

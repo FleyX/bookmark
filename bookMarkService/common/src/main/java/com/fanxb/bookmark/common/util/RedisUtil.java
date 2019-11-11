@@ -42,7 +42,7 @@ public class RedisUtil {
      *
      * @param key        key
      * @param value      value
-     * @param expireTime 过期时间
+     * @param expireTime 过期时间,ms
      */
     public static void set(String key, String value, long expireTime) {
         redisTemplate.opsForValue().set(key, value);
@@ -67,6 +67,7 @@ public class RedisUtil {
      * @author fanxb
      * @date 2019/4/12 10:45
      */
+    @SuppressWarnings("unchecked")
     public static <T> T get(String key, Class<T> tt) {
         String str = redisTemplate.opsForValue().get(key);
         if (StringUtil.isEmpty(str)) {

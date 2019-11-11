@@ -7,6 +7,7 @@ import com.fanxb.bookmark.business.user.entity.LoginRes;
 import com.fanxb.bookmark.business.user.entity.RegisterBody;
 import com.fanxb.bookmark.common.constant.Constant;
 import com.fanxb.bookmark.common.constant.NumberConstant;
+import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.MailInfo;
 import com.fanxb.bookmark.common.entity.User;
 import com.fanxb.bookmark.common.exception.FormDataException;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 类功能简述：
@@ -79,6 +81,9 @@ public class UserService {
     public void register(RegisterBody body) {
         String codeKey = Constant.authCodeKey(body.getEmail());
         String realCode = RedisUtil.get(codeKey, String.class);
+        if (Constant.isDev) {
+            realCode = "123456";
+        }
         if (StringUtil.isEmpty(realCode) || (!realCode.equals(body.getAuthCode()))) {
             throw new FormDataException("验证码错误");
         }
@@ -181,5 +186,26 @@ public class UserService {
         file.transferTo(Paths.get(Constant.fileSavePath, path));
         userDao.updateUserIcon(userId, path);
         return path;
+    }
+
+    /**
+     * 功能描述: 密码校验，校验成功返回一个actionId，以执行敏感操作
+     *
+     * @param password password
+     * @return java.lang.String
+     * @author fanxb
+     * @date 2019/11/11 23:41
+     */
+    public String checkPassword(String password) {
+        int userId = UserContextHolder.get().getUserId();
+        String pass = HashUtil.getPassword(password);
+        User user = userDao.selectByUserId(userId);
+        if (!user.getPassword().equals(pass)) {
+            throw new FormDataException("密码错误,请重试");
+        }
+        String actionId = UUID.randomUUID().toString().replaceAll("-", "");
+        String key = RedisConstant.getPasswordCheckKey(userId, actionId);
+        RedisUtil.set(key, "1", 10 * 60 * 1000);
+        return actionId;
     }
 }

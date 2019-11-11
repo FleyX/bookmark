@@ -1,5 +1,6 @@
 package com.fanxb.bookmark.business.user.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.fanxb.bookmark.business.user.entity.LoginBody;
 import com.fanxb.bookmark.business.user.entity.RegisterBody;
 import com.fanxb.bookmark.business.user.service.UserService;
@@ -100,6 +101,19 @@ public class UserController {
     public Result resetPassword(@RequestBody RegisterBody body) {
         userService.resetPassword(body);
         return Result.success(null);
+    }
+
+    /**
+     * 功能描述: 校验密码，生成一个actionId
+     *
+     * @param password password
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2019/11/11 23:31
+     */
+    @PostMapping("/checkPassword")
+    public Result checkPassword(@RequestBody JSONObject obj) {
+        return Result.success(userService.checkPassword(obj.getString("password")));
     }
 
 
