@@ -64,7 +64,7 @@ public class BookmarkService {
         Document doc = Jsoup.parse(stream, "utf-8", "");
         Elements elements = doc.select("html>body>dl>dt");
         //获取当前层sort最大值
-        Integer sortBase = bookmarkDao.selectMaxSort(1, path);
+        Integer sortBase = bookmarkDao.selectMaxSort(userId, path);
         if (sortBase == null) {
             sortBase = 0;
         }

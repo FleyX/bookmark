@@ -24,8 +24,6 @@ import java.util.List;
 public class BookmarkBackupService {
 
     @Autowired
-    private BookmarkDao bookmarkDao;
-    @Autowired
     private BookmarkBackupDao bookmarkBackupDao;
 
     @Autowired

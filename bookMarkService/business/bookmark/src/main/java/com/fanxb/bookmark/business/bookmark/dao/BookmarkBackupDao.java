@@ -1,6 +1,7 @@
 package com.fanxb.bookmark.business.bookmark.dao;
 
 import com.fanxb.bookmark.common.entity.Bookmark;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -12,6 +13,7 @@ import java.util.List;
  * Date: 2019/11/12
  * Time: 0:24
  */
+@Mapper
 public interface BookmarkBackupDao {
 
     /**
