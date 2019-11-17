@@ -33,7 +33,7 @@ import java.util.UUID;
 @Service
 public class UserService {
 
-    private static final String DEFAULT_ICON = "defaultIcon.png";
+    private static final String DEFAULT_ICON = "/favicon.ico";
     /**
      * 短期jwt失效时间
      */
