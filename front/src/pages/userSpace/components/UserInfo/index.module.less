@@ -1,4 +1,4 @@
-@import "../../global.less";
+@import "../../../../global.less";
 .head {
   background: @mainContentColor;
   padding: 0.1rem;
@@ -8,6 +8,7 @@
   .icon {
     position: relative;
     border-radius: 5px;
+    margin-right: 1em;
     @media (min-width: 768px) {
       width: 150px;
       height: 150px;
@@ -36,6 +37,32 @@
       // background-color: rbga(173, 166, 166, 1);
       background-color: rgba(173, 166, 166, 0.8) !important;
       color: white;
+    }
+  }
+
+  .userinfo {
+    flex: 1;
+
+    .username {
+      font-size: 0.4rem;
+      color: black;
+      font-weight: 600;
+    }
+
+    .item {
+      font-size: 1.5em;
+      padding-top: 1em;
+      padding-bottom: 1em;
+      border-bottom: 1px solid #ebebeb;
+
+      .label {
+        width: 5em;
+        color: black;
+      }
+
+      .value {
+        min-width: 5em;
+      }
     }
   }
 }

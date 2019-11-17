@@ -4,7 +4,7 @@ import axios from "axios";
 //定义http实例
 const instance = axios.create({
   baseURL: "/bookmark/api",
-  timeout: 15000
+  timeout: 60000
 });
 
 //实例添加请求拦截器
@@ -28,7 +28,7 @@ instance.interceptors.response.use(
       message.error(data.message);
       return Promise.reject(data.message);
     } else {
-      showError(data);
+      showError(data, res.config.url.replace(res.config.baseURL, ""));
       return Promise.reject(data.message);
     }
   },
@@ -39,7 +39,10 @@ instance.interceptors.response.use(
   }
 );
 
-function showError(response) {
+function showError(response, url) {
+  if (url === "/user/currentUserInfo") {
+    return;
+  }
   let description,
     message = "出问题啦";
   if (response) {

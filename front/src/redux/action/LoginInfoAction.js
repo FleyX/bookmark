@@ -5,8 +5,7 @@ export function getInitData() {
   let token = localStorage.getItem("token");
   window.token = token;
   return {
-    token,
-    userInfo: null
+    token
   };
 }
 
@@ -30,10 +29,17 @@ export const CHANGE_USER_INFO = "changeUserInfo";
 export const changeUserInfo = userInfo => {
   return {
     type: CHANGE_USER_INFO,
-    data: {
-      userInfo
-    }
+    data: Object.assign({}, userInfo)
   };
+};
+
+//更新一个数据
+export const UPDATE_ONE = "updateOne";
+
+export const updateOne = (key, value) => {
+  let data = {};
+  data[key] = value;
+  return { type: UPDATE_ONE, data };
 };
 
 // 退出登录

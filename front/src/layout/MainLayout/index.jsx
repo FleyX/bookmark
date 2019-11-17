@@ -20,32 +20,37 @@ function mapDispatchToProps(dispatch) {
 class MainLayout extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props);
     this.state = {};
   }
 
-  componentWillMount() {
-    httpUtil.get("/user/currentUserInfo").then(res => this.props.changeUserInfo(res));
+  async componentWillMount() {
+    if (!this.props.username) {
+      let res = await httpUtil.get("/user/currentUserInfo");
+      this.props.changeUserInfo(res);
+    }
   }
 
   renderUserArea() {
-    const { userInfo } = this.props;
+    const { username, icon } = this.props;
     const menu = (
       <Menu onClick={this.onClick}>
         <Menu.Item key="personSpace">个人资料</Menu.Item>
         <Menu.Item key="logout">退出登陆</Menu.Item>
       </Menu>
     );
-    if (userInfo !== null) {
+    if (username != null) {
       return (
         <Dropdown overlay={menu} placement="bottomCenter" trigger={["hover", "click"]}>
-          <span style={{ cursor: "pointer" }}>{userInfo.username}</span>
+          <span style={{ cursor: "pointer" }}>
+            <img className={styles.icon} src={icon} alt="icon" />
+            {username}
+          </span>
         </Dropdown>
       );
     } else {
       return (
         <div>
-          <Link to="/public/login">登陆</Link>
+          <Link to="/public/login">登陆</Link>&emsp;
           <Link to="/public/register">注册</Link>
         </div>
       );
@@ -69,7 +74,7 @@ class MainLayout extends React.Component {
 
   render() {
     return (
-      <div className={"fullScreen " + styles.main}>
+      <div className={styles.main}>
         <div className={styles.header}>
           <a href="/">
             <img style={{ width: "1.5rem" }} src="/img/bookmarkLogo.png" alt="logo" />
@@ -77,15 +82,15 @@ class MainLayout extends React.Component {
           {this.renderUserArea()}
         </div>
         <Divider style={{ margin: 0 }} />
-        <div className={styles.content}>{this.props.children}</div>
+        <div style={{ minHeight: `calc(${document.body.clientHeight}px - 1.45rem)` }} className={styles.content}>
+          {this.props.children}
+        </div>
+        <div className={styles.footer}>
+          开源地址：<a href="https://github.com/FleyX/bookmark">github.com/FleyX/bookmark</a>
+        </div>
       </div>
     );
   }
 }
 
-export default withRouter(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(MainLayout)
-);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(MainLayout));

@@ -1,5 +1,5 @@
 import React from "react";
-import { Input, Select } from "antd";
+import { Input, Select, Empty } from "antd";
 import styles from "./index.module.less";
 import httpUtil from "../../util/httpUtil";
 
@@ -46,7 +46,7 @@ class Search extends React.Component {
     this.timer = setTimeout(() => {
       this.search(content);
       this.clearTimer();
-    }, 300);
+    }, 200);
   }
 
   clearTimer() {
@@ -119,8 +119,36 @@ class Search extends React.Component {
     }
   }
 
+  /**
+   * 渲染结果列表
+   */
+  renderResults() {
+    const { resultList, currentIndex, currentOptionIndex, isFocus } = this.state;
+    if (currentOptionIndex !== 0 || !isFocus) {
+      return;
+    }
+    if (resultList.length > 0) {
+      return (
+        <div className={styles.resultList}>
+          {resultList.map((item, index) => (
+            <div
+              className={`${styles.item} ${index === currentIndex ? styles.checked : ""}`}
+              key={item.bookmarkId}
+              onClick={() => window.open(item.url)}
+            >
+              <span style={{ fontWeight: 600 }}>{item.name}&emsp;</span>
+              <span style={{ fontSize: "0.8em", fontWeight: 400 }}>{item.url}</span>
+            </div>
+          ))}
+        </div>
+      );
+    } else {
+      return <Empty className={styles.resultList} image={Empty.PRESENTED_IMAGE_SIMPLE} />;
+    }
+  }
+
   render() {
-    const { content, resultList, currentIndex, options, currentOptionIndex } = this.state;
+    const { content, options, currentOptionIndex } = this.state;
     const prefix = (
       <Select value={options[currentOptionIndex]} onChange={this.valueIndexChange.bind(this)}>
         {options.map((item, index) => (
@@ -143,22 +171,9 @@ class Search extends React.Component {
           onChange={this.contentChange.bind(this)}
           onKeyDown={this.keyUp.bind(this)}
           onFocus={() => this.setState({ isFocus: true })}
-          onBlur={() => this.setState({ isFocus: false })}
+          onBlur={() => setTimeout(() => this.setState({ isFocus: false }), 200)}
         />
-        {resultList.length > 0 ? (
-          <div className={styles.resultList}>
-            {resultList.map((item, index) => (
-              <div
-                className={`${styles.item} ${index === currentIndex ? styles.checked : ""}`}
-                key={item.bookmarkId}
-                onClick={() => window.open(item.url)}
-              >
-                <span style={{ fontWeight: 600 }}>{item.name}&emsp;</span>
-                <span style={{ fontSize: "0.8em", fontWeight: 400 }}>{item.url}</span>
-              </div>
-            ))}
-          </div>
-        ) : null}
+        {this.renderResults()}
       </div>
     );
   }
