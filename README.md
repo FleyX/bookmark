@@ -1,8 +1,6 @@
 本项目是一个云书签的项目，取名为：签签世界。
 
-demo 地址:[bm.tapme.top](https://bm.tapme.top)
-
-长城宽带用户请访问[ali.tapme.top:8083](http://ali.tapme.top:8083)
+demo 地址:[west.tapme.top:8083](http://west.tapme.top:8083)
 
 web端已经完成。
 
