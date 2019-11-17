@@ -1,1 +1,1 @@
-INSERT INTO `bookmark`.`url`(`method`, `url`, `type`) VALUES ('GET', '/baseInfo/verifyEmail', 0);
+INSERT INTO `bookmark`.`url` VALUES (8,'GET', '/baseInfo/verifyEmail', 0);
