@@ -83,9 +83,14 @@ public class LoginFilter implements Filter {
             return;
         }
 
+        String requestUrl = request.getRequestURI().replace(urlPrefix, "");
+        //放行静态文件
+        if (requestUrl.startsWith("/static")) {
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
+        }
         UserContextHolder.remove();
         List<Url> publicUrl = this.getPublicUrl();
-        String requestUrl = request.getRequestURI().replace(urlPrefix, "");
         for (Url url : publicUrl) {
             if (url.getMethod().equalsIgnoreCase(requestMethod) && matcher.match(url.getUrl(), requestUrl)) {
                 filterChain.doFilter(servletRequest, servletResponse);

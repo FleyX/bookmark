@@ -37,11 +37,12 @@ public class BaseInfoService {
 
     public void changePassword(UpdatePasswordBody body) {
         int userId = UserContextHolder.get().getUserId();
-        String realOldPass = userDao.selectByUserId(userId).getPassword();
-        if (!realOldPass.equals(HashUtil.getPassword(body.getOldPass()))) {
-            throw new FormDataException("旧密码错误");
+        String checkAuthKey = com.fanxb.bookmark.common.constant.RedisConstant.getPasswordCheckKey(userId, body.getActionId());
+        String str = RedisUtil.get(checkAuthKey, String.class);
+        if (str == null) {
+            throw new CustomException("密码校验失败，无法更新密码");
         }
-        userDao.updatePasswordByUserId(userId, HashUtil.getPassword(body.getNewPass()));
+        userDao.updatePasswordByUserId(userId, HashUtil.getPassword(body.getPassword()));
     }
 
 
@@ -75,10 +76,10 @@ public class BaseInfoService {
         String secret = UUID.randomUUID().toString().replaceAll("-", "");
         String url = VERIFY_EMAIL.replaceAll("XXXX", Constant.serviceAddress + VERIFY_EMAIL_PATH + secret);
         log.debug(url);
-        MailInfo info = new MailInfo(body.getNewEmail(), "验证邮箱", url);
+        MailInfo info = new MailInfo(body.getEmail(), "验证邮箱", url);
         MailUtil.sendMail(info, true);
         RedisUtil.set(RedisConstant.getUpdateEmailKey(secret), String.valueOf(userId), TimeUtil.DAY_MS);
-        userDao.updateNewEmailByUserId(userId, body.getNewEmail());
+        userDao.updateNewEmailByUserId(userId, body.getEmail());
     }
 
     /**

@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -182,8 +184,11 @@ public class UserService {
         }
         int userId = UserContextHolder.get().getUserId();
         String fileName = file.getOriginalFilename();
-        String path = Paths.get(FileConstant.iconPath, userId + fileName.substring(fileName.lastIndexOf("."))).toString();
-        file.transferTo(Paths.get(Constant.fileSavePath, path));
+        String path = Paths.get(FileConstant.iconPath, userId + "." + System.currentTimeMillis() + fileName.substring(fileName.lastIndexOf("."))).toString();
+        Path realPath = Paths.get(Constant.fileSavePath, path);
+        FileUtil.ensurePathExist(realPath.getParent().toString());
+        file.transferTo(realPath);
+        path = File.separator + path;
         userDao.updateUserIcon(userId, path);
         return path;
     }
@@ -205,7 +210,7 @@ public class UserService {
         }
         String actionId = UUID.randomUUID().toString().replaceAll("-", "");
         String key = RedisConstant.getPasswordCheckKey(userId, actionId);
-        RedisUtil.set(key, "1", 10 * 60 * 1000);
+        RedisUtil.set(key, "1", 5 * 60 * 1000);
         return actionId;
     }
 }

@@ -20,14 +20,6 @@ public class FileConstant {
     /**
      * 用户头像目录
      */
-    public static String iconPath = Paths.get("static", "public", "icon").toString();
+    public static String iconPath = Paths.get("files", "public", "icon").toString();
 
-
-    @PostConstruct
-    private void init() {
-        File file = Paths.get(Constant.fileSavePath, iconPath).toFile();
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-    }
 }

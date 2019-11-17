@@ -2,10 +2,7 @@ package com.fanxb.bookmark.common.util;
 
 import com.fanxb.bookmark.common.exception.CustomException;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.stream.Collectors;
 
 /**
@@ -44,5 +41,19 @@ public class FileUtil {
      */
     public static String streamToString(InputStream stream) {
         return streamToString(stream, "utf-8");
+    }
+
+    /**
+     * 功能描述:  路径
+     *
+     * @param path path
+     * @author fanxb
+     * @date 2019/11/14 0:27
+     */
+    public static void ensurePathExist(String path) {
+        File file = new File(path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
     }
 }

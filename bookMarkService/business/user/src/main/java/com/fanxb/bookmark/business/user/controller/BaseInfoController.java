@@ -35,7 +35,7 @@ public class BaseInfoController {
      * @date 2019/9/18 15:49
      */
     @PostMapping("/password")
-    public Result changePassword(@Valid @RequestBody UpdatePasswordBody body) {
+    public Result changePassword(@Validated @RequestBody UpdatePasswordBody body) {
         this.baseInfoService.changePassword(body);
         return Result.success(null);
     }
