@@ -21,8 +21,8 @@ function mapDispatchToProps(dispatch) {
 
 const reg = {
   name: {
-    reg: /^.{1,40}$/,
-    text: "名称字符数为1-40"
+    reg: /^.{1,200}$/,
+    text: "名称字符数为1-200"
   },
   url: {
     reg: /^.{1,5000}$/,
@@ -69,7 +69,7 @@ class AddModal extends React.Component {
 
   changeValue(e) {
     const name = e.target.name;
-    const value = e.target.value.trim();
+    const value = e.target.value
     this.checkValue(name, value);
     this.setState({ [name]: value });
   }

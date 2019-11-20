@@ -171,7 +171,7 @@ class Search extends React.Component {
           onChange={this.contentChange.bind(this)}
           onKeyDown={this.keyUp.bind(this)}
           onFocus={() => this.setState({ isFocus: true })}
-          onBlur={() => setTimeout(() => this.setState({ isFocus: false }), 200)}
+          onBlur={() => setTimeout(() => this.setState({ isFocus: false }), 600)}
         />
         {this.renderResults()}
       </div>
