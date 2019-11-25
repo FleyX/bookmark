@@ -1,12 +1,12 @@
 <template>
   <div>
-    <p>Hello world!</p>
+    <p>Hello world!这是选项页</p>
   </div>
 </template>
 
 <script>
 export default {
-  name: "App",
+  name: 'App',
 };
 </script>
 

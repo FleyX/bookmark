@@ -19,5 +19,11 @@
   "options_ui": {
     "page": "options/options.html",
     "chrome_style": true
-  }
+  },
+  "content_scripts": [{
+      "matches": ["http://west.tapme.top/*", "http://bookmark.tapme.top/*","http://localhost:3000/*"],
+      "js": ["popup/static/sso.js"]
+    }
+
+  ]
 }

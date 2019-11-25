@@ -1,17 +1,20 @@
 <template>
-  <p>Hello world!</p>
+  <div class="main">
+    <p>Hello world!</p>
+  </div>
 </template>
 
 <script>
 export default {
-  data () {
-    return {}
-  }
-}
+  data() {
+    return {};
+  },
+};
 </script>
 
 <style lang="scss" scoped>
-p {
-  font-size: 20px;
+.main {
+  width: 50%;
+  height: 50%;
 }
 </style>
