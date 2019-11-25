@@ -1,13 +1,7 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import MainLayout from "../../../layout/MainLayout/index";
 import http from "../../../util/httpUtil";
 import queryString from "query-string";
-
-const style = {
-  "text-align": "center",
-  "padding-top": "200px"
-};
 
 class EmailVerify extends React.Component {
   constructor(props) {

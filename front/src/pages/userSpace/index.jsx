@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./index.module.less";
 import MainLayout from "../../layout/MainLayout";
 import { connect } from "react-redux";
 import * as action from "../../redux/action/LoginInfoAction";
@@ -21,7 +20,6 @@ class UserSpace extends React.Component {
     this.state = {};
   }
   render() {
-    const { icon, username } = this.props;
     return (
       <MainLayout>
         <UserInfo />

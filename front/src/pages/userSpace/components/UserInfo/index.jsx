@@ -1,5 +1,5 @@
 import React from "react";
-import { message, Button, Tooltip, Input, Form } from "antd";
+import { message, Button, Tooltip, Input } from "antd";
 import styles from "./index.module.less";
 import { connect } from "react-redux";
 import * as action from "../../../../redux/action/LoginInfoAction";
@@ -62,7 +62,7 @@ class UserInfo extends React.Component {
    * @param {*} isShowKey 是否修改字段
    */
   async submit(itemKey, isShowKey) {
-    if (this.state[itemKey] == null || this.state[itemKey] == "") {
+    if (this.state[itemKey] == null || this.state[itemKey] === "") {
       message.error("请修改后重试");
       return;
     }
@@ -73,7 +73,11 @@ class UserInfo extends React.Component {
     }
     if ((itemKey === "password" || itemKey === "email") && actionId == null) {
       message.warning("敏感操作，需校验密码");
-      this.setState({ isModelShow: true, currentAction: itemKey, currentShowKey: isShowKey });
+      this.setState({
+        isModelShow: true,
+        currentAction: itemKey,
+        currentShowKey: isShowKey
+      });
       return;
     }
     try {
@@ -96,7 +100,12 @@ class UserInfo extends React.Component {
 
   async actionIdChange(actionId) {
     const { currentAction, currentShowKey } = this.state;
-    this.setState({ actionId, isModelShow: false, currentAction: null, currentShowKey: null });
+    this.setState({
+      actionId,
+      isModelShow: false,
+      currentAction: null,
+      currentShowKey: null
+    });
     this.submit(currentAction, currentShowKey);
   }
 
@@ -107,26 +116,45 @@ class UserInfo extends React.Component {
    */
   renderItem(label, itemKey, isShowKey) {
     let repeatPassword = this.state.repeatPassword;
-    let itemValue = this.state[itemKey] === null ? this.props[itemKey] : this.state[itemKey];
+    let itemValue =
+      this.state[itemKey] === null ? this.props[itemKey] : this.state[itemKey];
     let isShow = this.state[isShowKey];
     let block;
     if (isShow) {
       block = (
         <div>
-          {itemKey == "password" ? (
+          {itemKey === "password" ? (
             <div>
-              <Input.Password value={itemValue} placeholder="新密码" onChange={e => this.setState({ [itemKey]: e.target.value })} />
-              <Input.Password value={repeatPassword} placeholder="重复密码" onChange={e => this.setState({ repeatPassword: e.target.value })} />
+              <Input.Password
+                value={itemValue}
+                placeholder="新密码"
+                onChange={e => this.setState({ [itemKey]: e.target.value })}
+              />
+              <Input.Password
+                value={repeatPassword}
+                placeholder="重复密码"
+                onChange={e =>
+                  this.setState({ repeatPassword: e.target.value })
+                }
+              />
             </div>
           ) : (
-            <Input value={itemValue} onChange={e => this.setState({ [itemKey]: e.target.value })} />
+            <Input
+              value={itemValue}
+              onChange={e => this.setState({ [itemKey]: e.target.value })}
+            />
           )}
           <div style={{ marginTop: "0.1rem" }}>
-            <Button type="primary" onClick={this.submit.bind(this, itemKey, isShowKey)}>
+            <Button
+              type="primary"
+              onClick={this.submit.bind(this, itemKey, isShowKey)}
+            >
               保存
             </Button>
             &nbsp;&nbsp;
-            <Button onClick={() => this.setState({ [isShowKey]: false })}>取消</Button>
+            <Button onClick={() => this.setState({ [isShowKey]: false })}>
+              取消
+            </Button>
           </div>
         </div>
       );
@@ -134,7 +162,11 @@ class UserInfo extends React.Component {
       block = (
         <Tooltip title="点击编辑">
           <div
-            className={itemKey === "username" ? styles.username : "" + " pointer " + styles.value}
+            className={
+              itemKey === "username"
+                ? styles.username
+                : " pointer " + styles.value
+            }
             onClick={() => this.setState({ [isShowKey]: true })}
           >
             {itemKey === "password" ? "********" : itemValue}
@@ -152,14 +184,18 @@ class UserInfo extends React.Component {
 
   render() {
     const { isModelShow } = this.state;
-    const { icon, username } = this.props;
+    const { icon } = this.props;
     return (
       <div className={styles.head}>
         {/* 头像昵称 */}
         <div className={styles.icon}>
           <img src={icon} alt="icon" className={styles.full} />
           <label className={styles.full}>
-            <input type="file" style={{ display: "none" }} onChange={this.changeIcon.bind(this)} />
+            <input
+              type="file"
+              style={{ display: "none" }}
+              onChange={this.changeIcon.bind(this)}
+            />
             <div className={styles.full + " " + styles.changeIcon}>
               <span>编辑</span>
             </div>
@@ -172,7 +208,11 @@ class UserInfo extends React.Component {
           {this.renderItem("密码", "password", "isPassword")}
         </div>
 
-        <PasswordCheck visible={isModelShow} onClose={() => this.setState({ isModelShow: false })} onChange={this.actionIdChange.bind(this)} />
+        <PasswordCheck
+          visible={isModelShow}
+          onClose={() => this.setState({ isModelShow: false })}
+          onChange={this.actionIdChange.bind(this)}
+        />
       </div>
     );
   }
