@@ -1,6 +1,6 @@
 本项目是一个云书签的项目，取名为：签签世界。
 
-demo 地址:[west.tapme.top:8083](http://west.tapme.top:8083)
+访问地址:[bm.tapme.top](http://bm.tapme.top)
 
 web端已经完成。
 
