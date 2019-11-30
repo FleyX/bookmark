@@ -37,7 +37,7 @@ services:
       - ./es/ik:/usr/share/elasticsearch/plugins/ik
       - ./es/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     environment:
-      - "ES_JAVA_OPTS=-Xms400m -Xmx400m"
+      - "ES_JAVA_OPTS=-Xms1500m -Xmx1500m"
     ports:
       - 9200:9200
       - 9300:9300
