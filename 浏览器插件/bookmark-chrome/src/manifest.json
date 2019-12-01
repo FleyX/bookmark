@@ -22,7 +22,7 @@
   },
   "content_scripts": [{
       "matches": ["http://west.tapme.top/*", "http://bookmark.tapme.top/*","http://localhost:3000/*"],
-      "js": ["popup/static/sso.js"]
+      "js": ["static/sso.js"]
     }
 
   ]

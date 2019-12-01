@@ -1,14 +1,15 @@
 <template>
-  <div class="main">您还未登陆授权，<el-button type="primary" @click="go">前往授权页面</el-button></div>
+  <div class="main">您还未登陆授权<br />
+    <el-button type="primary" @click="go">前往授权页面</el-button>
+  </div>
 </template>
 
 <script>
+import config from '../../../../util/config';
 export default {
   name: 'login',
   data() {
     return {
-      // href: 'http://west.tapme.top:8083',
-      href: 'http://localhost:3000/userSpace/ssoAuth',
     };
   },
   mounted() {
@@ -16,7 +17,7 @@ export default {
   },
   methods: {
     go() {
-      window.open(this.href);
+      window.open(config.ssoUrl);
     },
     // 循环检测token是否生效
     checkToken() {
@@ -33,6 +34,4 @@ export default {
 </script>
 
 <style scoped>
-.main {
-}
 </style>

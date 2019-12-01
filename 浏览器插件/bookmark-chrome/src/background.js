@@ -7,6 +7,7 @@ chrome.extension.onConnect.addListener(port => {
     switch (msg.type) {
       case 'sendToken':
         localStorage.setItem('token', msg.data);
+        window.token = msg.data;
         break;
       default:
         console.error('未知的数据', msg);
