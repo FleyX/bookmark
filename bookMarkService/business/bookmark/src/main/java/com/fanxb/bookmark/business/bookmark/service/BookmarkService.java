@@ -24,10 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 类功能简述：
@@ -102,13 +99,13 @@ public class BookmarkService {
         if (A.equalsIgnoreCase(first.tagName())) {
             //说明为链接
             Bookmark node = new Bookmark(userId, path, first.ownText(), first.attr("href"), first.attr("icon")
-                    , Long.valueOf(first.attr("add_date")) * 1000, sort);
+                    , Long.parseLong(first.attr("add_date")) * 1000, sort);
             //存入数据库
             insertOne(node);
             insertList.add(new EsEntity<>(node.getBookmarkId().toString(), new BookmarkEs(node)));
         } else {
             //说明为文件夹
-            Bookmark node = new Bookmark(userId, path, first.ownText(), Long.valueOf(first.attr("add_date")) * 1000, sort);
+            Bookmark node = new Bookmark(userId, path, first.ownText(), Long.parseLong(first.attr("add_date")) * 1000, sort);
             Integer sortBase = 0;
             if (insertOne(node)) {
                 sortBase = bookmarkDao.selectMaxSort(node.getUserId(), path);
@@ -144,6 +141,24 @@ public class BookmarkService {
         }
     }
 
+
+    /**
+     * 功能描述: 获取某个用户的书签map
+     *
+     * @param userId userId
+     * @return java.util.Map<java.lang.String, java.util.List < com.fanxb.bookmark.common.entity.Bookmark>>
+     * @author fanxb
+     * @date 2019/12/14 0:02
+     */
+    public Map<String, List<Bookmark>> getOneBookmarkTree(int userId) {
+        List<Bookmark> list = bookmarkDao.getListByUserId(userId);
+        Map<String, List<Bookmark>> map = new HashMap<>(50);
+        list.forEach(item -> {
+            map.computeIfAbsent(item.getPath(), k -> new ArrayList<>());
+            map.get(item.getPath()).add(item);
+        });
+        return map;
+    }
 
     /**
      * Description: 根据userId和path获取书签列表

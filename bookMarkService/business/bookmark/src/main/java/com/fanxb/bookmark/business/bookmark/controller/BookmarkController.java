@@ -6,6 +6,7 @@ import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
 import com.fanxb.bookmark.common.entity.Bookmark;
 import com.fanxb.bookmark.common.entity.Result;
+import com.fanxb.bookmark.common.entity.UserContext;
 import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +39,18 @@ public class BookmarkController {
     @GetMapping("/currentUser/path")
     public Result getCurrentBookmarkList(String path) {
         return Result.success(bookmarkService.getBookmarkListByPath(UserContextHolder.get().getUserId(), path));
+    }
+
+    /**
+     * 功能描述: 获取当前登陆用户的书签树
+     *
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2019/12/14 0:09
+     */
+    @GetMapping("/currentUser")
+    public Result getBookmarkMap(){
+        return Result.success(bookmarkService.getOneBookmarkTree(UserContextHolder.get().getUserId()));
     }
 
     /**
