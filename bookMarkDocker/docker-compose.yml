@@ -1,36 +1,36 @@
 version: "2"
-services: 
+services:
   bookmark-mysql:
     image: mysql:8.0.16
     container_name: bookmark-mysql
-    ports: 
+    ports:
       - 3307:3306
-    networks: 
+    networks:
       - bookmark
-    volumes: 
+    volumes:
       - ./mysql/data:/var/lib/mysql
       - ./mysql/temp:/var/lib/mysql-files
       - ./mysql/my.cnf:/etc/mysql/my.cnf
       - /etc/localtime:/etc/localtime
       - ./timezone:/etc/timezone
-    environment: 
+    environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_DATABASE=bookmark
   bookmark-redis:
     image: redis:3.2.10
     container_name: bookmark-redis
-    volumes: 
+    volumes:
       - /etc/localtime:/etc/localtime
       - ./timezone:/etc/timezone
-    networks: 
+    networks:
       - bookmark
     # redis未设置密码，如端口暴露可能会被攻击
     ports:
-     - 6380:6379
+      - 6380:6379
   bookmark-es:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
     container_name: bookmark-es
-    volumes: 
+    volumes:
       - /etc/localtime:/etc/localtime
       - ./timezone:/etc/timezone
       - ./es/data:/usr/share/elasticsearch/data
@@ -41,40 +41,40 @@ services:
     ports:
       - 9200:9200
       - 9300:9300
-    networks: 
+    networks:
       - bookmark
   bookmark-front:
     image: nginx
     container_name: bookmark-front
     depends_on:
       - bookmark-service
-    networks: 
+    networks:
       - bookmark
-    volumes: 
+    volumes:
       - /etc/localtime:/etc/localtime
       - ./timezone:/etc/timezone
       - ../front/build:/opt/dist
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/log:/var/log/nginx
       - ${BOOKMARK_FILE_SAVE_PATH}/files/public:/opt/files/public
-    ports: 
+    ports:
       - 8083:8080
   bookmark-service:
     image: registry.cn-hangzhou.aliyuncs.com/fleyx/node-java-env:v2
     container_name: bookmark-service
-    depends_on: 
+    depends_on:
       - bookmark-mysql
       - bookmark-redis
       - bookmark-es
-    networks: 
+    networks:
       - bookmark
-    volumes: 
+    volumes:
       - /etc/localtime:/etc/localtime
       - ./timezone:/etc/timezone
       - ../bookMarkService/web/target/bookmark-web-1.0-SNAPSHOT.jar:/opt/app/service.jar
       - ${BOOKMARK_FILE_SAVE_PATH}:/opt/files
     working_dir: /opt/app
-    command: 
+    command:
       - /bin/bash
       - -c
       - |
@@ -92,6 +92,7 @@ services:
         -Des.host=bookmark-es \
         -DserviceAddress=${BOOKMARK_HOST} \
         -DfileSavePath=/opt/files \
+        -DserviceAddress=https://bm.tapme.top \
         service.jar
-networks: 
+networks:
   bookmark:
