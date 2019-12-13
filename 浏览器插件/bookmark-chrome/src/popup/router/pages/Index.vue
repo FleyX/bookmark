@@ -2,7 +2,7 @@
   <div>
     <div class="head">
       <img width="30%" src="/static/img/bookmarkLogo.png" alt="icon" />
-      <span>{{personInfo.username}}</span>
+      <span>{{ personInfo.username }}</span>
     </div>
     <!-- 书签检索 -->
     <div class="search">
@@ -10,7 +10,9 @@
         <el-button slot="append" icon="el-icon-search"></el-button>
       </el-input>
       <div class="searchResult">
-        <div class="item" v-for="item in searchList" :key="item.bookmarkId"><a target="_blank" :href="item.url">{{item.name}}</a></div>
+        <div class="item" v-for="item in searchList" :key="item.bookmarkId">
+          <a target="_blank" :href="item.url">{{ item.name }}</a>
+        </div>
       </div>
     </div>
   </div>
@@ -22,14 +24,14 @@ export default {
   data() {
     return {
       personInfo: {},
-      searchContent: "",
+      searchContent: '',
       searchList: [],
-      timeOut: null
+      timeOut: null,
     };
   },
   watch: {
     searchContent(newVal, oldVal) {
-      if (newVal.trim() != oldVal) {
+      if (newVal.trim() !== oldVal) {
         if (this.timeOut != null) {
           clearTimeout(this.timeOut);
         }
@@ -39,7 +41,7 @@ export default {
           this.timeOut = null;
         }, 200);
       }
-    }
+    },
   },
   created() {
     window.token = localStorage.getItem('token');
@@ -47,11 +49,11 @@ export default {
   },
   methods: {
     async init() {
-      let personInfo = await axios.get("/user/currentUserInfo");
+      let personInfo = await axios.get('/user/currentUserInfo');
       window.personInfo = personInfo;
       this.personInfo = personInfo;
-    }
-  }
+    },
+  },
 };
 </script>
 

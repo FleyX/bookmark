@@ -33,6 +33,7 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
   res => {
     if (res.data.code === -1) {
+      localStorage.removeItem('token');
       window.vueInstance.$router.replace('/public/login');
     } else if (res.data.code === 1) {
       return res.data.data;
