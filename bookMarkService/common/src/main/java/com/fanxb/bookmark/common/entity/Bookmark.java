@@ -14,19 +14,25 @@ import java.util.List;
  */
 @Data
 public class Bookmark {
+    /**
+     * 书签类别
+     */
     public static final int BOOKMARK_TYPE = 0;
+    /**
+     * 文件夹类别
+     */
     public static final int FOLDER_TYPE = 1;
 
     private Integer bookmarkId;
     /**
-     * 类型：0：文件夹，1：具体的书签
+     * 类型：1：文件夹，0：具体的书签
      */
     private Integer type;
     private Integer userId;
     private String path;
     private String name;
-    private String url="";
-    private String icon="";
+    private String url = "";
+    private String icon = "";
     private Integer sort;
     private Long addTime;
     private Long createTime;

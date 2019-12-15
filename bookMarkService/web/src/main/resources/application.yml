@@ -55,7 +55,7 @@ spring:
           starttls:
             enable: true
 
-mybatis:
+mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   # classpath后面加*，值里面的*才起作用
