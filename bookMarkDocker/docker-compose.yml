@@ -82,7 +82,7 @@ services:
         ls -l && \
         java -jar -DisDev=false \
         -DjwtSecret=${JWT_SECRET} \
-        -Dmybatis.configuration.log-impl=org.apache.ibatis.logging.nologging.NoLoggingImpl \
+        -Dmybatis-plus.configuration.log-impl=org.apache.ibatis.logging.nologging.NoLoggingImpl \
         -Dspring.mail.host=${SMTP_HOST} \
         -Dspring.mail.username=${SMTP_USERNAME} \
         -Dspring.mail.password=${SMTP_PASSWORD} \
