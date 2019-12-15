@@ -14,13 +14,18 @@
           <a target="_blank" :href="item.url">{{ item.name }}</a>
         </div>
       </div>
+      <bookmark-tree />
     </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+import BookmarkTree from '../components/BookmarkTree';
 export default {
+  components: {
+    BookmarkTree,
+  },
   data() {
     return {
       personInfo: {},
