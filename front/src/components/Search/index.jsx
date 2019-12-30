@@ -63,21 +63,35 @@ class Search extends React.Component {
       this.setState({ resultList: [] });
       return;
     }
-    httpUtil.get("/bookmark/searchUserBookmark?content=" + encodeURIComponent(content)).then(res => this.setState({ resultList: res }));
+    httpUtil
+      .get(
+        "/bookmark/searchUserBookmark?content=" + encodeURIComponent(content)
+      )
+      .then(res => this.setState({ resultList: res }));
   }
 
   /**
    * 处理跳转到搜索引擎或者对应的书签
    */
   enter() {
-    const { currentIndex, currentOptionIndex, resultList, content } = this.state;
+    const {
+      currentIndex,
+      currentOptionIndex,
+      resultList,
+      content
+    } = this.state;
     if (currentOptionIndex === 0 && resultList.length > 0) {
-      window.open(resultList[currentIndex].url);
+      let url = resultList[currentIndex].url;
+      window.open(url.startsWith("http") ? url : "http://" + url);
     }
     if (currentOptionIndex === 1) {
-      window.open("https://www.baidu.com/s?ie=UTF-8&wd=" + encodeURIComponent(content));
+      window.open(
+        "https://www.baidu.com/s?ie=UTF-8&wd=" + encodeURIComponent(content)
+      );
     } else if (currentOptionIndex === 2) {
-      window.open("https://www.google.com/search?q=" + encodeURIComponent(content));
+      window.open(
+        "https://www.google.com/search?q=" + encodeURIComponent(content)
+      );
     }
   }
 
@@ -123,7 +137,12 @@ class Search extends React.Component {
    * 渲染结果列表
    */
   renderResults() {
-    const { resultList, currentIndex, currentOptionIndex, isFocus } = this.state;
+    const {
+      resultList,
+      currentIndex,
+      currentOptionIndex,
+      isFocus
+    } = this.state;
     if (currentOptionIndex !== 0 || !isFocus) {
       return;
     }
@@ -132,25 +151,37 @@ class Search extends React.Component {
         <div className={styles.resultList}>
           {resultList.map((item, index) => (
             <div
-              className={`${styles.item} ${index === currentIndex ? styles.checked : ""}`}
+              className={`${styles.item} ${
+                index === currentIndex ? styles.checked : ""
+              }`}
               key={item.bookmarkId}
               onClick={() => window.open(item.url)}
             >
               <span style={{ fontWeight: 600 }}>{item.name}&emsp;</span>
-              <span style={{ fontSize: "0.8em", fontWeight: 400 }}>{item.url}</span>
+              <span style={{ fontSize: "0.8em", fontWeight: 400 }}>
+                {item.url}
+              </span>
             </div>
           ))}
         </div>
       );
     } else {
-      return <Empty className={styles.resultList} image={Empty.PRESENTED_IMAGE_SIMPLE} />;
+      return (
+        <Empty
+          className={styles.resultList}
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+      );
     }
   }
 
   render() {
     const { content, options, currentOptionIndex } = this.state;
     const prefix = (
-      <Select value={options[currentOptionIndex]} onChange={this.valueIndexChange.bind(this)}>
+      <Select
+        value={options[currentOptionIndex]}
+        onChange={this.valueIndexChange.bind(this)}
+      >
         {options.map((item, index) => (
           <Select.Option key={index} value={index}>
             {item}
@@ -171,7 +202,9 @@ class Search extends React.Component {
           onChange={this.contentChange.bind(this)}
           onKeyDown={this.keyUp.bind(this)}
           onFocus={() => this.setState({ isFocus: true })}
-          onBlur={() => setTimeout(() => this.setState({ isFocus: false }), 600)}
+          onBlur={() =>
+            setTimeout(() => this.setState({ isFocus: false }), 600)
+          }
         />
         {this.renderResults()}
       </div>
