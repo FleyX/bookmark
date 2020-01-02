@@ -14,7 +14,7 @@ export default {
 
 <style>
 .app {
-  width: 500px;
-  height: 500px;
+  width: 600px;
+  height: 580px;
 }
 </style>

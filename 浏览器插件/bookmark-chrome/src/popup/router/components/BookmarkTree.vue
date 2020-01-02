@@ -1,6 +1,10 @@
 <template>
   <div class="main">
-    <el-tree :props="props" :load="loadNode" @node-click="nodeClick" lazy> </el-tree>
+    <el-tree :props="props" :load="loadNode" accordion @node-click="nodeClick" lazy>
+      <span class="treeItem" slot-scope="{ node }">
+        <span>{{ node.label }}</span>
+      </span>
+    </el-tree>
   </div>
 </template>
 
@@ -57,7 +61,14 @@ export default {
 
 <style scoped>
 .main {
-  width: 80%;
+  width: 95%;
+  height: 500px;
+  overflow: auto;
   margin: 0 auto;
+}
+
+.treeItem {
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 </style>
