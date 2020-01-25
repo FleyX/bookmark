@@ -45,8 +45,7 @@ public class RedisUtil {
      * @param expireTime 过期时间,ms
      */
     public static void set(String key, String value, long expireTime) {
-        redisTemplate.opsForValue().set(key, value);
-        redisTemplate.expire(key, expireTime, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set(key, value, expireTime, TimeUnit.MILLISECONDS);
     }
 
     /**

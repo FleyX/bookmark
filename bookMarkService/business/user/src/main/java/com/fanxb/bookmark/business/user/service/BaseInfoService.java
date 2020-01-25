@@ -11,9 +11,11 @@ import com.fanxb.bookmark.common.exception.FormDataException;
 import com.fanxb.bookmark.common.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.UUID;
 
 /**
@@ -97,5 +99,10 @@ public class BaseInfoService {
             throw new CustomException("校验失败,请重试");
         }
         userDao.updateEmailByUserId(userId);
+    }
+
+    @PostConstruct
+    public void updateBookmarkUpdateTime(){
+        
     }
 }

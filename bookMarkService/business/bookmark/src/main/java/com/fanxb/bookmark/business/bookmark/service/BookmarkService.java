@@ -4,10 +4,13 @@ import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
 import com.fanxb.bookmark.common.constant.EsConstant;
+import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.Bookmark;
 import com.fanxb.bookmark.common.entity.EsEntity;
+import com.fanxb.bookmark.common.entity.redis.UserBookmarkUpdate;
 import com.fanxb.bookmark.common.exception.FormDataException;
 import com.fanxb.bookmark.common.util.EsUtil;
+import com.fanxb.bookmark.common.util.RedisUtil;
 import com.fanxb.bookmark.common.util.UserContextHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -20,6 +23,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +48,8 @@ public class BookmarkService {
 
     @Autowired
     private BookmarkDao bookmarkDao;
+
+    private StringRedisTemplate redisTemplate;
 
     @Autowired
     private EsUtil esUtil;
@@ -79,6 +85,7 @@ public class BookmarkService {
                 dealBookmark(userId, elements.get(i), path, sortBase + count + i - 1, insertEsList);
             }
         }
+        redisTemplate.opsForList().leftPush(RedisConstant.BOOKMARK_UPDATE_TIME, new UserBookmarkUpdate(userId, System.currentTimeMillis()).toString());
         esUtil.insertBatch(EsConstant.BOOKMARK_INDEX, insertEsList);
     }
 
@@ -195,6 +202,7 @@ public class BookmarkService {
             bookmarkDao.deleteUserBookmark(userId, bookmarkIdList);
         }
         set.addAll(bookmarkIdList);
+        redisTemplate.opsForList().leftPush(RedisConstant.BOOKMARK_UPDATE_TIME, new UserBookmarkUpdate(userId, System.currentTimeMillis()).toString());
         //es 中批量删除
         esUtil.deleteBatch(EsConstant.BOOKMARK_INDEX, set);
     }
@@ -225,6 +233,7 @@ public class BookmarkService {
             esUtil.insertOrUpdateOne(EsConstant.BOOKMARK_INDEX,
                     new EsEntity<>(bookmark.getBookmarkId().toString(), new BookmarkEs(bookmark)));
         }
+        redisTemplate.opsForList().leftPush(RedisConstant.BOOKMARK_UPDATE_TIME, new UserBookmarkUpdate(userId, System.currentTimeMillis()).toString());
         return bookmark;
     }
 
@@ -244,6 +253,7 @@ public class BookmarkService {
             esUtil.insertOrUpdateOne(EsConstant.BOOKMARK_INDEX,
                     new EsEntity<>(bookmark.getBookmarkId().toString(), new BookmarkEs(bookmark)));
         }
+        redisTemplate.opsForList().leftPush(RedisConstant.BOOKMARK_UPDATE_TIME, new UserBookmarkUpdate(userId, System.currentTimeMillis()).toString());
     }
 
 
@@ -263,6 +273,7 @@ public class BookmarkService {
         }
         //更新被移动节点的path和sort
         bookmarkDao.updatePathAndSort(userId, body.getBookmarkId(), body.getTargetPath(), body.getSort());
+        redisTemplate.opsForList().leftPush(RedisConstant.BOOKMARK_UPDATE_TIME, new UserBookmarkUpdate(userId, System.currentTimeMillis()).toString());
         log.info("{},从{}移动到{},sort:{}", userId, body.getSourcePath(), body.getTargetPath(), body.getSort());
     }
 
