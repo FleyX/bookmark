@@ -73,7 +73,8 @@ public class EsUtil {
                 throw new CustomException("初始化失败");
             }
         } catch (Exception e) {
-            log.error("注意初始化es失败", e);
+            log.error("注意初始化es失败:{}:{}", host, port, e);
+            System.exit(0);
         }
 
     }
