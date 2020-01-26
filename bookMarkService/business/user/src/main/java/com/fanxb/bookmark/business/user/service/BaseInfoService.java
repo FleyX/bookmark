@@ -100,9 +100,4 @@ public class BaseInfoService {
         }
         userDao.updateEmailByUserId(userId);
     }
-
-    @PostConstruct
-    public void updateBookmarkUpdateTime(){
-        
-    }
 }

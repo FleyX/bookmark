@@ -25,7 +25,7 @@ spring:
     database: 0
     host: localhost
     password:
-    timeout: 500ms
+    timeout: 20000ms
     lettuce:
       pool:
         max-active: 20

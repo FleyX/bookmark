@@ -1,6 +1,7 @@
 package com.fanxb.bookmark.business.user.dao;
 
 import com.fanxb.bookmark.common.entity.User;
+import com.fanxb.bookmark.common.entity.redis.UserBookmarkUpdate;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
@@ -100,7 +101,8 @@ public interface UserDao {
 
     /**
      * 更新用户新邮箱
-     * @param userId userId
+     *
+     * @param userId      userId
      * @param newPassword userId
      */
     @Update("update user set newEmail=#{newPassword} where userId= #{userId}")
@@ -108,8 +110,19 @@ public interface UserDao {
 
     /**
      * 新邮箱校验成功，更新邮箱
+     *
      * @param userId userId
      */
     @Update("update user set email=newEmail,newEmail='' where userId=#{userId}")
     void updateEmailByUserId(int userId);
+
+    /**
+     * 功能描述: 更新用户上次更新书签时间
+     *
+     * @param item item
+     * @author fanxb
+     * @date 2020/1/26 下午3:47
+     */
+    @Update("update user set bookmarkChangeTime=#{updateTime} where userId=#{userId}")
+    void updateLastBookmarkUpdateTime(UserBookmarkUpdate item);
 }
