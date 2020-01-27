@@ -22,4 +22,8 @@ public class User {
     private String password;
     private long createTime;
     private long lastLoginTime;
+    /**
+     * 上次更新书签时间
+     */
+    private long bookmarkChangeTime;
 }

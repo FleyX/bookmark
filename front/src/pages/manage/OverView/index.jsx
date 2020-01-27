@@ -1,9 +1,9 @@
 import React from "react";
 import { Tree, Empty, Button, Spin } from "antd";
 import MainLayout from "../../../layout/MainLayout";
-import httpUtil from "../../../util/httpUtil";
 import styles from "./index.module.less";
 import { batchDelete, renderTreeNodes, onDrop } from "./function.js";
+import { cacheBookmarkData, getBookmarkList } from "../../../util/cacheUtil";
 import AddModal from "./AddModal";
 import Search from "../../../components/Search";
 
@@ -43,15 +43,11 @@ class OverView extends React.Component {
   /**
    * 初始化第一级书签
    */
-  componentDidMount() {
+  async componentDidMount() {
     this.props.refresh();
-    httpUtil
-      .get("/bookmark/currentUser/path?path=")
-      .then(res => {
-        this.props.updateTreeData(res);
-        this.props.changeIsInit(true);
-      })
-      .catch(() => this.props.changeIsInit(true));
+    await cacheBookmarkData();
+    this.props.updateTreeData(getBookmarkList(""));
+    this.props.changeIsInit(true);
   }
 
   /**
@@ -62,13 +58,11 @@ class OverView extends React.Component {
     return new Promise(resolve => {
       const item = e.props.dataRef;
       const newPath = item.path + "." + item.bookmarkId;
-      httpUtil.get("/bookmark/currentUser/path?path=" + newPath).then(res => {
-        item.children = res;
-        this.props.updateTreeData([...treeData]);
-        loadedKeys.push(item.bookmarkId.toString());
-        this.props.changeLoadedKeys(loadedKeys);
-        resolve();
-      });
+      item.children = getBookmarkList(newPath);
+      this.props.updateTreeData([...treeData]);
+      loadedKeys.push(item.bookmarkId.toString());
+      this.props.changeLoadedKeys(loadedKeys);
+      resolve();
     });
   };
   /**

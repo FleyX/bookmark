@@ -7,8 +7,7 @@ import { stopTransfer } from "../../../util/eventUtil";
 const { TreeNode } = Tree;
 
 function menuVisible(item, visible) {
-  if (visible) {
-    window.copyUrl = item.url;
+  if (visible) { window.copyUrl = item.url;
   }
   this.props.changeCurrentClickItem(item);
 }
@@ -56,7 +55,11 @@ export function renderNodeContent(item) {
   return (
     <React.Fragment>
       {/* 触发右键菜单 */}
-      <Dropdown overlay={menu} trigger={["contextMenu"]} onVisibleChange={menuVisible.bind(this, item)}>
+      <Dropdown
+        overlay={menu}
+        trigger={["contextMenu"]}
+        onVisibleChange={menuVisible.bind(this, item)}
+      >
         {item.type === 0 ? (
           <a href={item.url} className={styles.nodeContent}>
             {item.name}
@@ -66,8 +69,18 @@ export function renderNodeContent(item) {
         )}
       </Dropdown>
       {isEdit ? (
-        <Dropdown overlay={menu} trigger={["click"]} onVisibleChange={menuVisible.bind(this, item)}>
-          <Button size="small" onClick={stopTransfer.bind(this)} type="primary" icon="menu" shape="circle" />
+        <Dropdown
+          overlay={menu}
+          trigger={["click"]}
+          onVisibleChange={menuVisible.bind(this, item)}
+        >
+          <Button
+            size="small"
+            onClick={stopTransfer.bind(this)}
+            type="primary"
+            icon="menu"
+            shape="circle"
+          />
         </Dropdown>
       ) : null}
     </React.Fragment>
@@ -130,7 +143,9 @@ export function batchDelete() {
     bookmarkIdList = [];
   checkedNodes.forEach(item => {
     const data = item.props.dataRef;
-    data.type === 0 ? bookmarkIdList.push(data.bookmarkId) : folderIdList.push(data.bookmarkId);
+    data.type === 0
+      ? bookmarkIdList.push(data.bookmarkId)
+      : folderIdList.push(data.bookmarkId);
   });
   deleteBookmark.call(this, folderIdList, bookmarkIdList);
 }
@@ -203,11 +218,13 @@ export function onDrop(info) {
     sort: -1
   };
   //从原来所属的节点列表中删除当前节点
-  const currentBelowList = current.path === "" ? treeData : getBelowList(treeData, current);
+  const currentBelowList =
+    current.path === "" ? treeData : getBelowList(treeData, current);
   currentBelowList.splice(currentBelowList.indexOf(current), 1);
   if (info.dropToGap) {
     body.targetPath = target.path;
-    const targetBelowList = target.path === "" ? treeData : getBelowList(treeData, target);
+    const targetBelowList =
+      target.path === "" ? treeData : getBelowList(treeData, target);
     const index = targetBelowList.indexOf(target);
     if (info.dropPosition > index) {
       body.sort = target.sort + 1;
@@ -236,7 +253,11 @@ export function onDrop(info) {
     current.sort = body.sort;
     //如果当前节点和目标节点不在一个层级中，需要更新当前子节点的path信息
     if (body.sourcePath !== body.targetPath) {
-      updateChildrenPath(current.children, body.sourcePath + "." + body.bookmarkId, body.targetPath + "." + body.bookmarkId);
+      updateChildrenPath(
+        current.children,
+        body.sourcePath + "." + body.bookmarkId,
+        body.targetPath + "." + body.bookmarkId
+      );
     }
   }
   httpUtil
