@@ -1,6 +1,7 @@
 package com.fanxb.bookmark.business.user.schedule;
 
 import com.alibaba.fastjson.JSON;
+import com.fanxb.bookmark.business.user.dao.UserDao;
 import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.redis.UserBookmarkUpdate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +24,15 @@ public class UserInfoUpdate {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private UserDao userDao;
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 100000)
     public void userBookmarkUpdateTime() {
         String value;
         while ((value = redisTemplate.opsForList().rightPop(RedisConstant.BOOKMARK_UPDATE_TIME, BLOCK_TIME, TimeUnit.SECONDS)) != null) {
             UserBookmarkUpdate item = JSON.parseObject(value, UserBookmarkUpdate.class);
-
+            userDao.updateLastBookmarkUpdateTime(item);
         }
     }
 }

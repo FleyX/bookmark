@@ -48,7 +48,7 @@ public class BookmarkService {
 
     @Autowired
     private BookmarkDao bookmarkDao;
-
+    @Autowired
     private StringRedisTemplate redisTemplate;
 
     @Autowired
