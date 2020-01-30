@@ -168,7 +168,12 @@ function deleteBookmark(nodeList) {
           .then(() => {
             //遍历节点树数据，并删除
             deleteNodes(dataNodeList);
-            // deleteTreeData(treeData, set);
+            //删除根节点下的数据
+            dataNodeList
+              .filter(item => item.path === "")
+              .forEach(item => {
+                treeData.splice(treeData.indexOf(item), 1);
+              });
             changeCheckedKeys([], null);
             updateTreeData([...treeData]);
             resolve();
@@ -191,7 +196,7 @@ export async function onDrop(info) {
     return;
   }
   this.setState({ isLoading: true });
-  let body =await moveNode(info);
+  let body = await moveNode(info);
   //目标未加载且当前节点为已经展开的目录情况下需要把当前节点从已加载列表中移除，否则在目标节点中展开时会不显示当前节点的子节点
   let index = loadedKeys.indexOf(body.bookmarkId.toString());
   if (index > -1) {
