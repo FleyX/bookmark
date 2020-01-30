@@ -4,6 +4,7 @@ import httpUtil from "../../../util/httpUtil";
 
 import * as action from "../../../redux/action/BookmarkTreeOverview";
 import { connect } from "react-redux";
+import { addNode } from "../../../util/cacheUtil";
 
 function mapStateToProps(state) {
   return state[action.DATA_NAME];
@@ -48,7 +49,11 @@ class AddModal extends React.Component {
     const { currentEditNode } = nextProps;
     if (currentEditNode != null) {
       this.type = "edit";
-      this.setState({ addType: currentEditNode.type === 0 ? "bookmark" : "folder", name: currentEditNode.name, url: currentEditNode.url });
+      this.setState({
+        addType: currentEditNode.type === 0 ? "bookmark" : "folder",
+        name: currentEditNode.name,
+        url: currentEditNode.url
+      });
     } else {
       this.type = "add";
       this.setState({ addType: "bookmark", name: "", url: "", file: null });
@@ -69,7 +74,7 @@ class AddModal extends React.Component {
 
   changeValue(e) {
     const name = e.target.name;
-    const value = e.target.value
+    const value = e.target.value;
     this.checkValue(name, value);
     this.setState({ [name]: value });
   }
@@ -96,7 +101,9 @@ class AddModal extends React.Component {
       url: url,
       type
     };
-    let isOk = this.checkValue("name", name) && (type === 0 ? this.checkValue("url", url) : true);
+    let isOk =
+      this.checkValue("name", name) &&
+      (type === 0 ? this.checkValue("url", url) : true);
     if (!isOk) {
       return;
     }
@@ -116,9 +123,17 @@ class AddModal extends React.Component {
   /**
    * 新增一个节点
    */
-  addOne() {
-    const { currentAddFolder, updateTreeData, closeModal, treeData } = this.props;
-    const path = currentAddFolder == null ? "" : currentAddFolder.path + "." + currentAddFolder.bookmarkId;
+  async addOne() {
+    const {
+      currentAddFolder,
+      updateTreeData,
+      closeModal,
+      treeData
+    } = this.props;
+    const path =
+      currentAddFolder == null
+        ? ""
+        : currentAddFolder.path + "." + currentAddFolder.bookmarkId;
     const { name, url, file, addType } = this.state;
     if (addType === "file") {
       if (file == null) {
@@ -145,29 +160,22 @@ class AddModal extends React.Component {
         name,
         url
       };
-      let isOk = this.checkValue("name", name) && (body.type === 0 ? this.checkValue("url", url) : true);
+      let isOk =
+        this.checkValue("name", name) &&
+        (body.type === 0 ? this.checkValue("url", url) : true);
       if (!isOk) {
         return;
       }
       this.setState({ isLoading: true });
-      httpUtil
-        .put("/bookmark", body)
-        .then(res => {
-          // addToTree(res);
-          message.success("加入成功");
-          if (currentAddFolder === null) {
-            treeData.push(res);
-          } else {
-            //存在children说明该子节点的孩子数据已经加载，需要重新将新的子书签加入进去
-            if (currentAddFolder.children) {
-              currentAddFolder.children.push(res);
-            }
-          }
-          updateTreeData(treeData);
-          closeModal();
-          this.setState({ isLoading: false });
-        })
-        .catch(() => this.setState({ isLoading: false }));
+      let res = await httpUtil.put("/bookmark", body);
+      message.success("加入成功");
+      await addNode(currentAddFolder, res);
+      if (!currentAddFolder) {
+        treeData.push(res);
+      }
+      updateTreeData(treeData);
+      closeModal();
+      this.setState({ isLoading: false });
     }
   }
 
@@ -211,11 +219,20 @@ class AddModal extends React.Component {
       }
     };
     return (
-      <Modal destroyOnClose title={type === "add" ? "新增" : "编辑"} visible={isShowModal} onCancel={closeModal} footer={false}>
+      <Modal
+        destroyOnClose
+        title={type === "add" ? "新增" : "编辑"}
+        visible={isShowModal}
+        onCancel={closeModal}
+        footer={false}
+      >
         <Form {...formItemLayout}>
           {type === "add" ? (
             <Form.Item label="类别">
-              <Radio.Group defaultValue="bookmark" onChange={e => this.setState({ addType: e.target.value })}>
+              <Radio.Group
+                defaultValue="bookmark"
+                onChange={e => this.setState({ addType: e.target.value })}
+              >
                 <Radio value="bookmark">书签</Radio>
                 <Radio value="folder">文件夹</Radio>
                 <Radio value="file">上传书签html</Radio>
@@ -223,13 +240,31 @@ class AddModal extends React.Component {
             </Form.Item>
           ) : null}
           {addType === "bookmark" || addType === "folder" ? (
-            <Form.Item label="名称" validateStatus={nameHelp === "" ? "success" : "error"} help={nameHelp}>
-              <Input type="text" name="name" onChange={this.changeValue.bind(this)} value={name} />
+            <Form.Item
+              label="名称"
+              validateStatus={nameHelp === "" ? "success" : "error"}
+              help={nameHelp}
+            >
+              <Input
+                type="text"
+                name="name"
+                onChange={this.changeValue.bind(this)}
+                value={name}
+              />
             </Form.Item>
           ) : null}
           {addType === "bookmark" ? (
-            <Form.Item label="URL" validateStatus={urlHelp === "" ? "success" : "error"} help={urlHelp}>
-              <Input type="text" name="url" value={url} onChange={this.changeValue.bind(this)} />
+            <Form.Item
+              label="URL"
+              validateStatus={urlHelp === "" ? "success" : "error"}
+              help={urlHelp}
+            >
+              <Input
+                type="text"
+                name="url"
+                value={url}
+                onChange={this.changeValue.bind(this)}
+              />
             </Form.Item>
           ) : null}
           {addType === "file" ? this.renderFileUpload() : null}
@@ -244,7 +279,4 @@ class AddModal extends React.Component {
   }
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(AddModal);
+export default connect(mapStateToProps, mapDispatchToProps)(AddModal);

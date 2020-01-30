@@ -46,7 +46,7 @@ class OverView extends React.Component {
   async componentDidMount() {
     this.props.refresh();
     await cacheBookmarkData();
-    this.props.updateTreeData(getBookmarkList(""));
+    this.props.updateTreeData([...getBookmarkList("")]);
     this.props.changeIsInit(true);
   }
 

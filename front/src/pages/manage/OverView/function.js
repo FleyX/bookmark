@@ -4,10 +4,12 @@ import { Modal, Button, Tree, message, Menu, Dropdown } from "antd";
 import styles from "./index.module.less";
 import IconFont from "../../../components/IconFont";
 import { stopTransfer } from "../../../util/eventUtil";
+import { deleteNodes, moveNode } from "../../../util/cacheUtil";
 const { TreeNode } = Tree;
 
 function menuVisible(item, visible) {
-  if (visible) { window.copyUrl = item.url;
+  if (visible) {
+    window.copyUrl = item.url;
   }
   this.props.changeCurrentClickItem(item);
 }
@@ -127,11 +129,7 @@ export function renderTreeNodes(items) {
  * @param {*} e
  */
 export function deleteOne(item) {
-  if (item.type === 0) {
-    deleteBookmark.call(this, [], [item.bookmarkId]);
-  } else {
-    deleteBookmark.call(this, [item.bookmarkId], []);
-  }
+  deleteBookmark.call(this, [item]);
 }
 
 /**
@@ -139,15 +137,8 @@ export function deleteOne(item) {
  */
 export function batchDelete() {
   const { checkedNodes } = this.props;
-  const folderIdList = [],
-    bookmarkIdList = [];
-  checkedNodes.forEach(item => {
-    const data = item.props.dataRef;
-    data.type === 0
-      ? bookmarkIdList.push(data.bookmarkId)
-      : folderIdList.push(data.bookmarkId);
-  });
-  deleteBookmark.call(this, folderIdList, bookmarkIdList);
+
+  deleteBookmark.call(this, checkedNodes);
 }
 
 /**
@@ -155,8 +146,18 @@ export function batchDelete() {
  * @param {*} folderIdList
  * @param {*} bookmarkIdList
  */
-function deleteBookmark(folderIdList, bookmarkIdList) {
+function deleteBookmark(nodeList) {
   const { updateTreeData, treeData, changeCheckedKeys } = this.props;
+  const folderIdList = [],
+    bookmarkIdList = [],
+    dataNodeList = [];
+  nodeList.forEach(item => {
+    const data = item.props ? item.props.dataRef : item;
+    dataNodeList.push(data);
+    data.type === 0
+      ? bookmarkIdList.push(data.bookmarkId)
+      : folderIdList.push(data.bookmarkId);
+  });
   Modal.confirm({
     title: "确认删除？",
     content: "删除后，无法找回",
@@ -166,10 +167,8 @@ function deleteBookmark(folderIdList, bookmarkIdList) {
           .post("/bookmark/batchDelete", { folderIdList, bookmarkIdList })
           .then(() => {
             //遍历节点树数据，并删除
-            const set = new Set();
-            folderIdList.forEach(item => set.add(parseInt(item)));
-            bookmarkIdList.forEach(item => set.add(parseInt(item)));
-            deleteTreeData(treeData, set);
+            deleteNodes(dataNodeList);
+            // deleteTreeData(treeData, set);
             changeCheckedKeys([], null);
             updateTreeData([...treeData]);
             resolve();
@@ -181,27 +180,10 @@ function deleteBookmark(folderIdList, bookmarkIdList) {
 }
 
 /**
- * 递归删除已经被删除的数据
- * @param {*} treeData
- */
-function deleteTreeData(treeData, set) {
-  for (let i = 0, length = treeData.length; i < length; i++) {
-    const item = treeData[i];
-    if (set.has(treeData[i].bookmarkId)) {
-      treeData.splice(i, 1);
-      length--;
-      i--;
-    } else if (item.children && item.children.length > 0) {
-      deleteTreeData(item.children, set);
-    }
-  }
-}
-
-/**
  * 节点拖拽
  * @param {*} info
  */
-export function onDrop(info) {
+export async function onDrop(info) {
   const { treeData, updateTreeData, loadedKeys, changeLoadedKeys } = this.props;
   const target = info.node.props.dataRef;
   if (!info.dropToGap && target.type === 0) {
@@ -209,56 +191,12 @@ export function onDrop(info) {
     return;
   }
   this.setState({ isLoading: true });
-  const current = info.dragNode.props.dataRef;
-  const body = {
-    bookmarkId: current.bookmarkId,
-    sourcePath: current.path,
-    targetPath: "",
-    //-1 表示排在最后
-    sort: -1
-  };
-  //从原来所属的节点列表中删除当前节点
-  const currentBelowList =
-    current.path === "" ? treeData : getBelowList(treeData, current);
-  currentBelowList.splice(currentBelowList.indexOf(current), 1);
-  if (info.dropToGap) {
-    body.targetPath = target.path;
-    const targetBelowList =
-      target.path === "" ? treeData : getBelowList(treeData, target);
-    const index = targetBelowList.indexOf(target);
-    if (info.dropPosition > index) {
-      body.sort = target.sort + 1;
-      insertToArray(current, index + 1, targetBelowList);
-    } else {
-      body.sort = target.sort;
-      insertToArray(current, index, targetBelowList);
-    }
-  } else {
-    //移动到一个文件夹内，该文件夹可能还未加载
-    body.targetPath = target.path + "." + target.bookmarkId;
-    //存在children说明已经加载
-    if (target.children) {
-      const length = target.children.length;
-      body.sort = length > 0 ? target.children[length - 1].sort + 1 : 1;
-      target.children.push(current);
-    } else if (current.type === 1 && current.children) {
-      //目标未加载且当前节点为已经展开的目录情况下需要把当前节点从已加载列表中移除，否则在目标节点中展开时会不显示当前节点的子节点
-      loadedKeys.splice(loadedKeys.indexOf(current.bookmarkId.toString()), 1);
-      changeLoadedKeys(loadedKeys);
-    }
-  }
-  if (body.sort !== -1) {
-    //说明目标节点已经加载，需要更新当前节点信息
-    current.path = body.targetPath;
-    current.sort = body.sort;
-    //如果当前节点和目标节点不在一个层级中，需要更新当前子节点的path信息
-    if (body.sourcePath !== body.targetPath) {
-      updateChildrenPath(
-        current.children,
-        body.sourcePath + "." + body.bookmarkId,
-        body.targetPath + "." + body.bookmarkId
-      );
-    }
+  let body =await moveNode(info);
+  //目标未加载且当前节点为已经展开的目录情况下需要把当前节点从已加载列表中移除，否则在目标节点中展开时会不显示当前节点的子节点
+  let index = loadedKeys.indexOf(body.bookmarkId.toString());
+  if (index > -1) {
+    loadedKeys.splice(index, 1);
+    changeLoadedKeys(loadedKeys);
   }
   httpUtil
     .post("/bookmark/moveNode", body)
@@ -272,55 +210,4 @@ export function onDrop(info) {
       message.error("后台移动失败，将于2s后刷新页面，以免前后台数据不一致");
       setTimeout(window.location.reload, 2000);
     });
-}
-
-/**
- * 递归获取node所属list
- * @param {*} tree 树结构
- * @param {*} node node
- */
-function getBelowList(treeList, node) {
-  for (let i in treeList) {
-    let item = treeList[i];
-    if (item.type === 1) {
-      if (item.path + "." + item.bookmarkId === node.path) {
-        return item.children;
-      } else if (item.children) {
-        let res = getBelowList(item.children, node);
-        //如果找到了,那么返回
-        if (res) return res;
-      }
-    }
-  }
-}
-
-/**
- * 往数组中插入一个节点，并让后面节点的sort+1
- * @param {*} item 节点
- * @param {*} index 插入位置
- * @param {*} arr  目标数组
- */
-function insertToArray(item, index, arr) {
-  const length = arr.length;
-  let i = length;
-  for (; i > index; i--) {
-    arr[i] = arr[i - 1];
-    arr[i].sort++;
-  }
-  arr[i] = item;
-}
-
-/**
- * 更新修改节点的子节点节点path信息
- * @param {*} children 孩子数组
- * @param {*} oldPath  旧path
- * @param {*} newPath 新path
- */
-function updateChildrenPath(children, oldPath, newPath) {
-  if (children && children.length > 0) {
-    children.forEach(item => {
-      item.path = item.path.replace(oldPath, newPath);
-      updateChildrenPath(item.children, oldPath, newPath);
-    });
-  }
 }
