@@ -3,7 +3,11 @@ import { Tree, Empty, Button, Spin } from "antd";
 import MainLayout from "../../../layout/MainLayout";
 import styles from "./index.module.less";
 import { batchDelete, renderTreeNodes, onDrop } from "./function.js";
-import { cacheBookmarkData, getBookmarkList } from "../../../util/cacheUtil";
+import {
+  cacheBookmarkData,
+  getBookmarkList,
+  clearCache
+} from "../../../util/cacheUtil";
 import AddModal from "./AddModal";
 import Search from "../../../components/Search";
 
@@ -85,6 +89,15 @@ class OverView extends React.Component {
     }
   }
 
+  /**
+   * 同步书签数据
+   */
+  async refreshTree() {
+    const { refresh } = this.state;
+    await clearCache();
+    refresh();
+  }
+
   render() {
     const {
       isEdit,
@@ -105,6 +118,13 @@ class OverView extends React.Component {
           <div className={styles.header}>
             <div className={styles.left}>
               <span className={styles.myTree}>我的书签树</span>
+              <Button
+                size="small"
+                type="primary"
+                icon="sync"
+                shape="circle"
+                onClick={this.refreshTree.bind(this, null)}
+              />
               <Button
                 size="small"
                 type="primary"

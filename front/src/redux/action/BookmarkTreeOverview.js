@@ -25,7 +25,7 @@ export const REFRESH = "refresh";
 export const refresh = () => {
   return {
     type: REFRESH,
-    data: getInitData()
+    data: {}
   };
 };
 
