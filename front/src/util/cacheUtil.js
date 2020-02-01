@@ -196,12 +196,15 @@ export async function keySearch(content) {
         continue;
       }
       if (!item.lowName) {
-        item.lowName = item.name.toLocaleLowerCase();
+        item.lowName = item.name + "////" + item.name.toLocaleLowerCase();
       }
       if (!item.lowUrl) {
-        item.lowUrl = item.url.toLocaleLowerCase();
+        item.lowUrl = item.url + "////" + item.url.toLocaleLowerCase();
       }
-      if (item.name.indexOf(content) > -1 || item.url.indexOf(content) > -1) {
+      if (
+        item.lowName.indexOf(content) > -1 ||
+        item.lowUrl.indexOf(content) > -1
+      ) {
         res.push(item);
         if (res.length >= 12) {
           console.info("搜索耗时：" + (Date.now() - time1));
