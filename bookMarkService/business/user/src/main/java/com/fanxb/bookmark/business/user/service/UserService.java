@@ -81,15 +81,6 @@ public class UserService {
      * @date 2019/7/6 11:30
      */
     public void register(RegisterBody body) {
-        String codeKey = Constant.authCodeKey(body.getEmail());
-        String realCode = RedisUtil.get(codeKey, String.class);
-        if (Constant.isDev) {
-            realCode = "123456";
-        }
-        if (StringUtil.isEmpty(realCode) || (!realCode.equals(body.getAuthCode()))) {
-            throw new FormDataException("验证码错误");
-        }
-        RedisUtil.delete(codeKey);
         User user = userDao.selectByUsernameOrEmail(body.getUsername(), body.getEmail());
         if (user != null) {
             if (user.getUsername().equals(body.getUsername())) {

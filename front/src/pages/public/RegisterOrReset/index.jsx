@@ -1,7 +1,11 @@
 import React from "react";
 import IconFont from "../../../components/IconFont";
 import { Button, Input, message } from "antd";
-import { LoginLayout, REGISTER_TYPE, RESET_PASSWORD_TYPE } from "../../../layout/LoginLayout";
+import {
+  LoginLayout,
+  REGISTER_TYPE,
+  RESET_PASSWORD_TYPE
+} from "../../../layout/LoginLayout";
 import styles from "./index.module.less";
 import axios from "../../../util/httpUtil";
 
@@ -109,16 +113,28 @@ export default class Register extends React.Component {
    * 提交表单
    */
   submit = () => {
-    const { current, username, email, password, repassword, authCode } = this.state;
+    const {
+      current,
+      username,
+      email,
+      password,
+      repassword,
+      authCode
+    } = this.state;
     let form = { username, email, password, authCode };
     if (current === REGISTER_TYPE && !this.checkParam("username", username)) {
+      return;
+    }
+    if (
+      current === RESET_PASSWORD_TYPE &&
+      !this.checkParam("authCode", authCode)
+    ) {
       return;
     }
     const isOk =
       this.checkParam("email", email) &&
       this.checkParam("password", password) &&
-      this.checkParam("repassword", repassword) &&
-      this.checkParam("authCode", authCode);
+      this.checkParam("repassword", repassword);
     if (!isOk) {
       return;
     }
@@ -146,7 +162,18 @@ export default class Register extends React.Component {
   };
 
   render() {
-    const { current, username, email, password, repassword, authCode, authCodeText, isCountDown, errorText, isLoading } = this.state;
+    const {
+      current,
+      username,
+      email,
+      password,
+      repassword,
+      authCode,
+      authCodeText,
+      isCountDown,
+      errorText,
+      isLoading
+    } = this.state;
     return (
       <LoginLayout type={current}>
         <div className={styles.main}>
@@ -158,7 +185,9 @@ export default class Register extends React.Component {
               name="username"
               value={username}
               onChange={this.changeData}
-              addonBefore={<IconFont type="icon-person" style={{ fontSize: "0.3rem" }} />}
+              addonBefore={
+                <IconFont type="icon-person" style={{ fontSize: "0.3rem" }} />
+              }
               placeholder="用户名"
             />
           ) : null}
@@ -168,7 +197,9 @@ export default class Register extends React.Component {
             name="email"
             value={email}
             onChange={this.changeData}
-            addonBefore={<IconFont type="icon-mail" style={{ fontSize: "0.3rem" }} />}
+            addonBefore={
+              <IconFont type="icon-mail" style={{ fontSize: "0.3rem" }} />
+            }
             placeholder="邮箱"
           />
           <Input
@@ -177,7 +208,9 @@ export default class Register extends React.Component {
             name="password"
             value={password}
             onChange={this.changeData}
-            addonBefore={<IconFont type="icon-password" style={{ fontSize: "0.3rem" }} />}
+            addonBefore={
+              <IconFont type="icon-password" style={{ fontSize: "0.3rem" }} />
+            }
             placeholder="密码"
           />
           <Input
@@ -186,24 +219,42 @@ export default class Register extends React.Component {
             name="repassword"
             value={repassword}
             onChange={this.changeData}
-            addonBefore={<IconFont type="icon-password" style={{ fontSize: "0.3rem" }} />}
+            addonBefore={
+              <IconFont type="icon-password" style={{ fontSize: "0.3rem" }} />
+            }
             placeholder="重复密码"
           />
-          <Input
-            type="text"
-            size="large"
-            name="authCode"
-            value={authCode}
-            onChange={this.changeData}
-            addonBefore={<IconFont type="icon-yanzhengma54" style={{ fontSize: "0.3rem" }} />}
-            addonAfter={
-              <span style={{ cursor: isCountDown ? "" : "pointer" }} onClick={this.getCode}>
-                {authCodeText}
-              </span>
-            }
-            placeholder="验证码"
-          />
-          <Button type="primary" className={styles.submit} onClick={this.submit} block loading={isLoading}>
+          {current === RESET_PASSWORD_TYPE ? (
+            <Input
+              type="text"
+              size="large"
+              name="authCode"
+              value={authCode}
+              onChange={this.changeData}
+              addonBefore={
+                <IconFont
+                  type="icon-yanzhengma54"
+                  style={{ fontSize: "0.3rem" }}
+                />
+              }
+              addonAfter={
+                <span
+                  style={{ cursor: isCountDown ? "" : "pointer" }}
+                  onClick={this.getCode}
+                >
+                  {authCodeText}
+                </span>
+              }
+              placeholder="验证码"
+            />
+          ) : null}
+          <Button
+            type="primary"
+            className={styles.submit}
+            onClick={this.submit}
+            block
+            loading={isLoading}
+          >
             {current === REGISTER_TYPE ? "注册" : "重置密码"}
           </Button>
         </div>
