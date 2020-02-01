@@ -179,3 +179,37 @@ export async function moveNode(info) {
   await updateCurrentChangeTime();
   return body;
 }
+
+/**
+ * 关键词搜索方法
+ * @param {*} content
+ */
+export async function keySearch(content) {
+  let time1 = Date.now();
+  content = content.toLocaleLowerCase().trim();
+  let res = [];
+  let arrs = Object.values(window[TREE_LIST_KEY]);
+  for (let i1 = 0, length1 = arrs.length; i1 < length1; i1++) {
+    for (let i2 = 0, length2 = arrs[i1].length; i2 < length2; i2++) {
+      let item = arrs[i1][i2];
+      if (item.type === 1) {
+        continue;
+      }
+      if (!item.lowName) {
+        item.lowName = item.name.toLocaleLowerCase();
+      }
+      if (!item.lowUrl) {
+        item.lowUrl = item.url.toLocaleLowerCase();
+      }
+      if (item.name.indexOf(content) > -1 || item.url.indexOf(content) > -1) {
+        res.push(item);
+        if (res.length >= 12) {
+          console.info("搜索耗时：" + (Date.now() - time1));
+          return res;
+        }
+      }
+    }
+  }
+  console.info("搜索耗时：" + (Date.now() - time1));
+  return res;
+}

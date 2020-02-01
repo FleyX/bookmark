@@ -2,6 +2,7 @@ import React from "react";
 import { Input, Select, Empty } from "antd";
 import styles from "./index.module.less";
 import httpUtil from "../../util/httpUtil";
+import { keySearch } from "../../util/cacheUtil";
 
 class Search extends React.Component {
   constructor(props) {
@@ -43,8 +44,8 @@ class Search extends React.Component {
       return;
     }
     this.clearTimer();
-    this.timer = setTimeout(() => {
-      this.search(content);
+    this.timer = setTimeout(async () => {
+      await this.search(content);
       this.clearTimer();
     }, 200);
   }
@@ -58,16 +59,18 @@ class Search extends React.Component {
   /**
    * 关键词检索
    */
-  search(content) {
+  async search(content) {
     if (content.length === 0) {
       this.setState({ resultList: [] });
       return;
     }
-    httpUtil
-      .get(
-        "/bookmark/searchUserBookmark?content=" + encodeURIComponent(content)
-      )
-      .then(res => this.setState({ resultList: res }));
+    // httpUtil
+    //   .get(
+    //     "/bookmark/searchUserBookmark?content=" + encodeURIComponent(content)
+    //   )
+    //   .then(res => this.setState({ resultList: res }));
+    let resultList = await keySearch(content);
+    this.setState({ resultList });
   }
 
   /**
