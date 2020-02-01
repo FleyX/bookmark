@@ -140,7 +140,7 @@ export async function moveNode(info) {
     //移动节点相对于目标节点位置的增量
     let addIndex = info.dropPosition > index ? 1 : 0;
     body.sort = target.sort + addIndex;
-    targetList.splice(addIndex, 0, current);
+    targetList.splice(index + addIndex, 0, current);
     for (let i = index + 1; i < targetList.length; i++) {
       targetList[i].sort += 1;
     }
