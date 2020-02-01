@@ -173,12 +173,6 @@ function deleteBookmark(nodeList) {
           .then(() => {
             //遍历节点树数据，并删除
             deleteNodes(dataNodeList);
-            //删除根节点下的数据
-            dataNodeList
-              .filter(item => item.path === "")
-              .forEach(item => {
-                treeData.splice(treeData.indexOf(item), 1);
-              });
             changeCheckedKeys([], null);
             updateTreeData([...getBookmarkList("")]);
             resolve();

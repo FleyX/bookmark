@@ -171,9 +171,6 @@ class AddModal extends React.Component {
       let res = await httpUtil.put("/bookmark", body);
       message.success("加入成功");
       await addNode(currentAddFolder, res);
-      if (!currentAddFolder) {
-        treeData.push(res);
-      }
       updateTreeData([...getBookmarkList("")]);
       closeModal();
       this.setState({ isLoading: false });
