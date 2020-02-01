@@ -4,7 +4,12 @@ import { Modal, Button, Tree, message, Menu, Dropdown } from "antd";
 import styles from "./index.module.less";
 import IconFont from "../../../components/IconFont";
 import { stopTransfer } from "../../../util/eventUtil";
-import { deleteNodes, moveNode, getBookmarkList } from "../../../util/cacheUtil";
+import {
+  deleteNodes,
+  moveNode,
+  getBookmarkList,
+  updateCurrentChangeTime
+} from "../../../util/cacheUtil";
 const { TreeNode } = Tree;
 
 function menuVisible(item, visible) {
@@ -189,7 +194,7 @@ function deleteBookmark(nodeList) {
  * @param {*} info
  */
 export async function onDrop(info) {
-  const { treeData, updateTreeData, loadedKeys, changeLoadedKeys } = this.props;
+  const { updateTreeData, loadedKeys, changeLoadedKeys } = this.props;
   const target = info.node.props.dataRef;
   if (!info.dropToGap && target.type === 0) {
     message.error("无法移动到书签内部");
@@ -203,16 +208,15 @@ export async function onDrop(info) {
     loadedKeys.splice(index, 1);
     changeLoadedKeys(loadedKeys);
   }
-  httpUtil
-    .post("/bookmark/moveNode", body)
-    .then(res => {
-      message.success("移动完成");
-      updateTreeData([...getBookmarkList("")]);
-      this.setState({ isLoading: false });
-    })
-    .catch(() => {
-      this.setState({ isLoading: false });
-      message.error("后台移动失败，将于2s后刷新页面，以免前后台数据不一致");
-      setTimeout(window.location.reload, 2000);
-    });
+  try {
+    await httpUtil.post("/bookmark/moveNode", body);
+    message.success("移动完成");
+    updateTreeData([...getBookmarkList("")]);
+  } catch (error) {
+    message.error("后台移动失败，将于2s后刷新页面，以免前后台数据不一致");
+    setTimeout(window.location.reload, 2000);
+  } finally {
+    this.setState({ isLoading: false });
+  }
+  await updateCurrentChangeTime();
 }

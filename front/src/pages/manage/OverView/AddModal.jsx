@@ -4,7 +4,7 @@ import httpUtil from "../../../util/httpUtil";
 
 import * as action from "../../../redux/action/BookmarkTreeOverview";
 import { connect } from "react-redux";
-import { addNode, getBookmarkList } from "../../../util/cacheUtil";
+import { addNode, getBookmarkList, clearCache } from "../../../util/cacheUtil";
 
 function mapStateToProps(state) {
   return state[action.DATA_NAME];
@@ -148,8 +148,9 @@ class AddModal extends React.Component {
         .put("/bookmark/uploadBookmarkFile", form, {
           headers: { "Content-Type": "multipart/form-data" }
         })
-        .then(res => {
+        .then(async res => {
           this.setState({ isLoading: false });
+          await clearCache();
           window.location.reload();
         })
         .catch(res => this.setState({ isLoading: false }));
