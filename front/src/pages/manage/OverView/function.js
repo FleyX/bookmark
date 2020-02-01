@@ -152,7 +152,7 @@ export function batchDelete() {
  * @param {*} bookmarkIdList
  */
 function deleteBookmark(nodeList) {
-  const { updateTreeData, treeData, changeCheckedKeys } = this.props;
+  const { updateTreeData, changeCheckedKeys } = this.props;
   const folderIdList = [],
     bookmarkIdList = [],
     dataNodeList = [];

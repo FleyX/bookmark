@@ -1,13 +1,11 @@
 import React from "react";
 import { Link, withRouter } from "react-router-dom";
-import { Menu, Dropdown, Divider, Modal } from "antd";
+import { Menu, Dropdown, Divider} from "antd";
 import httpUtil from "../../util/httpUtil";
 import { connect } from "react-redux";
 import styles from "./index.module.less";
 import * as infoAction from "../../redux/action/LoginInfoAction";
-import { checkCacheStatus, clearCache } from "../../util/cacheUtil";
 
-const { confirm } = Modal;
 
 function mapStateToProps(state) {
   return state[infoAction.DATA_NAME];
@@ -31,37 +29,8 @@ class MainLayout extends React.Component {
   }
 
   async componentWillMount() {
-    if (!this.props.username) {
-      let res = await httpUtil.get("/user/currentUserInfo");
-      this.props.changeUserInfo(res);
-      if (this.state.timer != null) {
-        clearInterval(this.state.timer);
-      }
-      await this.checkCache();
-      this.state.timer = setInterval(this.checkCache.bind(this), 5 * 60 * 1000);
-    }
-  }
-
-  async checkCache() {
-    //检查缓存情况
-    if (this.state.showDialog) {
-      return;
-    }
-    let _this = this;
-    if (!(await checkCacheStatus())) {
-      this.state.showDialog = true;
-      confirm({
-        title: "缓存过期",
-        content: "书签数据有更新，是否立即刷新？",
-        onOk() {
-          _this.state.showDialog = false;
-          clearCache();
-        },
-        onCancel() {
-          _this.state.showDialog = false;
-        }
-      });
-    }
+    let res = await httpUtil.get("/user/currentUserInfo");
+    this.props.changeUserInfo(res);
   }
 
   renderUserArea() {

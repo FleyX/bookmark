@@ -1,7 +1,6 @@
 import React from "react";
 import { Input, Select, Empty } from "antd";
 import styles from "./index.module.less";
-import httpUtil from "../../util/httpUtil";
 import { keySearch } from "../../util/cacheUtil";
 
 class Search extends React.Component {

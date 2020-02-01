@@ -106,7 +106,7 @@ public class UserController {
     /**
      * 功能描述: 校验密码，生成一个actionId
      *
-     * @param  obj obj
+     * @param obj obj
      * @return com.fanxb.bookmark.common.entity.Result
      * @author fanxb
      * @date 2019/11/11 23:31
@@ -114,6 +114,11 @@ public class UserController {
     @PostMapping("/checkPassword")
     public Result checkPassword(@RequestBody JSONObject obj) {
         return Result.success(userService.checkPassword(obj.getString("password")));
+    }
+
+    @GetMapping("/loginStatus")
+    public Result checkLoginStatus() {
+        return Result.success(null);
     }
 
 

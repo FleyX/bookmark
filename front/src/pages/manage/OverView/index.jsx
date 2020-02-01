@@ -1,18 +1,22 @@
 import React from "react";
-import { Tree, Empty, Button, Spin } from "antd";
+import { Tree, Empty, Button, Spin, Modal } from "antd";
 import MainLayout from "../../../layout/MainLayout";
 import styles from "./index.module.less";
 import { batchDelete, renderTreeNodes, onDrop } from "./function.js";
 import {
   cacheBookmarkData,
   getBookmarkList,
+  checkCacheStatus,
   clearCache
 } from "../../../util/cacheUtil";
+import httpUtil from "../../../util/httpUtil";
 import AddModal from "./AddModal";
 import Search from "../../../components/Search";
 
 import * as action from "../../../redux/action/BookmarkTreeOverview";
 import { connect } from "react-redux";
+
+const { confirm } = Modal;
 
 function mapStateToProps(state) {
   return state[action.DATA_NAME];
@@ -42,6 +46,40 @@ class OverView extends React.Component {
       //书签树节点是否显示loading
       isLoading: false
     };
+  }
+
+  async componentWillUnmount() {
+    if (this.state.timer != null) {
+      clearInterval(this.state.timer);
+    }
+  }
+
+  async componentWillMount() {
+    await httpUtil.get("/user/loginStatus");
+    this.state.timer = setInterval(this.checkCache.bind(this), 5 * 60 * 1000);
+    setTimeout(this.checkCache.bind(this), 5000);
+  }
+
+  async checkCache() {
+    //检查缓存情况
+    if (this.state.showDialog) {
+      return;
+    }
+    let _this = this;
+    if (!(await checkCacheStatus())) {
+      this.state.showDialog = true;
+      confirm({
+        title: "缓存过期",
+        content: "书签数据有更新，是否立即刷新？",
+        onOk() {
+          _this.state.showDialog = false;
+          clearCache();
+        },
+        onCancel() {
+          _this.state.showDialog = false;
+        }
+      });
+    }
   }
 
   /**

@@ -124,12 +124,7 @@ class AddModal extends React.Component {
    * 新增一个节点
    */
   async addOne() {
-    const {
-      currentAddFolder,
-      updateTreeData,
-      closeModal,
-      treeData
-    } = this.props;
+    const { currentAddFolder, updateTreeData, closeModal } = this.props;
     const path =
       currentAddFolder == null
         ? ""
