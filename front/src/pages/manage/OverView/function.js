@@ -4,7 +4,7 @@ import { Modal, Button, Tree, message, Menu, Dropdown } from "antd";
 import styles from "./index.module.less";
 import IconFont from "../../../components/IconFont";
 import { stopTransfer } from "../../../util/eventUtil";
-import { deleteNodes, moveNode } from "../../../util/cacheUtil";
+import { deleteNodes, moveNode, getBookmarkList } from "../../../util/cacheUtil";
 const { TreeNode } = Tree;
 
 function menuVisible(item, visible) {
@@ -175,7 +175,7 @@ function deleteBookmark(nodeList) {
                 treeData.splice(treeData.indexOf(item), 1);
               });
             changeCheckedKeys([], null);
-            updateTreeData([...treeData]);
+            updateTreeData([...getBookmarkList("")]);
             resolve();
           })
           .catch(() => reject());
@@ -207,7 +207,7 @@ export async function onDrop(info) {
     .post("/bookmark/moveNode", body)
     .then(res => {
       message.success("移动完成");
-      updateTreeData([...treeData]);
+      updateTreeData([...getBookmarkList("")]);
       this.setState({ isLoading: false });
     })
     .catch(() => {

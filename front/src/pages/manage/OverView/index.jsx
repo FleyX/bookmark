@@ -50,7 +50,7 @@ class OverView extends React.Component {
   async componentDidMount() {
     this.props.refresh();
     await cacheBookmarkData();
-    this.props.updateTreeData([...getBookmarkList("")]);
+    this.props.updateTreeData(getBookmarkList(""));
     this.props.changeIsInit(true);
   }
 
@@ -58,12 +58,12 @@ class OverView extends React.Component {
    * 异步加载
    */
   loadData = e => {
-    const { loadedKeys, treeData } = this.props;
+    const { loadedKeys } = this.props;
     return new Promise(resolve => {
       const item = e.props.dataRef;
       const newPath = item.path + "." + item.bookmarkId;
       item.children = getBookmarkList(newPath);
-      this.props.updateTreeData([...treeData]);
+      this.props.updateTreeData([...getBookmarkList("")]);
       loadedKeys.push(item.bookmarkId.toString());
       this.props.changeLoadedKeys(loadedKeys);
       resolve();

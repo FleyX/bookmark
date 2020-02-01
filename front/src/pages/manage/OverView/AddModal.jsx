@@ -4,7 +4,7 @@ import httpUtil from "../../../util/httpUtil";
 
 import * as action from "../../../redux/action/BookmarkTreeOverview";
 import { connect } from "react-redux";
-import { addNode } from "../../../util/cacheUtil";
+import { addNode, getBookmarkList } from "../../../util/cacheUtil";
 
 function mapStateToProps(state) {
   return state[action.DATA_NAME];
@@ -173,7 +173,7 @@ class AddModal extends React.Component {
       if (!currentAddFolder) {
         treeData.push(res);
       }
-      updateTreeData(treeData);
+      updateTreeData([...getBookmarkList("")]);
       closeModal();
       this.setState({ isLoading: false });
     }
