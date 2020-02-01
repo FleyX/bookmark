@@ -58,6 +58,10 @@ class OverView extends React.Component {
     await httpUtil.get("/user/loginStatus");
     this.state.timer = setInterval(this.checkCache.bind(this), 5 * 60 * 1000);
     setTimeout(this.checkCache.bind(this), 5000);
+    this.props.refresh();
+    await cacheBookmarkData();
+    this.props.updateTreeData(getBookmarkList(""));
+    this.props.changeIsInit(true);
   }
 
   async checkCache() {
@@ -71,25 +75,16 @@ class OverView extends React.Component {
       confirm({
         title: "缓存过期",
         content: "书签数据有更新，是否立即刷新？",
-        onOk() {
+        async onOk() {
           _this.state.showDialog = false;
-          clearCache();
+          await clearCache();
+          window.location.reload();
         },
         onCancel() {
           _this.state.showDialog = false;
         }
       });
     }
-  }
-
-  /**
-   * 初始化第一级书签
-   */
-  async componentDidMount() {
-    this.props.refresh();
-    await cacheBookmarkData();
-    this.props.updateTreeData(getBookmarkList(""));
-    this.props.changeIsInit(true);
   }
 
   /**
@@ -133,7 +128,7 @@ class OverView extends React.Component {
   async refreshTree() {
     const { refresh } = this.state;
     await clearCache();
-    refresh();
+    window.location.reload();
   }
 
   render() {

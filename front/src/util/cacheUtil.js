@@ -13,16 +13,29 @@ export const TREE_LIST_KEY = "treeListData";
  * 获取全部书签时间
  */
 export const TREE_LIST_TIME_KEY = "treeListDataTime";
+/**
+ * 书签数据所属用户
+ */
+export const TREE_LIST_USER_ID = "treeListDataUserId";
 
 /**
  * 缓存书签数据
  */
 export async function cacheBookmarkData() {
+  let currentId = JSON.parse(window.atob(window.token.split(".")[1])).userId;
+  let cacheId = await localforage.getItem(TREE_LIST_USER_ID);
+  if (currentId && currentId !== cacheId) {
+    await clearCache();
+  }
   let res = await localforage.getItem(TREE_LIST_KEY);
   if (!res) {
     res = await httpUtil.get("/bookmark/currentUser");
+    if (!res[""]) {
+      res[""] = [];
+    }
     await localforage.setItem(TREE_LIST_KEY, res);
     await localforage.setItem(TREE_LIST_TIME_KEY, Date.now());
+    await localforage.setItem(TREE_LIST_USER_ID, currentId);
   }
   window[TREE_LIST_KEY] = res;
 }
@@ -32,7 +45,8 @@ export async function cacheBookmarkData() {
  * @param {*} path path
  */
 export function getBookmarkList(path) {
-  return window[TREE_LIST_KEY][path];
+  let data = window[TREE_LIST_KEY][path];
+  return data ? data : [];
 }
 
 /**
@@ -51,7 +65,7 @@ export async function checkCacheStatus() {
 export async function clearCache() {
   await localforage.removeItem(TREE_LIST_KEY);
   await localforage.removeItem(TREE_LIST_TIME_KEY);
-  window.location.reload();
+  await localforage.removeItem(TREE_LIST_USER_ID);
 }
 
 /**
