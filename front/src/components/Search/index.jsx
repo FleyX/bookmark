@@ -200,7 +200,6 @@ class Search extends React.Component {
           value={content}
           placeholder={currentOptionIndex === 0 ? "检索我的书签" : "搜索"}
           enterButton
-          allowClear
           onSearch={this.enter.bind(this)}
           onChange={this.contentChange.bind(this)}
           onKeyDown={this.keyUp.bind(this)}
