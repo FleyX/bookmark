@@ -177,9 +177,9 @@ export async function moveNode(info) {
   if (body.sourcePath !== body.targetPath) {
     let keys = Object.keys(data);
     //旧路径
-    let oldPath = body.sourcePath + current.bookmarkId;
+    let oldPath = body.sourcePath + "." + current.bookmarkId;
     //新路径
-    let newPath = body.targetPath + current.bookmarkId;
+    let newPath = body.targetPath + "." + current.bookmarkId;
     keys.forEach(item => {
       if (!item.startsWith(oldPath)) {
         return;
@@ -187,6 +187,7 @@ export async function moveNode(info) {
       let newPathStr = item.replace(oldPath, newPath);
       let list = data[item];
       delete data[item];
+      data[newPathStr] = list;
       list.forEach(item1 => (item1.path = newPathStr));
     });
   }
