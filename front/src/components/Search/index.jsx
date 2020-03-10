@@ -42,11 +42,7 @@ class Search extends React.Component {
       this.clearTimer();
       return;
     }
-    this.clearTimer();
-    this.timer = setTimeout(async () => {
-      await this.search(content);
-      this.clearTimer();
-    }, 200);
+    this.search(content);
   }
 
   clearTimer() {
@@ -63,13 +59,8 @@ class Search extends React.Component {
       this.setState({ resultList: [] });
       return;
     }
-    // httpUtil
-    //   .get(
-    //     "/bookmark/searchUserBookmark?content=" + encodeURIComponent(content)
-    //   )
-    //   .then(res => this.setState({ resultList: res }));
     let resultList = await keySearch(content);
-    this.setState({ resultList });
+    this.setState({ resultList, currentIndex: 0 });
   }
 
   /**
