@@ -126,7 +126,6 @@ class OverView extends React.Component {
    * 同步书签数据
    */
   async refreshTree() {
-    const { refresh } = this.state;
     await clearCache();
     window.location.reload();
   }

@@ -1,11 +1,10 @@
 import React from "react";
 import { Link, withRouter } from "react-router-dom";
-import { Menu, Dropdown, Divider} from "antd";
+import { Menu, Dropdown, Divider } from "antd";
 import httpUtil from "../../util/httpUtil";
 import { connect } from "react-redux";
 import styles from "./index.module.less";
 import * as infoAction from "../../redux/action/LoginInfoAction";
-
 
 function mapStateToProps(state) {
   return state[infoAction.DATA_NAME];
@@ -95,17 +94,21 @@ class MainLayout extends React.Component {
         <Divider style={{ margin: 0 }} />
         <div
           style={{
-            minHeight: `calc(${document.body.clientHeight}px - 1.45rem)`
+            minHeight: `calc(${document.body.clientHeight}px - 1.2rem)`
           }}
           className={styles.content}
         >
           {this.props.children}
         </div>
         <div className={styles.footer}>
-          开源地址：
-          <a href="https://github.com/FleyX/bookmark">
-            github.com/FleyX/bookmark
-          </a>
+          <div>
+            开源地址：
+            <a href="https://github.com/FleyX/bookmark" target="github">
+              github.com/FleyX/bookmark
+            </a>
+            &emsp;
+            <Link to="/manage/feedback">反馈/建议</Link>
+          </div>
         </div>
       </div>
     );

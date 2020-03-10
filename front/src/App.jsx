@@ -14,6 +14,7 @@ import RegisterOrReset from "./pages/public/RegisterOrReset";
 import EmailVerify from "./pages/public/EmailVerify";
 
 import ManageOverview from "./pages/manage/OverView";
+import Feedback from "./pages/manage/Feedback";
 
 class App extends Component {
   constructor(props) {
@@ -46,6 +47,8 @@ class App extends Component {
             {/*书签管理页面*/}
             <Redirect exact path="/" to="/manage/overview" />
             <Route exact path="/manage/overview" component={ManageOverview} />
+            {/* 反馈页面 */}
+            <Route exact path="/manage/feedback" component={Feedback} />
 
             {/*个人中心页面*/}
             <Route exact path="/userSpace" component={UserSpace} />
