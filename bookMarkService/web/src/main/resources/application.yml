@@ -66,6 +66,9 @@ es:
   host: localhost
   port: 9200
   scheme: http
+pinyin:
+  base-url: http://localhost:8012
+  token: 123456
 
 # 默认文件上传基路径
 fileSavePath: ./

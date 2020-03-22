@@ -1,5 +1,6 @@
 const Koa = require("koa");
 const pinyin = require("pinyin");
+const koaBody = require("koa-body");
 
 const config = require("./config.js");
 
@@ -13,7 +14,7 @@ app.use(async (ctx, next) => {
     await next();
     ctx.res.statusCode = 200;
   } catch (error) {
-    log.error(error);
+    console.error(error);
     if (error.message.startsWith("token")) {
       ctx.res.statusCode = 401;
     } else {
@@ -28,17 +29,19 @@ app.use(async (ctx, next) => {
   if (!ctx.req.headers["token"] === config.token) {
     throw new Error("token校验失败");
   }
+  if (ctx.req.url !== "/pinyinChange" && ctx.req.method !== "POST") {
+    throw new Error("路径错误");
+  }
   await next();
 });
 
+app.use(koaBody());
+
 //业务处理
 app.use(async ctx => {
-  if (ctx.req.url !== "/pinyinChange" && ctx.req.method !== "post") {
-    throw new Error("路径错误");
-  }
   let body = ctx.request.body;
   let style;
-  switch (body.style) {
+  switch (body.config.style) {
     case 1:
       style = pinyin.STYLE_NORMAL;
       break;
@@ -60,9 +63,9 @@ app.use(async ctx => {
     default:
       style = pinyin.STYLE_NORMAL;
   }
-  body.config.style = style;
+  body.config.style = pinyin.STYLE_NORMAL;
   let res = [];
-  body.strs.forEach(item => res.push(pinyin(item, body.config.style)));
+  body.strs.forEach(item => res.push(pinyin(item, body.config)));
   ctx.body = res;
 });
 
