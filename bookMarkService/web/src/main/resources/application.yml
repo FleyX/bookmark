@@ -1,4 +1,3 @@
-isDev: true
 jwtSecret: abcdefgh
 server:
   port: 8088

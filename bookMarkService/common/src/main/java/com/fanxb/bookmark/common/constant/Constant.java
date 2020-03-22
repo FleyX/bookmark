@@ -37,6 +37,9 @@ public class Constant {
         return email + "_authCode";
     }
 
+    /**
+     * 是否为开发环境
+     */
     public static boolean isDev = false;
 
     @Value("${spring.profiles.active}")

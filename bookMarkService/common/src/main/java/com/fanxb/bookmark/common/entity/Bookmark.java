@@ -1,5 +1,7 @@
 package com.fanxb.bookmark.common.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ public class Bookmark {
      */
     public static final int FOLDER_TYPE = 1;
 
+    @TableId(type = IdType.AUTO)
     private Integer bookmarkId;
     /**
      * 类型：1：文件夹，0：具体的书签
@@ -34,6 +37,7 @@ public class Bookmark {
     private String url = "";
     private String icon = "";
     private Integer sort;
+    private String searchKey = "";
     private Long addTime;
     private Long createTime;
     private List<Bookmark> children;

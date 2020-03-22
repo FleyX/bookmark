@@ -4,15 +4,9 @@
 
 
     <insert id="insertOne" useGeneratedKeys="true" keyColumn="bookmarkId" keyProperty="bookmarkId">
-        insert into bookmark(userId,path,type,name,url,icon,sort,addTime,createTime)
+        insert into bookmark(userId,path,type,name,searchKey,url,icon,sort,addTime,createTime)
         value
-        ( #{userId},#{path},#{type},#{name},
-        <if test="url == null">
-            "","",
-        </if>
-        <if test="url != null">
-            #{url},#{icon},
-        </if>
+        ( #{userId},#{path},#{type},#{name},#{searchKey},#{url},#{icon},
         #{sort},#{addTime},#{createTime})
     </insert>
 
@@ -30,13 +24,14 @@
 
     <select id="getListByUserId" resultType="com.fanxb.bookmark.common.entity.Bookmark">
         select
-            bookmarkId,
-            path,
-            type,
-            name,
-            url,
-            icon,
-            sort
+        bookmarkId,
+        path,
+        type,
+        name,
+        searchKey,
+        url,
+        icon,
+        sort
         from bookmark
         where userId = #{userId}
         order by path, sort
@@ -44,13 +39,13 @@
 
     <select id="getListByUserIdAndPath" resultType="com.fanxb.bookmark.common.entity.Bookmark">
         select
-            bookmarkId,
-            path,
-            type,
-            name,
-            url,
-            icon,
-            sort
+        bookmarkId,
+        path,
+        type,
+        name,
+        url,
+        icon,
+        sort
         from bookmark
         where userId = #{userId} and path = #{path}
         order by sort
@@ -59,24 +54,24 @@
     <delete id="deleteUserFolder">
         DELETE
         FROM
-            bookmark
+        bookmark
         WHERE
-            userId = #{userId}
-            and path LIKE (SELECT a.path
-                           FROM (SELECT CONCAT(path, '.', '${folderId}', '%') AS path
-                                 FROM bookmark
-                                 WHERE bookmarkId = #{folderId}) a);
+        userId = #{userId}
+        and path LIKE (SELECT a.path
+        FROM (SELECT CONCAT(path, '.', '${folderId}', '%') AS path
+        FROM bookmark
+        WHERE bookmarkId = #{folderId}) a);
     </delete>
 
     <select id="getChildrenBookmarkId" resultType="integer">
         select bookmarkId
         from bookmark
         where
-            userId = #{userId}
-            and path LIKE (SELECT a.path
-                           FROM (SELECT CONCAT(path, '.', '${folderId}', '%') AS path
-                                 FROM bookmark
-                                 WHERE bookmarkId = #{folderId}) a);
+        userId = #{userId}
+        and path LIKE (SELECT a.path
+        FROM (SELECT CONCAT(path, '.', '${folderId}', '%') AS path
+        FROM bookmark
+        WHERE bookmarkId = #{folderId}) a);
     </select>
 
     <delete id="deleteUserBookmark">
@@ -88,7 +83,7 @@
 
     <update id="editBookmark" parameterType="com.fanxb.bookmark.common.entity.Bookmark">
         update bookmark
-        set name = #{name}, url = #{url}
+        set name = #{name}, url = #{url},searchKey = #{searchKey}
         where bookmarkId = #{bookmarkId} and userId = #{userId}
     </update>
 
@@ -112,10 +107,10 @@
 
     <select id="selectBookmarkEsByUserIdAndType" resultType="com.fanxb.bookmark.business.bookmark.entity.BookmarkEs">
         select
-            userId,
-            bookmarkId,
-            name,
-            url
+        userId,
+        bookmarkId,
+        name,
+        url
         from bookmark
         where userId = #{userId} and type = #{type}
         order by bookmarkId

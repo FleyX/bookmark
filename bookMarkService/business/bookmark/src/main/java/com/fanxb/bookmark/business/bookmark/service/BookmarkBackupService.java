@@ -2,6 +2,7 @@ package com.fanxb.bookmark.business.bookmark.service;
 
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkBackupDao;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
+import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.common.constant.EsConstant;
 import com.fanxb.bookmark.common.entity.Bookmark;
 import com.fanxb.bookmark.common.entity.EsEntity;
@@ -44,8 +45,8 @@ public class BookmarkBackupService {
         int start = 0;
         List<Bookmark> list;
         while ((list = bookmarkBackupDao.getBookmarkListPage(BACKUP_SIZE, start)).size() != 0) {
-            List<EsEntity> batchList = new ArrayList<>(list.size());
-            list.forEach(item -> batchList.add(new EsEntity<>(item.getBookmarkId().toString(), item)));
+            List<EsEntity<BookmarkEs>> batchList = new ArrayList<>(list.size());
+            list.forEach(item -> batchList.add(new EsEntity<>(item.getBookmarkId().toString(), new BookmarkEs(item))));
             esUtil.insertBatch(EsConstant.BOOKMARK_INDEX, batchList);
             start += BACKUP_SIZE;
         }

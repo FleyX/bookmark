@@ -4,6 +4,7 @@ import com.fanxb.bookmark.business.bookmark.entity.BatchDeleteBody;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
+import com.fanxb.bookmark.business.bookmark.service.PinYinService;
 import com.fanxb.bookmark.common.entity.Bookmark;
 import com.fanxb.bookmark.common.entity.Result;
 import com.fanxb.bookmark.common.entity.UserContext;
@@ -27,6 +28,8 @@ public class BookmarkController {
 
     @Autowired
     private BookmarkService bookmarkService;
+    @Autowired
+    private PinYinService pinYinService;
 
     /**
      * Description: 获取路径为path的书签数据
@@ -49,7 +52,7 @@ public class BookmarkController {
      * @date 2019/12/14 0:09
      */
     @GetMapping("/currentUser")
-    public Result getBookmarkMap(){
+    public Result getBookmarkMap() {
         return Result.success(bookmarkService.getOneBookmarkTree(UserContextHolder.get().getUserId()));
     }
 
@@ -141,6 +144,19 @@ public class BookmarkController {
     @PostMapping("/syncBookmark")
     public Result syncBookmark() {
         bookmarkService.syncUserBookmark(UserContextHolder.get().getUserId());
+        return Result.success(null);
+    }
+
+    /**
+     * 功能描述: 全量更新拼音数据
+     *
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2020/3/22 22:22
+     */
+    @PostMapping("/allPinyinCreate")
+    public Result changeAllPinyin() {
+        pinYinService.changeAll();
         return Result.success(null);
     }
 

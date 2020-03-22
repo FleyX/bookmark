@@ -1,8 +1,11 @@
 package com.fanxb.bookmark.business.bookmark.dao;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.common.entity.Bookmark;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,7 +18,7 @@ import java.util.List;
  * @date 2019/7/8 16:39
  */
 @Component
-public interface BookmarkDao {
+public interface BookmarkDao extends BaseMapper<Bookmark> {
 
     /**
      * Description: 插入一条书签记录
@@ -148,14 +151,37 @@ public interface BookmarkDao {
     /**
      * Description: 根据用户id，类别，分页查找书签
      *
+     * @param userId userId
+     * @param type   type
+     * @param start  start
+     * @param size   size
+     * @return java.util.List<com.fanxb.bookmark.business.bookmark.entity.BookmarkEs>
      * @author fanxb
      * @date 2019/7/26 15:23
-     * @param userId userId
-     * @param type type
-     * @param start start
-     * @param  size size
-     * @return java.util.List<com.fanxb.bookmark.business.bookmark.entity.BookmarkEs>
      */
     List<BookmarkEs> selectBookmarkEsByUserIdAndType(@Param("userId") int userId, @Param("type") int type, @Param("start") int start, @Param("size") int size);
+
+    /**
+     * 功能描述: 查询所有的bookmark,用于全量更新拼音key
+     *
+     * @param bookmarkId bookmarkId
+     * @param size       size
+     * @return List<Bookmark>
+     * @author fanxb
+     * @date 2020/3/22 22:06
+     */
+    @Select("select bookmarkId,name from bookmark where bookmarkId>${bookmarkId} order by bookmarkId asc limit 0,${size}")
+    List<Bookmark> selectPinyinEmpty(@Param("bookmarkId") int bookmarkId, @Param("size") int size);
+
+    /**
+     * 功能描述: 更新一个bookmark的key
+     *
+     * @param bookmarkId id
+     * @param searchKey searchKey
+     * @author fanxb
+     * @date 2020/3/22 22:08
+     */
+    @Update("update bookmark set searchKey=#{searchKey} where bookmarkId=#{bookmarkId}")
+    void updateSearchKey(@Param("bookmarkId") int bookmarkId, @Param("searchKey") String searchKey);
 
 }

@@ -11,6 +11,7 @@ import com.fanxb.bookmark.common.entity.redis.UserBookmarkUpdate;
 import com.fanxb.bookmark.common.exception.FormDataException;
 import com.fanxb.bookmark.common.util.EsUtil;
 import com.fanxb.bookmark.common.util.RedisUtil;
+import com.fanxb.bookmark.common.util.ThreadPoolUtil;
 import com.fanxb.bookmark.common.util.UserContextHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 类功能简述：
@@ -50,6 +52,8 @@ public class BookmarkService {
     private BookmarkDao bookmarkDao;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private PinYinService pinYinService;
 
     @Autowired
     private EsUtil esUtil;
@@ -73,7 +77,7 @@ public class BookmarkService {
         }
         int count = 0;
         // 將要插入es的书签数据放到list中,最后一次插入，尽量避免mysql回滚了，但是es插入了
-        List<EsEntity> insertEsList = new ArrayList<>();
+        List<EsEntity<BookmarkEs>> insertEsList = new ArrayList<>();
         for (int i = 0, length = elements.size(); i < length; i++) {
             if (i == 0) {
                 Elements firstChildren = elements.get(0).child(1).children();
@@ -87,6 +91,14 @@ public class BookmarkService {
         }
         redisTemplate.opsForList().leftPush(RedisConstant.BOOKMARK_UPDATE_TIME, new UserBookmarkUpdate(userId, System.currentTimeMillis()).toString());
         esUtil.insertBatch(EsConstant.BOOKMARK_INDEX, insertEsList);
+        //异步更新searchKey
+        ThreadPoolUtil.execute((() -> {
+            List<BookmarkEs> list = insertEsList.stream().map(EsEntity::getData).collect(Collectors.toList());
+            List<String> resList = pinYinService.changeStrings(list.stream().map(BookmarkEs::getName).collect(Collectors.toList()));
+            for (int i = 0, size = list.size(); i < size; i++) {
+                bookmarkDao.updateSearchKey(list.get(i).getBookmarkId(), resList.get(i));
+            }
+        }));
     }
 
     /**
@@ -98,7 +110,7 @@ public class BookmarkService {
      * @author fanxb
      * @date 2019/7/8 14:49
      */
-    private void dealBookmark(int userId, Element ele, String path, int sort, List<EsEntity> insertList) {
+    private void dealBookmark(int userId, Element ele, String path, int sort, List<EsEntity<BookmarkEs>> insertList) {
         if (!DT.equalsIgnoreCase(ele.tagName())) {
             return;
         }
@@ -114,6 +126,7 @@ public class BookmarkService {
             //说明为文件夹
             Bookmark node = new Bookmark(userId, path, first.ownText(), Long.parseLong(first.attr("add_date")) * 1000, sort);
             Integer sortBase = 0;
+            //同名文件夹将会合并
             if (insertOne(node)) {
                 sortBase = bookmarkDao.selectMaxSort(node.getUserId(), path);
                 if (sortBase == null) {
@@ -223,6 +236,7 @@ public class BookmarkService {
         bookmark.setUserId(userId);
         bookmark.setCreateTime(System.currentTimeMillis());
         bookmark.setAddTime(bookmark.getCreateTime());
+        bookmark.setSearchKey(pinYinService.changeString(bookmark.getName()));
         try {
             bookmarkDao.insertOne(bookmark);
         } catch (DuplicateKeyException e) {
@@ -248,6 +262,7 @@ public class BookmarkService {
     @Transactional(rollbackFor = Exception.class)
     public void updateOne(int userId, Bookmark bookmark) {
         bookmark.setUserId(userId);
+        bookmark.setSearchKey(pinYinService.changeString(bookmark.getName()));
         bookmarkDao.editBookmark(bookmark);
         if (bookmark.getType() == 0) {
             esUtil.insertOrUpdateOne(EsConstant.BOOKMARK_INDEX,
@@ -306,7 +321,7 @@ public class BookmarkService {
         esUtil.deleteByQuery(EsConstant.BOOKMARK_INDEX, new TermQueryBuilder("userId", userId));
         int index = 0;
         int size = 500;
-        List<EsEntity> res = new ArrayList<>();
+        List<EsEntity<BookmarkEs>> res = new ArrayList<>();
         do {
             res.clear();
             bookmarkDao.selectBookmarkEsByUserIdAndType(userId, 0, index, size)

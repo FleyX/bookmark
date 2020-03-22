@@ -80,7 +80,7 @@ services:
       - |
         sleep 20 && \
         ls -l && \
-        java -jar -DisDev=false \
+        java -jar -Dspring.profiles.actice=prd \
         -DjwtSecret=${JWT_SECRET} \
         -Dmybatis-plus.configuration.log-impl=org.apache.ibatis.logging.nologging.NoLoggingImpl \
         -Dspring.mail.host=${SMTP_HOST} \

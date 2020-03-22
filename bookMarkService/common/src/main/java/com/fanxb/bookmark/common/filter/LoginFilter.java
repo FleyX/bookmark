@@ -126,7 +126,7 @@ public class LoginFilter implements Filter {
         }
         try {
             Map<String, Claim> map = JwtUtil.decode(jwt, secret);
-            int userId = Integer.valueOf(map.get("userId").asString());
+            int userId = Integer.parseInt(map.get("userId").asString());
             UserContext context = new UserContext();
             context.setJwt(jwt);
             context.setUserId(userId);

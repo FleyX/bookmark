@@ -1,5 +1,6 @@
 package com.fanxb.bookmark.common.util;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fanxb.bookmark.common.exception.CustomException;
 import okhttp3.*;
@@ -23,11 +24,41 @@ public class HttpUtil {
             .readTimeout(300, TimeUnit.SECONDS).build();
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
+    /**
+     * 功能描述: get
+     *
+     * @param url url
+     * @return com.alibaba.fastjson.JSONObject
+     * @author fanxb
+     * @date 2020/3/22 21:11
+     */
     public static JSONObject get(String url) {
-        return get(url, null);
+        return get(url, null, JSONObject.class);
     }
 
+    /**
+     * 功能描述: get请求
+     *
+     * @param url     url
+     * @param headers header
+     * @author fanxb
+     * @date 2020/3/22 21:07
+     */
     public static JSONObject get(String url, Map<String, String> headers) {
+        return get(url, headers, JSONObject.class);
+    }
+
+    /**
+     * 功能描述: get请求
+     *
+     * @param url       url
+     * @param headers   header
+     * @param typeClass type
+     * @return T
+     * @author fanxb
+     * @date 2020/3/22 21:07
+     */
+    public static <T> T get(String url, Map<String, String> headers, Class<T> typeClass) {
         Request.Builder builder = new Request.Builder().url(url);
         if (headers != null && headers.size() > 0) {
             Set<String> keys = headers.keySet();
@@ -35,11 +66,34 @@ public class HttpUtil {
                 builder = builder.addHeader(key, headers.get(key));
             }
         }
-        return request(builder.build());
+        return request(builder.build(), typeClass);
     }
 
+    /**
+     * 功能描述:不带header，返回jsonObject的post方法
+     *
+     * @param url     url
+     * @param jsonObj body
+     * @return com.alibaba.fastjson.JSONObject
+     * @author fanxb
+     * @date 2020/3/22 21:05
+     */
     public static JSONObject post(String url, String jsonObj) {
-        return post(url, jsonObj, null);
+        return post(url, jsonObj, null, JSONObject.class);
+    }
+
+    /**
+     * 功能描述:返回jsonObject的post方法
+     *
+     * @param url     url
+     * @param jsonObj body
+     * @param headers headers
+     * @return com.alibaba.fastjson.JSONObject
+     * @author fanxb
+     * @date 2020/3/22 21:05
+     */
+    public static JSONObject post(String url, String jsonObj, Map<String, String> headers) {
+        return post(url, jsonObj, headers, JSONObject.class);
     }
 
     /**
@@ -48,9 +102,8 @@ public class HttpUtil {
      * @param url     url
      * @param jsonObj 请求体
      * @param headers 请求头
-     * @return
      */
-    public static JSONObject post(String url, String jsonObj, Map<String, String> headers) {
+    public static <T> T post(String url, String jsonObj, Map<String, String> headers, Class<T> typeClass) {
         RequestBody body = RequestBody.create(JSON, jsonObj);
         Request.Builder builder = new Request.Builder().url(url).post(body);
         if (headers != null) {
@@ -59,7 +112,7 @@ public class HttpUtil {
                 builder = builder.addHeader(key, headers.get(key));
             }
         }
-        return request(builder.build());
+        return request(builder.build(), typeClass);
     }
 
     /**
@@ -68,9 +121,9 @@ public class HttpUtil {
      * @param request request
      * @return
      */
-    public static JSONObject request(Request request) {
+    public static <T> T request(Request request, Class<T> typeClass) {
         try (Response res = CLIENT.newCall(request).execute()) {
-            return parseResponse(res);
+            return parseResponse(res, typeClass);
         } catch (Exception e) {
             throw new CustomException(e);
         }
@@ -82,11 +135,16 @@ public class HttpUtil {
      * @param res
      * @return
      */
-    public static JSONObject parseResponse(Response res) {
+    @SuppressWarnings("unchecked")
+    public static <T> T parseResponse(Response res, Class<T> typeClass) {
         try {
             if (checkIsOk(res.code())) {
                 String str = res.body().string();
-                return JSONObject.parseObject(str);
+                if (typeClass.getCanonicalName().equals(JSONObject.class.getCanonicalName())) {
+                    return (T) JSONObject.parseObject(str);
+                } else {
+                    return (T) JSONArray.parseArray(str);
+                }
             } else {
                 throw new CustomException("http请求出错:" + res.body().string());
             }

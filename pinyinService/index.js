@@ -16,21 +16,21 @@ app.use(async (ctx, next) => {
   } catch (error) {
     console.error(error);
     if (error.message.startsWith("token")) {
-      ctx.res.statusCode = 401;
+      ctx.status = 401;
     } else {
-      ctx.res.statusCode = 500;
+      ctx.status = 500;
     }
-    ctx.body(error.message);
+    ctx.body = error.message;
   }
 });
 
 //检查token
 app.use(async (ctx, next) => {
-  if (!ctx.req.headers["token"] === config.token) {
+  if (ctx.req.headers["token"] !== config.token) {
     throw new Error("token校验失败");
   }
-  if (ctx.req.url !== "/pinyinChange" && ctx.req.method !== "POST") {
-    throw new Error("路径错误");
+  if (ctx.req.url !== "/pinyinChange" || ctx.req.method !== "POST") {
+    throw new Error("路径或者方法错误");
   }
   await next();
 });
