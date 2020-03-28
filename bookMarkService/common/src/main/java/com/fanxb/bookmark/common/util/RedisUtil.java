@@ -1,6 +1,9 @@
 package com.fanxb.bookmark.common.util;
 
 import com.alibaba.fastjson.JSON;
+import com.fanxb.bookmark.common.constant.RedisConstant;
+import com.fanxb.bookmark.common.entity.User;
+import com.fanxb.bookmark.common.entity.redis.UserBookmarkUpdate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -78,5 +81,23 @@ public class RedisUtil {
                 return JSON.parseObject(str, tt);
             }
         }
+    }
+
+    /**
+     * 功能描述:推一条数据到mq队列中
+     *
+     * @param topic 队列名
+     * @param obj   数据
+     * @author 123
+     * @date 2020/3/24 14:32
+     */
+    public static void addToMq(String topic, Object obj) {
+        String data;
+        if (obj instanceof String) {
+            data = (String) obj;
+        } else {
+            data = JSON.toJSONString(obj);
+        }
+        redisTemplate.opsForList().leftPush(topic, data);
     }
 }
