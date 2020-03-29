@@ -125,4 +125,14 @@ public interface UserDao {
      */
     @Update("update user set bookmarkChangeTime=#{updateTime} where userId=#{userId}")
     void updateLastBookmarkUpdateTime(UserBookmarkUpdate item);
+
+    /**
+     * 功能描述: 更新所有用户的更新时间
+     *
+     * @param time time
+     * @author 123
+     * @date 2020/3/29 18:18
+     */
+    @Update("update user set bookmarkChangeTime=#{time}")
+    void updateAllBookmarkUpdateTime(long time);
 }
