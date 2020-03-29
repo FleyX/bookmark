@@ -45,8 +45,10 @@ export async function cacheBookmarkData() {
  * @param {*} path path
  */
 export function getBookmarkList(path) {
-  let data = window[TREE_LIST_KEY][path];
-  return data ? data : [];
+  if (window[TREE_LIST_KEY][path] === undefined) {
+    window[TREE_LIST_KEY][path] = [];
+  }
+  return window[TREE_LIST_KEY][path];
 }
 
 /**
@@ -83,6 +85,7 @@ export async function updateCurrentChangeTime() {
  * @param {*} node
  */
 export async function addNode(currentNode, node) {
+  debugger;
   let treeDataMap = window[TREE_LIST_KEY];
   if (currentNode) {
     let key = currentNode.path + "." + currentNode.bookmarkId;
