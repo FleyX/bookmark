@@ -8,7 +8,7 @@ docker 镜像 构建文件为本目录下的`Dockerfile`,已经生产推送到�
 
 部署过程如下：
 
-1. 首先运行 init.sh 进行前后端打包。
+1. 首先root运行 init.sh 进行环境初始化以及前后端打包。
 2. 将密码，smtp 等相关敏感信息设置 到环境变量中,内容如下：<br/>
 
    ```bash
@@ -18,6 +18,10 @@ docker 镜像 构建文件为本目录下的`Dockerfile`,已经生产推送到�
    export SMTP_USERNAME=test
    export SMTP_PASSWORD=test
    export SMTP_PORT=465
+   # 文件存储路径
+   export BOOKMARK_FILE_SAVE_PATH=./fileSave
+   # 服务部署地址
+   export BOOKMARK_HOST=http://localhost:8080
    ```
 
    两种设置办法：
