@@ -59,6 +59,17 @@ services:
       - ${BOOKMARK_FILE_SAVE_PATH}/files/public:/opt/files/public
     ports:
       - 8083:8080
+  bookmark-pinyin:
+    image: registry.cn-hangzhou.aliyuncs.com/fleyx/node-java-env:v2
+    container_name: bookmark-pinyin
+    networks:
+      - bookmark
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./timezone:/etc/timezone
+      - ../pinyinService:/opt/app
+    working_dir: /opt/app
+    command: npm --registry https://registry.npm.taobao.org install && node index.js 8012 123456321
   bookmark-service:
     image: registry.cn-hangzhou.aliyuncs.com/fleyx/node-java-env:v2
     container_name: bookmark-service
@@ -93,6 +104,8 @@ services:
         -DserviceAddress=${BOOKMARK_HOST} \
         -DfileSavePath=/opt/files \
         -DserviceAddress=https://bm.tapme.top \
+        -Dpinyin.base-url=http://bookmark-pinyin:8012 \
+        -Dpinyin.token=123456321 \
         service.jar
 networks:
   bookmark:
