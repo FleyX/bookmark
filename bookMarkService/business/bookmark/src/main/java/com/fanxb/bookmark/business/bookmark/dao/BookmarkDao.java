@@ -184,4 +184,14 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
     @Update("update bookmark set searchKey=#{searchKey} where bookmarkId=#{bookmarkId}")
     void updateSearchKey(@Param("bookmarkId") int bookmarkId, @Param("searchKey") String searchKey);
 
+    /**
+     * 分页获取所有的书签
+     *
+     * @param size       大小
+     * @param startIndex 开始下标
+     * @return
+     */
+    @Select("select * from bookmark order by bookmarkId limit ${startIndex},${size}")
+    List<Bookmark> getBookmarkListPage(@Param("size") int size, @Param("startIndex") int startIndex);
+
 }

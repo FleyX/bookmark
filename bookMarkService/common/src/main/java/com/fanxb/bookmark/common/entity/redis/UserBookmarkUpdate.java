@@ -20,6 +20,11 @@ public class UserBookmarkUpdate {
      */
     private long updateTime;
 
+    public UserBookmarkUpdate(int userId) {
+        this.userId = userId;
+        this.updateTime = System.currentTimeMillis();
+    }
+
     @Override
     public String toString() {
         return JSON.toJSONString(this);

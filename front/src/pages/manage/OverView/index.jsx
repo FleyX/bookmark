@@ -56,7 +56,7 @@ class OverView extends React.Component {
 
   async componentWillMount() {
     await httpUtil.get("/user/loginStatus");
-    this.state.timer = setInterval(this.checkCache.bind(this), 5 * 60 * 1000);
+    this.state.timer = setInterval(this.checkCache.bind(this), 10000);
     setTimeout(this.checkCache.bind(this), 5000);
     this.props.refresh();
     await cacheBookmarkData();

@@ -1,6 +1,7 @@
 package com.fanxb.bookmark.business.bookmark.controller;
 
 import com.fanxb.bookmark.business.bookmark.service.BookmarkBackupService;
+import com.fanxb.bookmark.business.bookmark.service.impl.BookmarkBackupServiceImpl;
 import com.fanxb.bookmark.common.entity.Result;
 import com.fanxb.bookmark.common.util.ThreadPoolUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class BookmarkBackupController {
     private BookmarkBackupService backupService;
 
     @Autowired
-    public BookmarkBackupController(BookmarkBackupService backupService) {
+    public BookmarkBackupController(BookmarkBackupServiceImpl backupService) {
         this.backupService = backupService;
     }
 

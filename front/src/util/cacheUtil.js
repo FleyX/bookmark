@@ -1,10 +1,11 @@
 /* eslint-disable no-undef */
 import httpUtil from "./httpUtil";
+import config from "./config";
 
 /**
- * 缓存工具类
+ * web版本
  */
-
+export const WEB_VERSION = "webVersion";
 /**
  * 全部书签数据key
  */
@@ -24,7 +25,9 @@ export const TREE_LIST_USER_ID = "treeListDataUserId";
 export async function cacheBookmarkData() {
   let currentId = JSON.parse(window.atob(window.token.split(".")[1])).userId;
   let cacheId = await localforage.getItem(TREE_LIST_USER_ID);
-  if (currentId && currentId !== cacheId) {
+  let webVersion = await localforage.getItem(WEB_VERSION);
+  if ((currentId && currentId !== cacheId) || config.version !== webVersion) {
+    await localforage.setItem(WEB_VERSION, config.version);
     await clearCache();
   }
   let res = await localforage.getItem(TREE_LIST_KEY);
@@ -213,16 +216,7 @@ export async function keySearch(content) {
       if (item.type === 1) {
         continue;
       }
-      if (!item.lowName) {
-        item.lowName = item.name + "////" + item.name.toLocaleLowerCase();
-      }
-      if (!item.lowUrl) {
-        item.lowUrl = item.url + "////" + item.url.toLocaleLowerCase();
-      }
-      if (
-        item.lowName.indexOf(content) > -1 ||
-        item.lowUrl.indexOf(content) > -1
-      ) {
+      if (item.searchKey.indexOf(content) > -1) {
         res.push(item);
         if (res.length >= 12) {
           console.info("搜索耗时：" + (Date.now() - time1));

@@ -1,15 +1,17 @@
 package com.fanxb.bookmark.business.bookmark.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.business.bookmark.entity.PinYinBody;
 import com.fanxb.bookmark.business.bookmark.service.PinYinService;
 import com.fanxb.bookmark.common.constant.Constant;
+import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.Bookmark;
+import com.fanxb.bookmark.common.entity.redis.UserBookmarkUpdate;
 import com.fanxb.bookmark.common.util.HttpUtil;
+import com.fanxb.bookmark.common.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,10 +56,12 @@ public class PinYinServiceImpl implements PinYinService {
                 bookmarkDao.updateSearchKey(bookmarks.get(j).getBookmarkId(), resList.get(j));
             }
             if (bookmarks.size() < SIZE) {
-                return;
+                break;
             }
             i = bookmarks.get(SIZE - 1).getBookmarkId();
         }
+        //更新所有用户的上次刷新时间
+        RedisUtil.addToMq(RedisConstant.BOOKMARK_UPDATE_TIME, new UserBookmarkUpdate(-1, System.currentTimeMillis()));
     }
 
     @Override

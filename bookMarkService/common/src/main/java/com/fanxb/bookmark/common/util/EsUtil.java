@@ -2,7 +2,6 @@ package com.fanxb.bookmark.common.util;
 
 import com.alibaba.fastjson.JSON;
 import com.fanxb.bookmark.common.constant.EsConstant;
-import com.fanxb.bookmark.common.entity.Bookmark;
 import com.fanxb.bookmark.common.entity.EsEntity;
 import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.exception.EsException;
@@ -123,7 +122,7 @@ public class EsUtil {
      * @author fanxb
      * @date 2019/7/24 17:38
      */
-    public <T> void  insertBatch(String index, List<EsEntity<T>> list) {
+    public <T> void insertBatch(String index, List<EsEntity<T>> list) {
         BulkRequest request = new BulkRequest();
         list.forEach(item -> request.add(new IndexRequest(index).id(item.getId())
                 .source(JSON.toJSONString(item.getData()), XContentType.JSON)));
@@ -142,9 +141,9 @@ public class EsUtil {
      * @author fanxb
      * @date 2019/7/25 14:24
      */
-    public <T> void deleteBatch(String index, Collection<T> idList) {
+    public <T> void deleteBatch(String index, Collection<String> idList) {
         BulkRequest request = new BulkRequest();
-        idList.forEach(item -> request.add(new DeleteRequest(index, item.toString())));
+        idList.forEach(item -> request.add(new DeleteRequest(index, item)));
         try {
             client.bulk(request, RequestOptions.DEFAULT);
         } catch (Exception e) {

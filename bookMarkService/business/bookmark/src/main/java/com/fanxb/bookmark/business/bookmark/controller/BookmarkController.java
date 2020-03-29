@@ -3,11 +3,11 @@ package com.fanxb.bookmark.business.bookmark.controller;
 import com.fanxb.bookmark.business.bookmark.entity.BatchDeleteBody;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
+import com.fanxb.bookmark.business.bookmark.service.BookmarkBackupService;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
 import com.fanxb.bookmark.business.bookmark.service.PinYinService;
 import com.fanxb.bookmark.common.entity.Bookmark;
 import com.fanxb.bookmark.common.entity.Result;
-import com.fanxb.bookmark.common.entity.UserContext;
 import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +25,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/bookmark")
 public class BookmarkController {
-
+    @Autowired
+    private BookmarkBackupService bookmarkBackupService;
     @Autowired
     private BookmarkService bookmarkService;
     @Autowired
@@ -143,7 +144,7 @@ public class BookmarkController {
      */
     @PostMapping("/syncBookmark")
     public Result syncBookmark() {
-        bookmarkService.syncUserBookmark(UserContextHolder.get().getUserId());
+        bookmarkBackupService.syncUserBookmark(UserContextHolder.get().getUserId());
         return Result.success(null);
     }
 

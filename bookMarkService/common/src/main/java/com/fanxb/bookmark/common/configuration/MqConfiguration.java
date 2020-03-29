@@ -1,9 +1,7 @@
 package com.fanxb.bookmark.common.configuration;
 
-import cn.hutool.core.util.StrUtil;
 import com.fanxb.bookmark.common.annotation.MqConsumer;
 import com.fanxb.bookmark.common.entity.redis.RedisConsumer;
-import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.factory.ThreadPoolFactory;
 import com.fanxb.bookmark.common.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -13,14 +11,12 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -57,7 +53,7 @@ public class MqConfiguration implements ApplicationRunner {
             MqConsumer annotation = annotations[0];
             topicMap.computeIfAbsent(annotation.value(), k -> new ArrayList<>()).add((RedisConsumer) item);
         });
-        log.info("es订阅信息汇总完毕！！！！！！");
+        log.info("redis订阅信息汇总完毕！！！！！！");
         //由一个线程始终循环获取es队列数据
         threadPoolExecutor.execute(loop());
     }
@@ -114,14 +110,5 @@ public class MqConfiguration implements ApplicationRunner {
             });
         }
     }
-
-
 }
 
-@MqConsumer("test1212")
-class Test implements RedisConsumer {
-    @Override
-    public void deal(String message) {
-        System.out.println(message);
-    }
-}
