@@ -2,7 +2,7 @@
 base=$(cd "$(dirname "$0")";pwd)
 
 # 创建es存放数据文件夹并设置读写权限
-mkdir $base/es/data>/dev/null 2>&1
+# mkdir $base/es/data>/dev/null 2>&1
 
 chmod 777 $base/es/data
 
