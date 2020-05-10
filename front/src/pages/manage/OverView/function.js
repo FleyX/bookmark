@@ -1,15 +1,10 @@
-import httpUtil from "../../../util/httpUtil";
-import React from "react";
-import { Modal, Button, Tree, message, Menu, Dropdown } from "antd";
-import styles from "./index.module.less";
-import IconFont from "../../../components/IconFont";
-import { stopTransfer } from "../../../util/eventUtil";
-import {
-  deleteNodes,
-  moveNode,
-  getBookmarkList,
-  updateCurrentChangeTime
-} from "../../../util/cacheUtil";
+import httpUtil from '../../../util/httpUtil';
+import React from 'react';
+import { Modal, Button, Tree, message, Menu, Dropdown } from 'antd';
+import styles from './index.module.less';
+import IconFont from '../../../components/IconFont';
+import { stopTransfer } from '../../../util/eventUtil';
+import { deleteNodes, moveNode, getBookmarkList } from '../../../util/cacheUtil';
 const { TreeNode } = Tree;
 
 function menuVisible(item, visible) {
@@ -23,13 +18,13 @@ function menuClick(e) {
   stopTransfer(e);
   const { currentClickItem, addNode, editNode } = this.props;
   switch (e.key) {
-    case "add":
+    case 'add':
       addNode(currentClickItem);
       break;
-    case "edit":
+    case 'edit':
       editNode(currentClickItem);
       break;
-    case "delete":
+    case 'delete':
       deleteOne.call(this, currentClickItem);
       break;
     default:
@@ -62,11 +57,7 @@ export function renderNodeContent(item) {
   return (
     <React.Fragment>
       {/* 触发右键菜单 */}
-      <Dropdown
-        overlay={menu}
-        trigger={["contextMenu"]}
-        onVisibleChange={menuVisible.bind(this, item)}
-      >
+      <Dropdown overlay={menu} trigger={['contextMenu']} onVisibleChange={menuVisible.bind(this, item)}>
         {item.type === 0 ? (
           <a href={item.url} className={styles.nodeContent}>
             {item.name}
@@ -76,18 +67,8 @@ export function renderNodeContent(item) {
         )}
       </Dropdown>
       {isEdit ? (
-        <Dropdown
-          overlay={menu}
-          trigger={["click"]}
-          onVisibleChange={menuVisible.bind(this, item)}
-        >
-          <Button
-            size="small"
-            onClick={stopTransfer.bind(this)}
-            type="primary"
-            icon="menu"
-            shape="circle"
-          />
+        <Dropdown overlay={menu} trigger={['click']} onVisibleChange={menuVisible.bind(this, item)}>
+          <Button size="small" onClick={stopTransfer.bind(this)} type="primary" icon="menu" shape="circle" />
         </Dropdown>
       ) : null}
     </React.Fragment>
@@ -106,25 +87,13 @@ export function renderTreeNodes(items) {
     const isLeaf = item.type === 0;
     if (!isLeaf) {
       return (
-        <TreeNode
-          icon={<IconFont type="icon-folder" />}
-          isLeaf={isLeaf}
-          title={renderNodeContent.call(this, item)}
-          key={item.bookmarkId}
-          dataRef={item}
-        >
+        <TreeNode icon={<IconFont type="icon-folder" />} isLeaf={isLeaf} title={renderNodeContent.call(this, item)} key={item.bookmarkId} dataRef={item}>
           {renderTreeNodes.call(this, item.children)}
         </TreeNode>
       );
     }
     return (
-      <TreeNode
-        icon={<IconFont type="icon-bookmark" />}
-        isLeaf={isLeaf}
-        title={renderNodeContent.call(this, item)}
-        key={item.bookmarkId}
-        dataRef={item}
-      />
+      <TreeNode icon={<IconFont type="icon-bookmark" />} isLeaf={isLeaf} title={renderNodeContent.call(this, item)} key={item.bookmarkId} dataRef={item} />
     );
   });
 }
@@ -159,22 +128,20 @@ function deleteBookmark(nodeList) {
   nodeList.forEach(item => {
     const data = item.props ? item.props.dataRef : item;
     dataNodeList.push(data);
-    data.type === 0
-      ? bookmarkIdList.push(data.bookmarkId)
-      : folderIdList.push(data.bookmarkId);
+    data.type === 0 ? bookmarkIdList.push(data.bookmarkId) : folderIdList.push(data.bookmarkId);
   });
   Modal.confirm({
-    title: "确认删除？",
-    content: "删除后，无法找回",
+    title: '确认删除？',
+    content: '删除后，无法找回',
     onOk() {
       return new Promise((resolve, reject) => {
         httpUtil
-          .post("/bookmark/batchDelete", { folderIdList, bookmarkIdList })
+          .post('/bookmark/batchDelete', { folderIdList, bookmarkIdList })
           .then(() => {
             //遍历节点树数据，并删除
             deleteNodes(dataNodeList);
             changeCheckedKeys([], null);
-            updateTreeData([...getBookmarkList("")]);
+            updateTreeData([...getBookmarkList('')]);
             resolve();
           })
           .catch(() => reject());
@@ -191,7 +158,7 @@ export async function onDrop(info) {
   const { updateTreeData, loadedKeys, changeLoadedKeys } = this.props;
   const target = info.node.props.dataRef;
   if (!info.dropToGap && target.type === 0) {
-    message.error("无法移动到书签内部");
+    message.error('无法移动到书签内部');
     return;
   }
   this.setState({ isLoading: true });
@@ -203,14 +170,13 @@ export async function onDrop(info) {
     changeLoadedKeys(loadedKeys);
   }
   try {
-    await httpUtil.post("/bookmark/moveNode", body);
-    message.success("移动完成");
-    updateTreeData([...getBookmarkList("")]);
+    await httpUtil.post('/bookmark/moveNode', body);
+    message.success('移动完成');
+    updateTreeData([...getBookmarkList('')]);
   } catch (error) {
-    message.error("后台移动失败，将于2s后刷新页面，以免前后台数据不一致");
+    message.error('后台移动失败，将于2s后刷新页面，以免前后台数据不一致');
     setTimeout(window.location.reload, 2000);
   } finally {
     this.setState({ isLoading: false });
   }
-  await updateCurrentChangeTime();
 }
