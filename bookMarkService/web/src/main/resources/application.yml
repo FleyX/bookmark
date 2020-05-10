@@ -62,6 +62,8 @@ mybatis-plus:
 debug: false
 
 es:
+  #是否启动es
+  status: false
   host: localhost
   port: 9200
   scheme: http
