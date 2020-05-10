@@ -1,44 +1,29 @@
 /* eslint-disable no-undef */
-import httpUtil from "./httpUtil";
-import config from "./config";
-
-/**
- * web版本
- */
-export const WEB_VERSION = "webVersion";
+import httpUtil from './httpUtil';
 /**
  * 全部书签数据key
  */
-export const TREE_LIST_KEY = "treeListData";
+export const TREE_LIST_KEY = 'treeListData';
 /**
- * 获取全部书签时间
+ * 当前用户书签版本
  */
-export const TREE_LIST_TIME_KEY = "treeListDataTime";
-/**
- * 书签数据所属用户
- */
-export const TREE_LIST_USER_ID = "treeListDataUserId";
+export const TREE_LIST_VERSION_KEY = 'treeDataVersion';
 
 /**
  * 缓存书签数据
  */
 export async function cacheBookmarkData() {
-  let currentId = JSON.parse(window.atob(window.token.split(".")[1])).userId;
-  let cacheId = await localforage.getItem(TREE_LIST_USER_ID);
-  let webVersion = await localforage.getItem(WEB_VERSION);
-  if ((currentId && currentId !== cacheId) || config.version !== webVersion) {
-    await localforage.setItem(WEB_VERSION, config.version);
-    await clearCache();
-  }
-  let res = await localforage.getItem(TREE_LIST_KEY);
+  let key = getCacheKey();
+  let res = await localforage.getItem(key);
+  //如果没有缓存
   if (!res) {
-    res = await httpUtil.get("/bookmark/currentUser");
-    if (!res[""]) {
-      res[""] = [];
+    res = await httpUtil.get('/bookmark/currentUser');
+    if (!res['']) {
+      res[''] = [];
     }
-    await localforage.setItem(TREE_LIST_KEY, res);
-    await localforage.setItem(TREE_LIST_TIME_KEY, Date.now());
-    await localforage.setItem(TREE_LIST_USER_ID, currentId);
+    let version = (await httpUtil.get('/user/currentUserInfo')).version;
+    await localforage.setItem(key, res);
+    await localforage.setItem(TREE_LIST_VERSION_KEY, version);
   }
   window[TREE_LIST_KEY] = res;
 }
@@ -59,27 +44,26 @@ export function getBookmarkList(path) {
  * @return  返回true说明未过期，否则说明过期了
  */
 export async function checkCacheStatus() {
-  let date = await localforage.getItem(TREE_LIST_TIME_KEY, Date.now());
-  let userInfo = await httpUtil.get("/user/currentUserInfo");
-  return !date || date > userInfo.bookmarkChangeTime;
+  let version = await localforage.getItem(TREE_LIST_VERSION_KEY);
+  let realVersion = (await httpUtil.get('/user/currentUserInfo')).version;
+  return version >= realVersion;
 }
 
 /**
  * 清楚缓存数据
  */
 export async function clearCache() {
-  await localforage.removeItem(TREE_LIST_KEY);
-  await localforage.removeItem(TREE_LIST_TIME_KEY);
-  await localforage.removeItem(TREE_LIST_USER_ID);
+  await localforage.removeItem(getCacheKey());
+  await localforage.removeItem(TREE_LIST_VERSION_KEY);
 }
 
 /**
- * 更新本地缓存数据的时间
+ * 更新本地缓存
  */
 export async function updateCurrentChangeTime() {
-  await localforage.setItem(TREE_LIST_TIME_KEY, Date.now());
-  await localforage.setItem(TREE_LIST_TIME_KEY, Date.now());
-  await localforage.setItem(TREE_LIST_KEY, window[TREE_LIST_KEY]);
+  let version = await localforage.getItem(TREE_LIST_VERSION_KEY);
+  await localforage.setItem(TREE_LIST_VERSION_KEY, version + 1);
+  await localforage.setItem(getCacheKey(), window[TREE_LIST_KEY]);
 }
 
 /**
@@ -91,13 +75,13 @@ export async function addNode(currentNode, node) {
   debugger;
   let treeDataMap = window[TREE_LIST_KEY];
   if (currentNode) {
-    let key = currentNode.path + "." + currentNode.bookmarkId;
+    let key = currentNode.path + '.' + currentNode.bookmarkId;
     if (!treeDataMap[key]) {
       treeDataMap[key] = [];
     }
     treeDataMap[key].push(node);
   } else {
-    treeDataMap[""].push(node);
+    treeDataMap[''].push(node);
   }
   await updateCurrentChangeTime();
 }
@@ -117,7 +101,7 @@ export async function deleteNodes(nodeList) {
     }
     //如果是文件夹还是把他的子节点删除
     if (item.type === 1) {
-      let key = item.path + "." + item.bookmarkId;
+      let key = item.path + '.' + item.bookmarkId;
       Object.keys(data).forEach(one => {
         if (one.startsWith(key)) {
           delete data[one];
@@ -147,7 +131,7 @@ export async function moveNode(info) {
   const body = {
     bookmarkId: current.bookmarkId,
     sourcePath: current.path,
-    targetPath: "",
+    targetPath: '',
     //-1 表示排在最后
     sort: -1
   };
@@ -166,14 +150,13 @@ export async function moveNode(info) {
     }
   } else {
     //移动到一个文件夹下面
-    body.targetPath = target.path + "." + target.bookmarkId;
+    body.targetPath = target.path + '.' + target.bookmarkId;
     let targetList = data[body.targetPath];
     if (!targetList) {
       targetList = [];
       data[body.targetPath] = targetList;
     }
-    body.sort =
-      targetList.length > 0 ? targetList[targetList.length - 1].sort + 1 : 1;
+    body.sort = targetList.length > 0 ? targetList[targetList.length - 1].sort + 1 : 1;
     targetList.push(current);
   }
   //更新节点的path和对应子节点path
@@ -183,9 +166,9 @@ export async function moveNode(info) {
   if (body.sourcePath !== body.targetPath) {
     let keys = Object.keys(data);
     //旧路径
-    let oldPath = body.sourcePath + "." + current.bookmarkId;
+    let oldPath = body.sourcePath + '.' + current.bookmarkId;
     //新路径
-    let newPath = body.targetPath + "." + current.bookmarkId;
+    let newPath = body.targetPath + '.' + current.bookmarkId;
     keys.forEach(item => {
       if (!item.startsWith(oldPath)) {
         return;
@@ -219,12 +202,20 @@ export async function keySearch(content) {
       if (item.searchKey.indexOf(content) > -1) {
         res.push(item);
         if (res.length >= 12) {
-          console.info("搜索耗时：" + (Date.now() - time1));
+          console.info('搜索耗时：' + (Date.now() - time1));
           return res;
         }
       }
     }
   }
-  console.info("搜索耗时：" + (Date.now() - time1));
+  console.info('搜索耗时：' + (Date.now() - time1));
   return res;
+}
+
+/**
+ * 获取localstore缓存的key
+ */
+export function getCacheKey() {
+  let currentId = JSON.parse(window.atob(window.token.split('.')[1])).userId;
+  return currentId + TREE_LIST_KEY;
 }

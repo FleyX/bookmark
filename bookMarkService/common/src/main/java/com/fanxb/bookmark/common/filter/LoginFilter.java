@@ -133,7 +133,7 @@ public class LoginFilter implements Filter {
             UserContextHolder.set(context);
             return true;
         } catch (Exception e) {
-            log.error("jwt解密失败：{}", jwt, e);
+            log.error("jwt解密失败：{},原因：{}", jwt, e.getMessage());
             return false;
         }
     }

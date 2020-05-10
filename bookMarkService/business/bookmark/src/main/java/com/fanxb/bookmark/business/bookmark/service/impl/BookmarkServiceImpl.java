@@ -74,7 +74,7 @@ public class BookmarkServiceImpl implements BookmarkService {
                 dealBookmark(userId, elements.get(i), path, sortBase + count + i - 1, bookmarks);
             }
         }
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_UPDATE_TIME, new UserBookmarkUpdate(userId, System.currentTimeMillis()));
+        updateVersion(userId);
         RedisUtil.addToMq(RedisConstant.BOOKMARK_INSERT_ES, bookmarks);
         RedisUtil.addToMq(RedisConstant.BOOKMARK_PINYIN_CHANGE, bookmarks);
 
@@ -172,8 +172,8 @@ public class BookmarkServiceImpl implements BookmarkService {
             bookmarkDao.deleteUserBookmark(userId, bookmarkIdList);
         }
         set.addAll(bookmarkIdList.stream().map(String::valueOf).collect(Collectors.toSet()));
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_UPDATE_TIME, new UserBookmarkUpdate(userId, System.currentTimeMillis()));
         RedisUtil.addToMq(RedisConstant.BOOKMARK_DELETE_ES, set);
+        updateVersion(userId);
     }
 
     @Override
@@ -191,7 +191,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         if (bookmark.getType() == 0) {
             RedisUtil.addToMq(RedisConstant.BOOKMARK_INSERT_ES, Collections.singleton(bookmark));
         }
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_UPDATE_TIME, new UserBookmarkUpdate(userId, System.currentTimeMillis()));
+        updateVersion(userId);
         return bookmark;
     }
 
@@ -204,7 +204,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         if (bookmark.getType() == 0) {
             RedisUtil.addToMq(RedisConstant.BOOKMARK_INSERT_ES, Collections.singleton(bookmark));
         }
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_UPDATE_TIME, new UserBookmarkUpdate(userId, System.currentTimeMillis()));
+        updateVersion(userId);
     }
 
 
@@ -225,7 +225,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         }
         //更新被移动节点的path和sort
         bookmarkDao.updatePathAndSort(userId, body.getBookmarkId(), body.getTargetPath(), body.getSort());
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_UPDATE_TIME, new UserBookmarkUpdate(userId, System.currentTimeMillis()));
+        updateVersion(userId);
     }
 
     @Override
@@ -237,6 +237,17 @@ public class BookmarkServiceImpl implements BookmarkService {
         builder.size(5);
         builder.query(boolQueryBuilder);
         return esUtil.search(EsConstant.BOOKMARK_INDEX, builder, BookmarkEs.class);
+    }
+
+    /**
+     * 功能描述: 向mq发送消息通知，数据更新
+     *
+     * @param userId userId
+     * @author fanxb
+     * @date 2020/5/10 12:07
+     */
+    private void updateVersion(int userId) {
+        RedisUtil.addToMq(RedisConstant.BOOKMARK_UPDATE_VERSION, userId);
     }
 
 

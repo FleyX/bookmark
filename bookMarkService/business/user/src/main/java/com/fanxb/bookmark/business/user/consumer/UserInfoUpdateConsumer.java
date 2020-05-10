@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author fanxb
  * @date 2020/1/26 上午11:54
  */
-@MqConsumer(RedisConstant.BOOKMARK_UPDATE_TIME)
+@MqConsumer(RedisConstant.BOOKMARK_UPDATE_VERSION)
 public class UserInfoUpdateConsumer implements RedisConsumer {
 
     @Autowired
@@ -20,11 +20,11 @@ public class UserInfoUpdateConsumer implements RedisConsumer {
 
     @Override
     public void deal(String message) {
-        UserBookmarkUpdate item = JSON.parseObject(message, UserBookmarkUpdate.class);
-        if (item.getUserId() == -1) {
-            userDao.updateAllBookmarkUpdateTime(item.getUpdateTime());
+        int userId = Integer.parseInt(message);
+        if (userId == -1) {
+            userDao.updateAllBookmarkUpdateVersion();
         } else {
-            userDao.updateLastBookmarkUpdateTime(item);
+            userDao.updateLastBookmarkUpdateTime(userId);
         }
     }
 }

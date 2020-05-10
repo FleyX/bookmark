@@ -40,6 +40,6 @@ public class PinyinUpdateConsumer implements RedisConsumer {
             bookmarkDao.updateSearchKey(bookmarks.get(i).getBookmarkId(), resList.get(i));
         }
         //更新本用户书签更新时间
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_UPDATE_TIME, new UserBookmarkUpdate(bookmarks.get(0).getUserId()));
+        RedisUtil.addToMq(RedisConstant.BOOKMARK_UPDATE_VERSION, new UserBookmarkUpdate(bookmarks.get(0).getUserId()));
     }
 }

@@ -123,8 +123,8 @@ public interface UserDao {
      * @author fanxb
      * @date 2020/1/26 下午3:47
      */
-    @Update("update user set bookmarkChangeTime=#{updateTime} where userId=#{userId}")
-    void updateLastBookmarkUpdateTime(UserBookmarkUpdate item);
+    @Update("update user set version=version+1 where userId=#{userId}")
+    void updateLastBookmarkUpdateTime(int userId);
 
     /**
      * 功能描述: 更新所有用户的更新时间
@@ -133,6 +133,6 @@ public interface UserDao {
      * @author 123
      * @date 2020/3/29 18:18
      */
-    @Update("update user set bookmarkChangeTime=#{time}")
-    void updateAllBookmarkUpdateTime(long time);
+    @Update("update user set version=version+1")
+    void updateAllBookmarkUpdateVersion();
 }

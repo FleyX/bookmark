@@ -61,7 +61,7 @@ public class PinYinServiceImpl implements PinYinService {
             i = bookmarks.get(SIZE - 1).getBookmarkId();
         }
         //更新所有用户的上次刷新时间
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_UPDATE_TIME, new UserBookmarkUpdate(-1, System.currentTimeMillis()));
+        RedisUtil.addToMq(RedisConstant.BOOKMARK_UPDATE_VERSION, new UserBookmarkUpdate(-1, System.currentTimeMillis()));
     }
 
     @Override

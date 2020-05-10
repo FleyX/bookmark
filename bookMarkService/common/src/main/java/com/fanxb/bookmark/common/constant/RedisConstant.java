@@ -14,7 +14,7 @@ public class RedisConstant {
     /**
      * 某用户书签数据更新时间,该队列左进右出
      */
-    public static final String BOOKMARK_UPDATE_TIME = "bookmark_update_time";
+    public static final String BOOKMARK_UPDATE_VERSION = "bookmark_update_version";
     /**
      * 某个用户上传了文件夹，需要进行书签转化
      */
