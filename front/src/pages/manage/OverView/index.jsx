@@ -105,6 +105,7 @@ class OverView extends React.Component {
     const item = e.node.props.dataRef;
     if (item.type === 0) {
       window.open(item.url.startsWith('http') ? item.url : 'http://' + item.url);
+      httpUtil.post('/bookmark/visitNum?id=' + item.bookmarkId);
     } else {
       const id = item.bookmarkId.toString();
       const index = expandedKeys.indexOf(id);

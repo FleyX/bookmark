@@ -2,6 +2,7 @@ package com.fanxb.bookmark.business.bookmark.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
+import com.fanxb.bookmark.business.bookmark.entity.redis.VisitNumPlus;
 import com.fanxb.bookmark.common.entity.Bookmark;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -24,7 +25,6 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      * Description: 插入一条书签记录
      *
      * @param node node
-     * @return void
      * @author fanxb
      * @date 2019/7/8 16:49
      */
@@ -177,7 +177,7 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      * 功能描述: 更新一个bookmark的key
      *
      * @param bookmarkId id
-     * @param searchKey searchKey
+     * @param searchKey  searchKey
      * @author fanxb
      * @date 2020/3/22 22:08
      */
@@ -189,9 +189,20 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      *
      * @param size       大小
      * @param startIndex 开始下标
-     * @return
+     * @return bookmark List
+     * @author fanxb
      */
     @Select("select * from bookmark order by bookmarkId limit ${startIndex},${size}")
     List<Bookmark> getBookmarkListPage(@Param("size") int size, @Param("startIndex") int startIndex);
+
+    /**
+     * 功能描述: 书签访问次数+1
+     *
+     * @param item 信息
+     * @author fanxb
+     * @date 2020/5/12 10:40
+     */
+    @Update("update bookmark set visitNum=visitNum+1 where userId=#{userId} and bookmarkId=#{bookmarkId}")
+    void updateVisitNum(VisitNumPlus item);
 
 }

@@ -75,9 +75,9 @@ public class MqConfiguration implements ApplicationRunner {
                     }
                 });
                 if (count.get() == topicMap.keySet().size()) {
-                    //当所有的队列都为空时休眠1s
+                    //当所有的队列都为空时休眠3s
                     try {
-                        TimeUnit.SECONDS.sleep(1);
+                        TimeUnit.SECONDS.sleep(3);
                     } catch (Exception e) {
                         log.error("休眠出错", e);
                     }
