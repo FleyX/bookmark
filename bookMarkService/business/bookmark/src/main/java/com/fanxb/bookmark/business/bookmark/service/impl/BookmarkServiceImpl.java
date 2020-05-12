@@ -239,6 +239,11 @@ public class BookmarkServiceImpl implements BookmarkService {
         return esUtil.search(EsConstant.BOOKMARK_INDEX, builder, BookmarkEs.class);
     }
 
+    @Override
+    public void visitNumPlus(int id) {
+        RedisUtil.addToMq(RedisConstant.BOOKMARK_VISIT_NUM_PLUS, id);
+    }
+
     /**
      * 功能描述: 向mq发送消息通知，数据更新
      *

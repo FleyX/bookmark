@@ -40,6 +40,10 @@ public class Bookmark {
     private String searchKey = "";
     private Long addTime;
     private Long createTime;
+    /**
+     * 访问次数
+     */
+    private int visitNum;
     private List<Bookmark> children;
 
     public Bookmark() {

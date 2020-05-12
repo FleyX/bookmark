@@ -177,7 +177,7 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      * 功能描述: 更新一个bookmark的key
      *
      * @param bookmarkId id
-     * @param searchKey searchKey
+     * @param searchKey  searchKey
      * @author fanxb
      * @date 2020/3/22 22:08
      */
@@ -193,5 +193,15 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      */
     @Select("select * from bookmark order by bookmarkId limit ${startIndex},${size}")
     List<Bookmark> getBookmarkListPage(@Param("size") int size, @Param("startIndex") int startIndex);
+
+    /**
+     * 功能描述: 书签访问次数+1
+     *
+     * @param id 书签id
+     * @author fanxb
+     * @date 2020/5/12 10:40
+     */
+    @Update("update bookmark set visitNum=visitNum+1 where bookmarkId=#{id}")
+    void updateVisitNum(int id);
 
 }

@@ -27,4 +27,8 @@ public class RedisConstant {
      * 从es中删除数据
      */
     public static final String BOOKMARK_DELETE_ES = "bookmark_DELETE_es";
+    /**
+     * 书签访问次数+1
+     */
+    public static final String BOOKMARK_VISIT_NUM_PLUS = "bookmark_visit_num_plus";
 }
