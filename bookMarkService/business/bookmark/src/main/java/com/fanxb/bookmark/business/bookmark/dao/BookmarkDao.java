@@ -2,6 +2,7 @@ package com.fanxb.bookmark.business.bookmark.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
+import com.fanxb.bookmark.business.bookmark.entity.redis.VisitNumPlus;
 import com.fanxb.bookmark.common.entity.Bookmark;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -201,7 +202,7 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      * @author fanxb
      * @date 2020/5/12 10:40
      */
-    @Update("update bookmark set visitNum=visitNum+1 where bookmarkId=#{id}")
-    void updateVisitNum(int id);
+    @Update("update bookmark set visitNum=visitNum+1 where userId=#{userId} and bookmarkId=#{bookmarkId}")
+    void updateVisitNum(VisitNumPlus item);
 
 }

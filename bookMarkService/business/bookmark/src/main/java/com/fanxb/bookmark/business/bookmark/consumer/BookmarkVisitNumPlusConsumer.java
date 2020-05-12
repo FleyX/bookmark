@@ -1,6 +1,8 @@
 package com.fanxb.bookmark.business.bookmark.consumer;
 
+import com.alibaba.fastjson.JSON;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
+import com.fanxb.bookmark.business.bookmark.entity.redis.VisitNumPlus;
 import com.fanxb.bookmark.common.annotation.MqConsumer;
 import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.redis.RedisConsumer;
@@ -29,8 +31,9 @@ public class BookmarkVisitNumPlusConsumer implements RedisConsumer {
 
     @Override
     public void deal(String message) {
+        VisitNumPlus item = JSON.parseObject(message, VisitNumPlus.class);
         try {
-            bookmarkDao.updateVisitNum(Integer.parseInt(message));
+            bookmarkDao.updateVisitNum(item);
         } catch (Exception e) {
             log.error("书签访问次数增加失败：{}", e.getMessage());
         }
