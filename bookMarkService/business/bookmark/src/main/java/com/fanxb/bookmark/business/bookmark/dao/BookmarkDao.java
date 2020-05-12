@@ -25,7 +25,6 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      * Description: 插入一条书签记录
      *
      * @param node node
-     * @return void
      * @author fanxb
      * @date 2019/7/8 16:49
      */
@@ -190,7 +189,8 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      *
      * @param size       大小
      * @param startIndex 开始下标
-     * @return
+     * @return bookmark List
+     * @author fanxb
      */
     @Select("select * from bookmark order by bookmarkId limit ${startIndex},${size}")
     List<Bookmark> getBookmarkListPage(@Param("size") int size, @Param("startIndex") int startIndex);
@@ -198,7 +198,7 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
     /**
      * 功能描述: 书签访问次数+1
      *
-     * @param id 书签id
+     * @param item 信息
      * @author fanxb
      * @date 2020/5/12 10:40
      */
