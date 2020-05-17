@@ -20,7 +20,7 @@ docker 镜像 构建文件为本目录下的`Dockerfile`,已经生产推送到�
    export SMTP_PORT=465
    # 文件存储路径
    export BOOKMARK_FILE_SAVE_PATH=./fileSave
-   # 服务部署地址
+   # 服务部署地址(需要改为真实前端访问地址)
    export BOOKMARK_HOST=http://localhost:8080
    ```
 

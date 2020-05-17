@@ -161,4 +161,18 @@ public class BookmarkController {
         return Result.success(null);
     }
 
+    /**
+     * 功能描述: 书签增加1
+     *
+     * @param id id
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2020/5/12 10:44
+     */
+    @PostMapping("/visitNum")
+    public Result visitNum(int id) {
+        bookmarkService.visitNumPlus(id);
+        return Result.success(null);
+    }
+
 }

@@ -1,0 +1,1 @@
+ALTER TABLE `bookmark`.`bookmark` ADD COLUMN `visitNum` int(0) UNSIGNED NOT NULL DEFAULT 0 COMMENT '访问次数' AFTER `createTime`;

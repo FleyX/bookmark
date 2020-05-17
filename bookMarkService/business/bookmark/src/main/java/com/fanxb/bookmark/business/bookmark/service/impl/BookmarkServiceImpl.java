@@ -1,8 +1,10 @@
 package com.fanxb.bookmark.business.bookmark.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
+import com.fanxb.bookmark.business.bookmark.entity.redis.VisitNumPlus;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
 import com.fanxb.bookmark.business.bookmark.service.PinYinService;
 import com.fanxb.bookmark.common.constant.EsConstant;
@@ -237,6 +239,12 @@ public class BookmarkServiceImpl implements BookmarkService {
         builder.size(5);
         builder.query(boolQueryBuilder);
         return esUtil.search(EsConstant.BOOKMARK_INDEX, builder, BookmarkEs.class);
+    }
+
+    @Override
+    public void visitNumPlus(int id) {
+        VisitNumPlus item = new VisitNumPlus(UserContextHolder.get().getUserId(), id);
+        RedisUtil.addToMq(RedisConstant.BOOKMARK_VISIT_NUM_PLUS, JSON.toJSONString(item));
     }
 
     /**

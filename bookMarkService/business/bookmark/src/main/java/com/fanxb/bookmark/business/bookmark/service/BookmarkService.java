@@ -98,8 +98,18 @@ public interface BookmarkService {
      *
      * @param userId  userId
      * @param context context
+     * @return es搜索结果
      * @author fanxb
      * @date 2019/7/25 10:45
      */
     List<BookmarkEs> searchUserBookmark(int userId, String context);
+
+    /**
+     * 功能描述: 当前用户书签访问次数+1
+     *
+     * @param id 书签id
+     * @author fanxb
+     * @date 2020/5/12 10:21
+     */
+    void visitNumPlus(int id);
 }

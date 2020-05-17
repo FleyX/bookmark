@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
  * Created By Fxb
  * Date: 2020/3/29
  * Time: 11:34
+ * @author fanxb
  */
 @MqConsumer(RedisConstant.BOOKMARK_INSERT_ES)
 public class BookmarkInsertEsConsumer implements RedisConsumer {
