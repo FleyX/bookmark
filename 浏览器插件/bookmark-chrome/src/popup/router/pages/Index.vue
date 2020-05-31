@@ -6,17 +6,14 @@
     </div>
     <!-- 书签检索 -->
     <search />
-    <bookmark-tree />
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import BookmarkTree from '../components/BookmarkTree';
 import Search from '../components/SearchBookmark';
 export default {
   components: {
-    BookmarkTree,
     Search,
   },
   data() {
@@ -27,7 +24,11 @@ export default {
 
   created() {
     window.token = localStorage.getItem('token');
-    this.init();
+    if (!window.token) {
+      this.$router.replace('/public/login');
+    } else {
+      this.init();
+    }
   },
   methods: {
     async init() {

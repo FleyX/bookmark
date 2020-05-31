@@ -3,6 +3,9 @@
   "description": "A Vue.js web extension",
   "version": null,
   "manifest_version": 2,
+  "permissions": [
+    "contextMenus"
+  ],
   "icons": {
     "48": "icons/icon_48.png",
     "128": "icons/icon_128.png"
@@ -21,7 +24,7 @@
     "chrome_style": true
   },
   "content_scripts": [{
-      "matches": ["http://west.tapme.top/*", "http://bookmark.tapme.top/*","http://localhost:3000/*"],
+      "matches": ["https://bm.tapme.top/*", "http://bookmark.tapme.top/*", "http://localhost:3000/*"],
       "js": ["static/sso.js"]
     }
 
