@@ -1,4 +1,9 @@
 global.browser = require('webextension-polyfill');
+import httpUtil from './util/httpUtil.js';
+
+window.envType = 'background';
+window.token = localStorage.getItem('token');
+
 let token = null;
 let globalPort = null;
 
@@ -22,12 +27,21 @@ chrome.extension.onConnect.addListener(port => {
 chrome.contextMenus.create(
   {
     title: '添加到书签',
-    onclick: () => {
-      globalPort.postMessage('点击');
-      console.log('我被点击了');
+    onclick: (info, tab) => {
+      console.log(info, tab);
+      globalPort.postMessage(createMsg('addBookmark', null));
     },
   },
   err => {
-    console.error(err);
+    console.log(err);
   }
 );
+
+/**
+ * 构建一个标准命令
+ * @param {*} code code
+ * @param {*} data data
+ */
+function createMsg(code, data) {
+  return JSON.stringify({ code, data });
+}

@@ -1,15 +1,22 @@
-/**
- * web页面植入脚本，用于授权等一系列操作。
- */
-
 console.log('注入了页面');
 var port = chrome.extension.connect({ name: 'data' });
+/**
+ * 接受background传来的消息
+ */
 port.onMessage.addListener(msg => {
   console.log('收到消息:' + msg);
-  console.log(window.location);
-  console.log(window.token);
+  let obj = JSON.parse(msg);
+  switch (obj.code) {
+    case 'addBookmark':
+      break;
+    default:
+      console.error('未知的命令:' + obj.code);
+  }
 });
 
+/**
+ * 接收当前注入页面传来的消息
+ */
 window.addEventListener('message', function(event) {
   if (event.data.type === undefined) {
     return;

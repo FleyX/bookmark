@@ -24,7 +24,7 @@
     "chrome_style": true
   },
   "content_scripts": [{
-      "matches": ["https://bm.tapme.top/*", "http://bookmark.tapme.top/*", "http://localhost:3000/*"],
+      "matches": ["*://*/*"],
       "js": ["static/sso.js"]
     }
 

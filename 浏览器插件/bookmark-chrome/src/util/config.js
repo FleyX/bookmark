@@ -2,8 +2,8 @@
 var baseUri;
 
 if (process.env.NODE_ENV === 'development') {
-  // baseUri = 'http://localhost:3000';
-  baseUri = 'https://bm.tapme.top';
+  baseUri = 'http://localhost:3000';
+  // baseUri = 'https://bm.tapme.top';
 } else {
   baseUri = 'https://bm.tapme.top';
 }
