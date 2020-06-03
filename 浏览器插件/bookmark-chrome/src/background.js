@@ -1,5 +1,5 @@
-global.browser = require('webextension-polyfill');
 import httpUtil from './util/httpUtil.js';
+global.browser = require('webextension-polyfill');
 
 window.envType = 'background';
 window.token = localStorage.getItem('token');
@@ -29,7 +29,12 @@ chrome.contextMenus.create(
     title: '添加到书签',
     onclick: (info, tab) => {
       console.log(info, tab);
-      globalPort.postMessage(createMsg('addBookmark', null));
+      httpUtil.put('/bookmark', {
+        type: 0,
+        path: '',
+        name: tab.title,
+        url: tab.url,
+      });
     },
   },
   err => {
