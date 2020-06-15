@@ -99,18 +99,17 @@ services:
         sleep 20 && \
         ls -l && \
         java -jar -Dspring.profiles.actice=prd \
-        -DjwtSecret=${JWT_SECRET} \
+        -DjwtSecret='${JWT_SECRET}' \
         -Dmybatis-plus.configuration.log-impl=org.apache.ibatis.logging.nologging.NoLoggingImpl \
         -Dspring.mail.host=${SMTP_HOST} \
-        -Dspring.mail.username=${SMTP_USERNAME} \
-        -Dspring.mail.password=${SMTP_PASSWORD} \
-        -Dspring.datasource.druid.password=${MYSQL_PASSWORD} \
+        -Dspring.mail.username='${SMTP_USERNAME}' \
+        -Dspring.mail.password='${SMTP_PASSWORD}' \
+        -Dspring.datasource.druid.password='${MYSQL_PASSWORD}' \
         -Dspring.datasource.druid.url=jdbc:mysql://bookmark-mysql:3306/bookmark?useUnicode=true\&characterEncoding=utf-8\&useSSL=false\&useJDBCCompliantTimezoneShift=true\&useLegacyDatetimeCode=false\&serverTimezone=UTC \
         -Dspring.redis.host=bookmark-redis \
         -Des.host=bookmark-es \
         -DserviceAddress=${BOOKMARK_HOST} \
         -DfileSavePath=/opt/files \
-        -DserviceAddress=https://bm.tapme.top \
         -Dpinyin.base-url=http://bookmark-pinyin:8012 \
         -Dpinyin.token=123456321 \
         service.jar
