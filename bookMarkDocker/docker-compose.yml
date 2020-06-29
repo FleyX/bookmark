@@ -77,6 +77,8 @@ services:
         cd /opt/app && \
         npm --registry https://registry.npm.taobao.org install && \
         node index.js 8012 123456321
+    ports:
+      - 8012:8012
   bookmark-service:
     image: registry.cn-hangzhou.aliyuncs.com/fleyx/node-java-env:v2
     container_name: bookmark-service
