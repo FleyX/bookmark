@@ -1,19 +1,29 @@
 <template>
   <div class="home">
-    {{ count }}
+    <!-- {{ count}}
+    <div><button @click="setCount(1)">增加1</button></div>
+    <div><button @click="asyncAdd(10)">异步增加</button></div>
+    <Button type="primary">button</Button> -->
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import { mapState } from "vuex";
-import * as types from "../store/type";
+// import { mapState, mapActions, mapMutations } from 'vuex';
 
 export default {
   name: "Home",
   computed: {
-    ...mapState([types.COUNT])
+    // ...mapState({
+    //   count: (state) => state.count.count,
+    // }),
   },
-  components: {}
+  watch: {},
+  methods: {
+    // ...mapActions('count', ['asyncAdd']),
+    // ...mapMutations('count', ['setCount']),
+  }
 };
 </script>
+
+<style lang="less" scoped></style>
