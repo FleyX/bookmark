@@ -1,17 +1,15 @@
 <template>
   <div class="main">
+    <img class="ico" src="/static/img/bookmarkLogo.png" />
     <div class="main-body">
-      <login-register-header type="login"></login-register-header>
+      <router-view />
     </div>
   </div>
 </template>
 
 <script>
-import LoginRegisterHeader from "../../components/public/LoginRegisterHeader.vue";
-
 export default {
-  name: "Login",
-  components: { LoginRegisterHeader }
+  name: "Public"
 };
 </script>
 
@@ -19,14 +17,21 @@ export default {
 @import "../../global.less";
 .main {
   width: 100%;
-  height: 100%;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+
+  .ico {
+    position: fixed;
+    left: 5%;
+    top: 5%;
+    width: 2rem;
+  }
   .main-body {
     width: 5rem;
-    height: 3.5rem;
-    background-color: @loginBgColor;
+    min-height: 3.5rem;
+    background-color: @contentBgColor;
     border-radius: 5px;
     padding: 0.1rem;
   }

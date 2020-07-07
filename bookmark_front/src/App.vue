@@ -1,30 +1,23 @@
 <template>
   <div id="app">
-    <Top />
-    <Content>
-      <router-view />
-    </Content>
-    <Bottom />
+    <router-view />
   </div>
 </template>
 
 <script>
-import Top from "@/components/layout/Top.vue";
-import Content from "@/components/layout/Content.vue";
-import Bottom from "@/components/layout/Bottom.vue";
-
 export default {
-  name: "App",
-  components: { Top, Content, Bottom }
+  name: "App"
 };
 </script>
 
 <style lang="less">
+@import "./global.less";
 html,
 body {
   margin: 0;
   padding: 0;
   font-size: 100px;
+  background-color: @bgColor;
 }
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

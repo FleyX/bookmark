@@ -1,21 +1,43 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Home from "../views/Home.vue";
+import Main from "../views/main/Main.vue";
+import UserInfo from "../views/main/pages/personSpace/UserInfo.vue";
+import BookmarkTree from "../views/main/pages/things/BookmarkTree.vue";
 
-import Login from "../views/public/Login.vue";
+import Public from "../views/public/Public.vue";
+import Login from "../views/public/pages/Login.vue";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
     path: "/",
-    name: "Home",
-    component: Home
+    name: "Main",
+    component: Main,
+    children: [
+      {
+        path: "",
+        name: "BookmarkTree",
+        component: BookmarkTree
+      },
+      {
+        path: "personSpakce/userInfo",
+        name: "UserInfo",
+        component: UserInfo
+      }
+    ]
   },
   {
-    path: "/public/login",
-    name: "Login",
-    component: Login
+    path: "/public",
+    name: "Public",
+    component: Public,
+    children: [
+      {
+        path: "login",
+        name: "Login",
+        component: Login
+      }
+    ]
   }
 ];
 

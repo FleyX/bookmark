@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import count from "./modules/count";
+import globalConfig from "./modules/globalConfig";
 
 Vue.use(Vuex);
 
@@ -9,6 +9,6 @@ export default new Vuex.Store({
   mutations: {},
   actions: {},
   modules: {
-    count
+    globalConfig
   }
 });
