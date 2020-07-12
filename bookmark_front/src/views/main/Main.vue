@@ -9,9 +9,9 @@
 </template>
 
 <script>
-import Top from "@/components/layout/Top.vue";
-import Content from "@/components/layout/Content.vue";
-import Bottom from "@/components/layout/Bottom.vue";
+import Content from "@/layout/main/Content.vue";
+import Bottom from "@/layout/main/Bottom.vue";
+import Top from "@//layout/main/Top.vue";
 
 export default {
   name: "Home",

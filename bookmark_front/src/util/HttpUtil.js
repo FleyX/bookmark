@@ -20,13 +20,15 @@ async function request(url, method, params, body, isForm, redirect) {
     headers["Content-Type"] = "multipart/form-data";
   }
   try {
-    const { code, data, message } = await http.default.request({
+    const res = await http.default.request({
       url,
       baseURL: "/bookmark/api",
+      method,
       params,
       data: body,
       headers
     });
+    const { code, data, message } = res.data;
     if (code === 1) {
       return data;
     }
@@ -35,10 +37,9 @@ async function request(url, method, params, body, isForm, redirect) {
       router.replace(`/public/login?redirect=${encodeURIComponent(router.currentRoute.fullPath)}`);
       return null;
     }
-    console.log(`请求异常:${message}`);
+    window.vueInstance.$message.error(message);
     throw new Error(message);
   } catch (err) {
-    console.error(err);
     throw new Error(err);
   }
 }
