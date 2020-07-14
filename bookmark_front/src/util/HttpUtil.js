@@ -13,21 +13,23 @@ import router from "../router/index";
  * @returns 数据
  */
 async function request(url, method, params, body, isForm, redirect) {
-  const headers = {
-    "jwt-token": await getToken()
+  let options = {
+    url,
+    baseURL: "/bookmark/api",
+    method,
+    params,
+    headers: {
+      "jwt-token": await getToken()
+    }
   };
   if (isForm) {
-    headers["Content-Type"] = "multipart/form-data";
+    options.headers["Content-Type"] = "multipart/form-data";
+  }
+  if (body) {
+    options.data = body;
   }
   try {
-    const res = await http.default.request({
-      url,
-      baseURL: "/bookmark/api",
-      method,
-      params,
-      data: body,
-      headers
-    });
+    const res = await http.default.request(options);
     const { code, data, message } = res.data;
     if (code === 1) {
       return data;
@@ -51,7 +53,7 @@ async function request(url, method, params, body, isForm, redirect) {
  * @param {*} redirect 未登陆是否跳转到登陆页
  */
 async function get(url, params = null, redirect = true) {
-  return request(url, "get", params, null, redirect);
+  return request(url, "get", params, null, false, redirect);
 }
 
 /**

@@ -16,7 +16,7 @@
         <a-form-model-item prop="password">
           <div class="reset">
             <a-checkbox v-model="form.rememberMe">记住我</a-checkbox>
-            <router-link replace="reset">重置密码</router-link>
+            <router-link to="resetPassword" replace>重置密码</router-link>
           </div>
         </a-form-model-item>
 
@@ -33,6 +33,7 @@
 <script>
 import Header from "@/components/public/Switch.vue";
 import httpUtil from "../../../util/HttpUtil.js";
+import { mapMutations } from "vuex";
 export default {
   name: "Login",
   components: {
@@ -48,21 +49,24 @@ export default {
       rules: {
         str: [
           { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 1, max: 50, message: "最短1，最长50", trigger: "blur" }
+          { min: 1, max: 50, message: "最短1，最长50", trigger: "change" }
         ],
         password: [
           { required: true, message: "请输入密码", trigger: "blur" },
-          { pattern: "^\\w{6,18}$", message: "密码为6-18位数字,字母,下划线组合", trigger: "blur" }
+          { pattern: "^\\w{6,18}$", message: "密码为6-18位数字,字母,下划线组合", trigger: "change" }
         ]
       }
     };
   },
   methods: {
+    ...mapMutations("globalConfig", ["setUserInfo", "setToken"]),
     submit() {
-      let _this = this;
       this.$refs.loginForm.validate(async status => {
         if (status) {
-          let res = await httpUtil.post("/user/login", null, _this.form);
+          let res = await httpUtil.post("/user/login", null, this.form);
+          this.setUserInfo(res.user);
+          this.$store.commit("globalConfig/setToken", res.token);
+          this.$router.replace("/");
         }
       });
     }

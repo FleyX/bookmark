@@ -6,6 +6,8 @@ import BookmarkTree from "../views/main/pages/things/BookmarkTree.vue";
 
 import Public from "../views/public/Public.vue";
 import Login from "../views/public/pages/Login.vue";
+import Register from "../views/public/pages/Register.vue";
+import ResetPassword from "../views/public/pages/ResetPassword.vue";
 
 Vue.use(VueRouter);
 
@@ -35,6 +37,16 @@ const routes = [
         path: "login",
         name: "Login",
         component: Login
+      },
+      {
+        path: "register",
+        name: "Register",
+        component: Register
+      },
+      {
+        path: "resetPassword",
+        name: "ResetPassword",
+        component: ResetPassword
       }
     ]
   }

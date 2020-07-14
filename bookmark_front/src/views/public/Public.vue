@@ -31,7 +31,7 @@ export default {
   .main-body {
     width: 5rem;
     min-height: 3.5rem;
-    background-color: @contentBgColor;
+    background-color: @publicBgColor;
     border-radius: 5px;
     padding: 0.1rem;
   }

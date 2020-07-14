@@ -15,7 +15,10 @@ import Top from "@//layout/main/Top.vue";
 
 export default {
   name: "Home",
-  components: { Top, Content, Bottom }
+  components: { Top, Content, Bottom },
+  async beforeCreate() {
+    this.$store.dispatch("globalConfig/init");
+  }
 };
 </script>
 
