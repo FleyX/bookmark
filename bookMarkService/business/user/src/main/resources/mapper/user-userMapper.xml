@@ -3,20 +3,22 @@
 <mapper namespace="com.fanxb.bookmark.business.user.dao.UserDao">
 
 
-    <insert id="addOne">
-        insert into user (username, email, icon, password, createTime, lastLoginTime)
-            value
-            (#{username}, #{email}, #{icon}, #{password}, #{createTime}, #{lastLoginTime})
+    <insert id="addOne" useGeneratedKeys="true" keyColumn="userId" keyProperty="userId">
+        insert into user (username, email, icon, password, createTime, lastLoginTime,version)
+        value
+        (#{username}, #{email}, #{icon}, #{password}, #{createTime}, #{lastLoginTime},#{version})
     </insert>
 
     <select id="selectByUsernameOrEmail" resultType="com.fanxb.bookmark.common.entity.User">
         select
-            userId,
-            username,
-            email,
-            icon,
-            password,
-            createTime
+        userId,
+        username,
+        email,
+        icon,
+        password,
+        createTime,
+        lastLoginTime,
+        version
         from user
         where username = #{name} or email = #{email}
         limit 1

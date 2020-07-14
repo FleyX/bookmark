@@ -49,8 +49,7 @@ public class UserController {
      */
     @PutMapping("")
     public Result register(@RequestBody RegisterBody body) {
-        userService.register(body);
-        return Result.success(null);
+        return Result.success(userService.register(body));
     }
 
     /**

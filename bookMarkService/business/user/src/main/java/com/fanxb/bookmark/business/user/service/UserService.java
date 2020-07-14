@@ -80,7 +80,7 @@ public class UserService {
      * @author fanxb
      * @date 2019/7/6 11:30
      */
-    public void register(RegisterBody body) {
+    public LoginRes register(RegisterBody body) {
         User user = userDao.selectByUsernameOrEmail(body.getUsername(), body.getEmail());
         if (user != null) {
             if (user.getUsername().equals(body.getUsername())) {
@@ -96,8 +96,13 @@ public class UserService {
         user.setIcon(DEFAULT_ICON);
         user.setPassword(HashUtil.sha1(HashUtil.md5(body.getPassword())));
         user.setCreateTime(System.currentTimeMillis());
-        user.setLastLoginTime(0);
+        user.setLastLoginTime(System.currentTimeMillis());
+        user.setVersion(0);
         userDao.addOne(user);
+        Map<String, String> data = new HashMap<>(1);
+        data.put("userId", String.valueOf(user.getUserId()));
+        String token = JwtUtil.encode(data, Constant.jwtSecret, LONG_EXPIRE_TIME);
+        return new LoginRes(user, token);
     }
 
     /**
@@ -121,10 +126,7 @@ public class UserService {
         String token = JwtUtil.encode(data, Constant.jwtSecret, body.isRememberMe() ? LONG_EXPIRE_TIME : SHORT_EXPIRE_TIME);
         LoginRes res = new LoginRes();
         res.setToken(token);
-        res.setUserId(userInfo.getUserId());
-        res.setUsername(userInfo.getUsername());
-        res.setEmail(userInfo.getEmail());
-        res.setIcon(userInfo.getIcon());
+        res.setUser(userInfo);
         userDao.updateLastLoginTime(System.currentTimeMillis(), userInfo.getUserId());
         return res;
     }
@@ -175,6 +177,7 @@ public class UserService {
         }
         int userId = UserContextHolder.get().getUserId();
         String fileName = file.getOriginalFilename();
+        assert fileName != null;
         String path = Paths.get(FileConstant.iconPath, userId + "." + System.currentTimeMillis() + fileName.substring(fileName.lastIndexOf("."))).toString();
         Path realPath = Paths.get(Constant.fileSavePath, path);
         FileUtil.ensurePathExist(realPath.getParent().toString());
