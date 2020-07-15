@@ -18,6 +18,7 @@ body {
   padding: 0;
   font-size: 100px;
   background-color: @bgColor;
+  height: initial;
 }
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

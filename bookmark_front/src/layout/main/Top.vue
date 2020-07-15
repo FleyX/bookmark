@@ -1,13 +1,35 @@
 <template>
   <div class="main">
     <img class="ico" src="/static/img/bookmarkLogo.png" />
-    <div class="user">fanxb</div>
+    <a-dropdown>
+      <div class="user">
+        <img :src="userInfo.icon" class="userIcon" />
+        <span class="name">{{ userInfo.username }}</span>
+      </div>
+      <a-menu slot="overlay" :trigger="['hover', 'click']" @click="menuClick">
+        <a-menu-item key="logout">
+          <a href="javascript:;">退出</a>
+        </a-menu-item>
+      </a-menu>
+    </a-dropdown>
   </div>
 </template>
 
 <script>
+import { mapState } from "vuex";
 export default {
-  name: "Top"
+  name: "Top",
+  computed: {
+    ...mapState("globalConfig", ["userInfo"])
+  },
+  methods: {
+    async menuClick({ key }) {
+      if (key === "logout") {
+        await this.$store.dispatch("globalConfig/clear");
+        this.$router.replace("/public/login");
+      }
+    }
+  }
 };
 </script>
 
@@ -16,9 +38,9 @@ export default {
 .main {
   position: fixed;
   top: 0;
-  width: calc(100% - 10px);
-  height: @topHeight - (2 * @topPadding);
-  padding: @topPadding;
+  width: 100%;
+  height: @topHeight;
+  padding: @topPaddingTop 3% @topPaddingTop 3%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -28,6 +50,17 @@ export default {
   }
   .user {
     font-size: 0.3rem;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    .userIcon {
+      width: @topHeight - 0.1rem;
+      height: @topHeight - 0.1rem;
+      border-radius: 50%;
+    }
+    .name {
+      font-size: 0.2rem;
+    }
   }
 }
 </style>

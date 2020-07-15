@@ -1,4 +1,4 @@
-import localforage from "localforage";
+import localforage, { clear } from "localforage";
 /**
  * 存储全局配置
  */
@@ -6,7 +6,7 @@ const state = {
   /**
    * 用户信息
    */
-  userInfo: null,
+  userInfo: {},
   /**
    * token
    */
@@ -20,6 +20,7 @@ const state = {
 const getters = {};
 
 const actions = {
+  //初始化数据
   async init(context) {
     if (context.state.isInit) {
       return;
@@ -29,6 +30,14 @@ const actions = {
     window.token = token;
     context.commit("setToken", token);
     context.commit("isInit", true);
+  },
+  //登出清除数据
+  async clear(context) {
+    await localforage.removeItem("userInfo");
+    await localforage.removeItem("token");
+    delete window.token;
+    context.commit("setUserInfo", {});
+    context.commit("setToken", null);
   }
 };
 
