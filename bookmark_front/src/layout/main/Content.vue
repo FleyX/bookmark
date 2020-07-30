@@ -28,6 +28,6 @@ export default {};
 
   font-size: 0.14rem;
 
-  background-color: rgba(249, 231, 62, 0.2);
+  background-color: white;
 }
 </style>

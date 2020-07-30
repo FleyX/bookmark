@@ -2,7 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Main from "../views/main/Main.vue";
 import UserInfo from "../views/main/pages/personSpace/UserInfo.vue";
-import BookmarkTree from "../views/main/pages/things/BookmarkTree.vue";
+import BookmarkManage from "../views/main/pages/things/BookmarkManage.vue";
 
 import Public from "../views/public/Public.vue";
 import Login from "../views/public/pages/Login.vue";
@@ -18,8 +18,8 @@ const routes = [
     children: [
       {
         path: "",
-        name: "BookmarkTree",
-        component: BookmarkTree
+        name: "BookmarkManage",
+        component: BookmarkManage
       },
       {
         path: "personSpakce/userInfo",

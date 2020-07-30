@@ -28,21 +28,27 @@ async function request(url, method, params, body, isForm, redirect) {
   if (body) {
     options.data = body;
   }
+  let res;
   try {
-    const res = await http.default.request(options);
-    const { code, data, message } = res.data;
-    if (code === 1) {
-      return data;
-    }
-    if (code === -1 && redirect) {
-      // 跳转到登陆页
-      router.replace(`/public/login?redirect=${encodeURIComponent(router.currentRoute.fullPath)}`);
-      return null;
-    }
+    res = await http.default.request(options);
+  } catch (err) {
+    window.vueInstance.$message.error("发生了某些异常问题");
+    console.error(err);
+    return;
+  }
+  const { code, data, message } = res.data;
+  if (code === 1) {
+    return data;
+  } else if (code === -1 && redirect) {
+    // 跳转到登陆页
+    window.vueInstance.$message.error("您尚未登陆，请先登陆");
+    router.replace(`/public/login?redirect=${encodeURIComponent(router.currentRoute.fullPath)}`);
+    throw new Error(message);
+  } else if (code === 0) {
     window.vueInstance.$message.error(message);
     throw new Error(message);
-  } catch (err) {
-    throw new Error(err);
+  } else {
+    console.error(res.data);
   }
 }
 

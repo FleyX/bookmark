@@ -45,6 +45,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   background-color: rgba(197, 190, 198, 0.4);
+  z-index: 100;
   .ico {
     height: 100%;
   }

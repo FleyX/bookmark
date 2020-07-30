@@ -1,4 +1,4 @@
-import localforage, { clear } from "localforage";
+import localforage from "localforage";
 /**
  * 存储全局配置
  */

@@ -51,12 +51,12 @@ public class LoginFilter implements Filter {
     @Autowired
     private UrlDao urlDao;
 
-    private static AntPathMatcher matcher = new AntPathMatcher();
+    private static final AntPathMatcher matcher = new AntPathMatcher();
 
     volatile private static List<Url> publicUrl;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
     }
 
     @Override

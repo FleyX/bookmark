@@ -21,7 +21,7 @@
         <a-form-model-item prop="authCode" ref="authCode" :autoLink="false">
           <div class="authCodeGroup">
             <a-input v-model="form.authCode" placeholder="验证码" @change="() => $refs.authCode.onFieldChange()" />
-            <a-button @click="getAuthCode">{{ countDown == 0 ? "获取验证码" : countDown + "秒后重试" }}</a-button>
+            <a-button @click="getAuthCode" :disabled="countDown > 0">{{ countDown == 0 ? "获取验证码" : countDown + "秒后重试" }}</a-button>
           </div>
         </a-form-model-item>
 
@@ -84,26 +84,30 @@ export default {
     async getAuthCode() {
       this.$refs.resetPassword.validateField("email", async message => {
         if (message === "") {
-          await httpUtil.get("/user/authCode", { email: this.form.email });
-          this.$message.success("发送成功，请查收(注意垃圾箱)");
-          this.countDown = 60;
-          if (this.timer != null) {
-            clearInterval(this.timer);
-          }
-          this.timer = setInterval(() => {
-            if (this.countDown > 0) {
-              this.countDown = this.countDown - 1;
-            } else {
+          try {
+            this.countDown = 60;
+            if (this.timer != null) {
               clearInterval(this.timer);
             }
-          }, 1000);
+            this.timer = setInterval(() => {
+              if (this.countDown > 0) {
+                this.countDown = this.countDown - 1;
+              } else {
+                clearInterval(this.timer);
+              }
+            }, 1000);
+            await httpUtil.get("/user/authCode", { email: this.form.email });
+            this.$message.success("发送成功，请查收(注意垃圾箱)");
+          } catch (error) {
+            this.countDown = 0;
+          }
         }
       });
     },
     submit() {
       this.$refs.resetPassword.validate(async status => {
         if (status) {
-          let res = await httpUtil.put("/resetPassword", null, this.form);
+          let res = await httpUtil.post("/user/resetPassword", null, this.form);
           this.$message.success("重置成功");
           this.$router.replace("login");
         }
