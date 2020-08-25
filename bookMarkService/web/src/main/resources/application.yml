@@ -65,7 +65,7 @@ es:
   #是否启动es
   status: false
   host: localhost
-  port: 9200
+  port: 9200f
   scheme: http
 pinyin:
   base-url: http://localhost:8012

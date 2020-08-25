@@ -28,6 +28,10 @@ const actions = {
   //刷新缓存数据
   async refresh(context) {
     let treeData = await httpUtil.get("/bookmark/currentUser");
+    if (!treeData[""]) {
+      treeData[""] = [];
+    }
+    treeData[""].forEach(item => (item.isLeaf = item.type === 0));
     context.commit("totalTreeData", treeData);
     localforage.setItem("totalTreeData", treeData);
   },
