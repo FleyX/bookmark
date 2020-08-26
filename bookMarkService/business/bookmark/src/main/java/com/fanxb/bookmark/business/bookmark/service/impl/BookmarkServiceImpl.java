@@ -1,5 +1,6 @@
 package com.fanxb.bookmark.business.bookmark.service.impl;
 
+import cn.hutool.core.util.ArrayUtil;
 import com.alibaba.fastjson.JSON;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
@@ -163,17 +164,20 @@ public class BookmarkServiceImpl implements BookmarkService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void batchDelete(int userId, List<Integer> folderIdList, List<Integer> bookmarkIdList) {
+    public void batchDelete(int userId, List<String> pathList, List<Integer> bookmarkIdList) {
+        //所有要删除的书签id
         Set<String> set = new HashSet<>();
-        for (Integer item : folderIdList) {
-            set.addAll(bookmarkDao.getChildrenBookmarkId(userId, item).stream().map(String::valueOf).collect(Collectors.toSet()));
-            bookmarkDao.deleteUserFolder(userId, item);
-            bookmarkIdList.add(item);
+        for (String path : pathList) {
+            Integer id = Integer.parseInt(ArrayUtil.reverse(path.split("\\."))[0]);
+            set.addAll(bookmarkDao.getChildrenBookmarkId(userId, path).stream().map(String::valueOf).collect(Collectors.toSet()));
+            //删除此文件夹所有的子节点
+            bookmarkDao.deleteUserFolder(userId, path);
+            bookmarkIdList.add(id);
         }
         if (bookmarkIdList.size() > 0) {
             bookmarkDao.deleteUserBookmark(userId, bookmarkIdList);
+            set.addAll(bookmarkIdList.stream().map(String::valueOf).collect(Collectors.toSet()));
         }
-        set.addAll(bookmarkIdList.stream().map(String::valueOf).collect(Collectors.toSet()));
         RedisUtil.addToMq(RedisConstant.BOOKMARK_DELETE_ES, set);
         updateVersion(userId);
     }
@@ -247,8 +251,13 @@ public class BookmarkServiceImpl implements BookmarkService {
         RedisUtil.addToMq(RedisConstant.BOOKMARK_VISIT_NUM_PLUS, JSON.toJSONString(item));
     }
 
+    @Override
+    public List<Bookmark> userPopular(int num) {
+        return bookmarkDao.selectPopular(UserContextHolder.get().getUserId(), num);
+    }
+
     /**
-     * 功能描述: 向mq发送消息通知，数据更新
+     * 功能描述: 向mq发送消息通知，书签数据更新
      *
      * @param userId userId
      * @author fanxb

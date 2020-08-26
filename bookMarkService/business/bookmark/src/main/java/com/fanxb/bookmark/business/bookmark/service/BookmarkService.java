@@ -18,8 +18,8 @@ public interface BookmarkService {
     /**
      * chrome导出书签tag
      */
-    static final String DT = "dt";
-    static final String A = "a";
+    String DT = "dt";
+    String A = "a";
 
     /**
      * Description: 根据userId和path获取书签列表
@@ -76,12 +76,12 @@ public interface BookmarkService {
      * Description: 批量删除书签
      *
      * @param userId         用户id
-     * @param folderIdList   书签文件夹id list
+     * @param pathList       要删除的路径list
      * @param bookmarkIdList 书签id list
      * @author fanxb
      * @date 2019/7/12 14:09
      */
-    void batchDelete(int userId, List<Integer> folderIdList, List<Integer> bookmarkIdList);
+    void batchDelete(int userId, List<String> pathList, List<Integer> bookmarkIdList);
 
     /**
      * 功能描述: 移动一个节点
@@ -112,4 +112,14 @@ public interface BookmarkService {
      * @date 2020/5/12 10:21
      */
     void visitNumPlus(int id);
+
+    /**
+     * 功能描述: 获取用户访问次数前num的书签数据
+     *
+     * @param num 获取条数
+     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @author fanxb
+     * @date 2020/8/26 15:54
+     */
+    List<Bookmark> userPopular(int num);
 }

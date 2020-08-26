@@ -75,14 +75,14 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
     List<Bookmark> getListByUserIdAndPath(@Param("userId") int userId, @Param("path") String path);
 
     /**
-     * Description: 删除某用户某个书签文件下所有数据
+     * Description: 删除某用户某个书签路径下所有数据,不包含文件夹自身
      *
      * @param userId   用户id
-     * @param folderId 文件夹id
+     * @param path 文件夹id
      * @author fanxb
      * @date 2019/7/12 14:13
      */
-    void deleteUserFolder(@Param("userId") int userId, @Param("folderId") int folderId);
+    void deleteUserFolder(@Param("userId") int userId, @Param("path") String path);
 
     /**
      * Description: 删除用户书签
@@ -138,15 +138,15 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
     void updatePathAndSort(@Param("userId") int userId, @Param("bookmarkId") int bookmarkId, @Param("path") String path, @Param("sort") int sort);
 
     /**
-     * Description: 获取某个文件夹下所有的节点id
+     * Description: 获取某个路径下所有的节点id
      *
-     * @param userId   userId
-     * @param folderId folderId
+     * @param userId userId
+     * @param path   path
      * @return java.util.List<java.lang.Integer>
      * @author fanxb
      * @date 2019/7/25 14:14
      */
-    List<Integer> getChildrenBookmarkId(@Param("userId") int userId, @Param("folderId") int folderId);
+    List<Integer> getChildrenBookmarkId(@Param("userId") int userId, @Param("path") String path);
 
     /**
      * Description: 根据用户id，类别，分页查找书签
@@ -204,5 +204,8 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      */
     @Update("update bookmark set visitNum=visitNum+1 where userId=#{userId} and bookmarkId=#{bookmarkId}")
     void updateVisitNum(VisitNumPlus item);
+
+    @Select("select bookmarkId,name,url,icon from bookmark where userId=#{userId} and type=0 order by visitNum desc limit 0,#{num}")
+    List<Bookmark> selectPopular(@Param("userId") int userId,@Param("num") int num);
 
 }

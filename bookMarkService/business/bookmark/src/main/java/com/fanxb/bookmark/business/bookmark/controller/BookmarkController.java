@@ -111,7 +111,7 @@ public class BookmarkController {
      */
     @PostMapping("/batchDelete")
     public Result batchDelete(@RequestBody BatchDeleteBody body) {
-        bookmarkService.batchDelete(UserContextHolder.get().getUserId(), body.getFolderIdList(), body.getBookmarkIdList());
+        bookmarkService.batchDelete(UserContextHolder.get().getUserId(), body.getPathList(), body.getBookmarkIdList());
         return Result.success(null);
     }
 
@@ -173,6 +173,16 @@ public class BookmarkController {
     public Result visitNum(int id) {
         bookmarkService.visitNumPlus(id);
         return Result.success(null);
+    }
+
+    /**
+     * 功能描述: 获取用户访问次数前10的书签
+     *
+     * @author fanxb
+     */
+    @GetMapping("/user/popular")
+    public Result currentUserPopular() {
+        return Result.success(bookmarkService.userPopular(10));
     }
 
 }

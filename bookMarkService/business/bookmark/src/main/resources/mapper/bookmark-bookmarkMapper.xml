@@ -57,10 +57,7 @@
         bookmark
         WHERE
         userId = #{userId}
-        and path LIKE (SELECT a.path
-        FROM (SELECT CONCAT(path, '.', '${folderId}', '%') AS path
-        FROM bookmark
-        WHERE bookmarkId = #{folderId}) a);
+        and (path = #{path} or path like concat(#{path},".%"))
     </delete>
 
     <select id="getChildrenBookmarkId" resultType="integer">
@@ -68,10 +65,7 @@
         from bookmark
         where
         userId = #{userId}
-        and path LIKE (SELECT a.path
-        FROM (SELECT CONCAT(path, '.', '${folderId}', '%') AS path
-        FROM bookmark
-        WHERE bookmarkId = #{folderId}) a);
+        and (path =#{path} or path like concat(#{path},".%") );
     </select>
 
     <delete id="deleteUserBookmark">
