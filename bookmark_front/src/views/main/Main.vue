@@ -21,8 +21,10 @@ export default {
     //数据初始化
     await this.$store.dispatch("globalConfig/init");
     //更新用户基本信息
-    this.$store.commit("globalConfig/setUserInfo", await httpUtil.get("/user/currentUserInfo"));
-  }
+    let userInfo = await httpUtil.get("/user/currentUserInfo");
+    this.$store.commit("globalConfig/setUserInfo", userInfo);
+    this.$store.commit("treeData/version", userInfo.version);
+  },
 };
 </script>
 

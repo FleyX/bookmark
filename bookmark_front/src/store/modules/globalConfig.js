@@ -14,7 +14,11 @@ const state = {
   /**
    * 是否已经初始化完成,避免多次重复初始化
    */
-  isInit: false
+  isInit: false,
+  /**
+   * 是否移动端
+   */
+  isPhone: false
 };
 
 const getters = {};
@@ -30,6 +34,7 @@ const actions = {
     window.token = token;
     context.commit("setToken", token);
     context.commit("isInit", true);
+    context.commit("isPhone", /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent));
   },
   //登出清除数据
   async clear(context) {
@@ -53,6 +58,9 @@ const mutations = {
   },
   isInit(state, isInit) {
     state.isInit = isInit;
+  },
+  isPhone(state, status) {
+    state.isPhone = status;
   }
 };
 

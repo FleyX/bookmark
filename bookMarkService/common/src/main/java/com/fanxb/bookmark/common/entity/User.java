@@ -26,6 +26,9 @@ public class User {
     @JSONField(serialize = false)
     private String password;
     private long createTime;
+    /**
+     * 上次登录时间
+     */
     private long lastLoginTime;
     /**
      * 书签同步版本

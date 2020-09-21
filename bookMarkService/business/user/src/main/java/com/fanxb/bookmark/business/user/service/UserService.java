@@ -13,6 +13,9 @@ import com.fanxb.bookmark.common.entity.User;
 import com.fanxb.bookmark.common.exception.FormDataException;
 import com.fanxb.bookmark.common.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisKeyValueTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +25,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 类功能简述：
@@ -50,6 +54,8 @@ public class UserService {
 
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     /**
      * Description: 向目标发送验证码
@@ -114,13 +120,18 @@ public class UserService {
      * @date 2019/7/6 16:37
      */
     public LoginRes login(LoginBody body) {
+        String key = RedisConstant.getUserFailCountKey(body.getStr());
+        String count = redisTemplate.opsForValue().get(key);
+        if (count != null && Integer.parseInt(count) >= 5) {
+            redisTemplate.expire(key, 30, TimeUnit.MINUTES);
+            throw new FormDataException("您已连续输错密码5次，请30分钟后再试，或联系管理员处理");
+        }
         User userInfo = userDao.selectByUsernameOrEmail(body.getStr(), body.getStr());
-        if (userInfo == null) {
-            throw new FormDataException("账号/密码错误");
+        if (userInfo == null || !HashUtil.sha1(HashUtil.md5(body.getPassword())).equals(userInfo.getPassword())) {
+            redisTemplate.opsForValue().set(key, count == null ? "1" : String.valueOf(Integer.parseInt(count) + 1), 30, TimeUnit.MINUTES);
+            throw new FormDataException("账号密码错误");
         }
-        if (!HashUtil.sha1(HashUtil.md5(body.getPassword())).equals(userInfo.getPassword())) {
-            throw new FormDataException("账号/密码错误");
-        }
+        redisTemplate.delete(key);
         Map<String, String> data = new HashMap<>(1);
         data.put("userId", String.valueOf(userInfo.getUserId()));
         String token = JwtUtil.encode(data, Constant.jwtSecret, body.isRememberMe() ? LONG_EXPIRE_TIME : SHORT_EXPIRE_TIME);

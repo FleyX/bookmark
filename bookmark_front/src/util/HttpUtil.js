@@ -45,10 +45,16 @@ async function request(url, method, params, body, isForm, redirect) {
     router.replace(`/public/login?redirect=${encodeURIComponent(router.currentRoute.fullPath)}`);
     throw new Error(message);
   } else if (code === 0) {
+    //通用异常，使用
+    window.vueInstance.$notification.error({
+      message: "异常",
+      description: message
+    });
+    throw new Error(message);
+  } else if (code === -2) {
+    //表单异常，使用message提示
     window.vueInstance.$message.error(message);
     throw new Error(message);
-  } else {
-    console.error(res.data);
   }
 }
 
