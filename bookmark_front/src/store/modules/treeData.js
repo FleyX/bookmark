@@ -1,7 +1,9 @@
 import localforage from "localforage";
 import httpUtil from "../../util/HttpUtil";
+import { getUesrInfo } from "../../util/UserUtil";
 
 const TOTAL_TREE_DATA = "totalTreeData";
+const VERSION = "version";
 
 /**
  * 书签树相关配置
@@ -9,11 +11,30 @@ const TOTAL_TREE_DATA = "totalTreeData";
 const state = {
   //全部书签数据
   [TOTAL_TREE_DATA]: {},
-  version: null,
-  isInit: false
+  [VERSION]: null,
+  isInit: false,
+  /**
+   * 是否正在加载数据
+   */
+  isIniting: false
 };
 
-const getters = {};
+const getters = {
+  /**
+   * 通过id获取节点数据
+   */
+  getById: state => id => {
+    let arr = Object.values(state[TOTAL_TREE_DATA]);
+    for (let i in arr) {
+      for (let j in arr[i]) {
+        if (arr[i][j].bookmarkId === id) {
+          return arr[i][j];
+        }
+      }
+    }
+    return null;
+  }
+};
 
 const actions = {
   //从缓存初始化数据
@@ -21,12 +42,34 @@ const actions = {
     if (context.state.isInit) {
       return;
     }
+    context.commit("isIniting", true);
     let data = await localforage.getItem(TOTAL_TREE_DATA);
     if (data == null) {
       await context.dispatch("refresh");
     } else {
       context.commit(TOTAL_TREE_DATA, data);
+      context.commit(VERSION, await localforage.getItem(VERSION));
     }
+    context.commit("isIniting", false);
+    context.commit("isInit", true);
+  },
+  /**
+   * 确保数据加载完毕
+   */
+  ensureDataOk(context) {
+    return new Promise((resolve, reject) => {
+      let timer = setInterval(() => {
+        try {
+          if (context.state.isInit && context.state.isIniting == false) {
+            clearInterval(timer);
+            console.log(timer);
+            resolve();
+          }
+        } catch (err) {
+          reject(err);
+        }
+      }, 100);
+    });
   },
   //刷新缓存数据
   async refresh(context) {
@@ -36,14 +79,19 @@ const actions = {
     }
     treeData[""].forEach(item => (item.isLeaf = item.type === 0));
     context.commit(TOTAL_TREE_DATA, treeData);
-    localforage.setItem(TOTAL_TREE_DATA, treeData);
+    await localforage.setItem(TOTAL_TREE_DATA, treeData);
     let userInfo = await httpUtil.get("/user/currentUserInfo");
-    context.commit("version", userInfo.version);
+    context.commit(VERSION, userInfo.version);
+    await localforage.setItem(VERSION, userInfo.version);
   },
   //清除缓存数据
   async clear(context) {
-    context.commit(TOTAL_TREE_DATA, {});
+    context.commit(TOTAL_TREE_DATA, null);
+    context.commit(VERSION, null);
+    context.commit("isInit", false);
+    context.commit("isIniting", false);
     await localforage.removeItem(TOTAL_TREE_DATA);
+    await localforage.removeItem(VERSION);
   },
   async moveNode(context, info) {
     debugger;
@@ -121,6 +169,9 @@ const mutations = {
   isInit(state, isInit) {
     state.isInit = isInit;
   },
+  isIniting(state, isIniting) {
+    state.isIniting = isIniting;
+  },
   deleteData(state, { pathList, bookmarkIdList }) {
     //待删除的书签
     let bookmarkIdSet = new Set();
@@ -164,12 +215,17 @@ const mutations = {
     }
     localforage.setItem(TOTAL_TREE_DATA, state[TOTAL_TREE_DATA]);
   },
+  /**
+   * 更新版本文件
+   */
   version(state, version) {
-    if (version == null) {
+    console.log("version:", version);
+    if (version == null && state.version != null) {
       state.version = state.version + 1;
     } else {
       state.version = version;
     }
+    localforage.setItem(VERSION, state[VERSION]);
   }
 };
 

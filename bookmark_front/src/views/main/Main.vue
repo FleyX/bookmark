@@ -17,13 +17,71 @@ import httpUtil from "../../util/HttpUtil";
 export default {
   name: "Home",
   components: { Top, Content, Bottom },
-  async beforeCreate() {
+  data() {
+    return {
+      timer: null,
+      //当前是第几轮
+      count: 0,
+      //计时经过多少轮后才处理
+      total: 1,
+      //弹窗是否处于展开状态
+      isOpen: false,
+    };
+  },
+  async mounted() {
     //数据初始化
     await this.$store.dispatch("globalConfig/init");
-    //更新用户基本信息
-    let userInfo = await httpUtil.get("/user/currentUserInfo");
-    this.$store.commit("globalConfig/setUserInfo", userInfo);
-    this.$store.commit("treeData/version", userInfo.version);
+    console.log("globalConfig加载完毕");
+    await this.$store.dispatch("treeData/init");
+    console.log("treeData加载完毕");
+    await this.checkVersion();
+    this.timer = setInterval(this.checkVersion, 60 * 1000);
+  },
+  destroyed() {
+    if (this.timer != null) {
+      clearInterval(this.timer);
+    }
+  },
+  methods: {
+    /**
+     * 检查当前页面版本是否和服务器版本一致
+     */
+    async checkVersion() {
+      this.count++;
+      if (this.count < this.total || this.isOpen) {
+        return;
+      }
+      this.count = 0;
+      let userInfo = await httpUtil.get("/user/currentUserInfo");
+      this.$store.commit("globalConfig/setUserInfo", userInfo);
+      const _this = this;
+      if (this.$store.state.treeData.version < userInfo.version) {
+        this.isOpen = true;
+        this.$confirm({
+          title: "书签数据有更新，是否立即刷新？",
+          content: "点击确定将刷新整个页面，请注意！",
+          cancelText: "五分钟后再提醒",
+          closable: false,
+          keyboard: false,
+          maskClosable: false,
+          onOk() {
+            _this.isOpen = false;
+            return new Promise(async (resolve) => {
+              await _this.$store.dispatch("treeData/clear");
+              window.location.reload();
+              resolve();
+            });
+          },
+          onCancel() {
+            _this.isOpen = false;
+            _this.total = 5;
+          },
+          afterClose() {
+            _this.isOpen = false;
+          },
+        });
+      }
+    },
   },
 };
 </script>

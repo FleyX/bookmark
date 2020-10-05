@@ -16,7 +16,13 @@
         </div>
       </template>
       <div v-else prop="file">
-        <a-upload-dragger name="file" :data="{ path: form.path }" :headers="{ 'jwt-token': token }" action="/bookmark/api/bookmark/uploadBookmarkFile" @change="fileChange">
+        <a-upload-dragger
+          name="file"
+          :data="{ path: form.path }"
+          :headers="{ 'jwt-token': token }"
+          action="/bookmark/api/bookmark/uploadBookmarkFile"
+          @change="fileChange"
+        >
           <p class="ant-upload-drag-icon">
             <a-icon type="inbox" />
           </p>

@@ -1,6 +1,9 @@
 <template>
   <a-spin :spinning="loading" :delay="300">
-    <div>
+    <div class="search">
+      <search :showActions="true" @location="location" />
+    </div>
+    <div class="actions">
       <span class="myBookmark">我的书签</span>
       <a-tooltip title="刷新书签缓存">
         <a-button @click="refresh(true)" type="primary" shape="circle" icon="sync" />
@@ -8,7 +11,13 @@
       <a-tooltip title="多选">
         <a-button type="primary" shape="circle" icon="check" @click="switchMul" />
       </a-tooltip>
-      <a-tooltip v-if="checkedKeys.length === 0 || (checkedKeys.length === 1 && checkedNodes[0].type === 1)" title="添加书签">
+      <a-tooltip
+        v-if="
+          (checkedKeys.length === 0 && (currentSelect == null || currentSelect.type === 1)) ||
+          (checkedKeys.length === 1 && checkedNodes[0].type === 1)
+        "
+        title="添加书签"
+      >
         <a-button type="primary" shape="circle" icon="plus" @click="addData" />
       </a-tooltip>
       <a-tooltip v-if="currentSelect || checkedKeys.length === 1" title="编辑书签">
@@ -17,11 +26,19 @@
       <a-tooltip v-if="moveShow" title="移动书签">
         <a-button type="primary" shape="circle" icon="scissor" />
       </a-tooltip>
-      <a-tooltip v-if="checkedKeys.length > 0 || currentSelect" title="删除书签" @click="deleteBookmarks">
-        <a-button type="danger" shape="circle" icon="delete" />
-      </a-tooltip>
+      <a-popconfirm
+        v-if="checkedKeys.length > 0 || currentSelect"
+        title="此操作同时也会删除子节点数据，确认？"
+        ok-text="是"
+        cancel-text="否"
+        @confirm="deleteBookmarks"
+      >
+        <a-tooltip title="删除书签">
+          <a-button type="danger" shape="circle" icon="delete" />
+        </a-tooltip>
+      </a-popconfirm>
     </div>
-    <a-empty v-if="treeData.length == 0" description="无数据，点击上方 + 新增"></a-empty>
+    <a-empty v-if="treeData.length == 0 && loading == false" description="无数据，点击上方 + 新增"></a-empty>
     <a-tree
       v-else
       :tree-data="treeData"
@@ -49,11 +66,12 @@
 
 <script>
 import AddBookmark from "../../../../components/main/things/AddBookmark.vue";
+import Search from "../../../../components/main/Search.vue";
 import HttpUtil from "../../../../util/HttpUtil.js";
 import { mapState, mapActions } from "vuex";
 export default {
   name: "BookmarkManage",
-  components: { AddBookmark },
+  components: { AddBookmark, Search },
   data() {
     return {
       treeData: [],
@@ -83,15 +101,18 @@ export default {
     ...mapState("treeData", ["totalTreeData"]),
     ...mapState("globalConfig", ["isPhone"]),
   },
-  async beforeCreate() {
-    await this.$store.dispatch("treeData/init");
+  async mounted() {
+    await this.$store.dispatch("treeData/ensureDataOk");
     this.treeData = this.totalTreeData[""];
     this.loading = false;
   },
   methods: {
+    /**
+     * 加载数据，兼容treeNode为id
+     */
     loadData(treeNode) {
       return new Promise((resolve) => {
-        const data = treeNode.dataRef;
+        const data = typeof treeNode === "number" ? this.$store.getters["treeData/getById"](treeNode) : treeNode.dataRef;
         let newPath = data.path + "." + data.bookmarkId;
         if (!this.totalTreeData[newPath]) {
           this.totalTreeData[newPath] = [];
@@ -104,8 +125,8 @@ export default {
       });
     },
     async refresh(deleteCache) {
-      this.loading = true;
       if (deleteCache) {
+        this.loading = true;
         await this.$store.dispatch("treeData/refresh");
       }
       this.treeData = [...this.totalTreeData[""]];
@@ -182,15 +203,20 @@ export default {
       const bookmarkIdList = [],
         pathList = [];
       if (this.checkedNodes) {
-        this.checkedNodes.forEach((item) => (item.type === 1 ? pathList.push(item.path + "." + item.bookmarkId) : bookmarkIdList.push(item.bookmarkId)));
+        this.checkedNodes.forEach((item) =>
+          item.type === 1 ? pathList.push(item.path + "." + item.bookmarkId) : bookmarkIdList.push(item.bookmarkId)
+        );
       }
       if (this.currentSelect) {
-        this.currentSelect.type === 1 ? pathList.push(this.currentSelect.path + "." + this.currentSelect.bookmarkId) : bookmarkIdList.push(this.currentSelect.bookmarkId);
+        this.currentSelect.type === 1
+          ? pathList.push(this.currentSelect.path + "." + this.currentSelect.bookmarkId)
+          : bookmarkIdList.push(this.currentSelect.bookmarkId);
       }
       if (pathList.length === 0 && bookmarkIdList.length === 0) {
         this.$message.warn("请选择后再进行操作");
         return;
       }
+
       this.loading = true;
       await HttpUtil.post("/bookmark/batchDelete", null, {
         pathList,
@@ -225,6 +251,20 @@ export default {
       this.$set(this.addModal, "show", true);
       this.$set(this.addModal, "isAdd", true);
       this.$set(this.addModal, "targetNode", this.currentSelect || (this.checkedNodes.length > 0 ? this.checkedNodes[0] : null));
+    },
+    async location(item) {
+      console.log(item);
+      this.refresh(false);
+      this.expandedKeys = item.path
+        .split(".")
+        .filter((one) => one.length > 0)
+        .map((one) => parseInt(one));
+      this.loadedKeys = item.path
+        .split(".")
+        .filter((one) => one.length > 0)
+        .map((one) => parseInt(one));
+      this.expandedKeys.forEach(async (one) => await this.loadData(one));
+      this.currentSelect = item;
     },
     /**
      * 关闭弹窗
@@ -279,6 +319,13 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.search {
+}
+.actions {
+  height: 0.42rem;
+  display: flex;
+  align-items: center;
+}
 .myBookmark {
   font-size: 0.25rem;
   font-weight: 600;

@@ -25,7 +25,7 @@ export async function clearToken() {
  * 本地获取用户信息
  */
 export async function getUesrInfo() {
-  return null;
+  return window.vueInstance.$store.state.globalConfig.userInfo;
 }
 
 /**
