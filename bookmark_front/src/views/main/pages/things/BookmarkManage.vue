@@ -56,6 +56,7 @@
       checkStrictly
       :draggable="!isPhone"
       @drop="onDrop"
+      @rightClick="rightClick"
     />
     <!-- 新增、修改 -->
     <a-modal v-model="addModal.show" :title="addModal.isAdd ? '新增' : '编辑'" :footer="null">
@@ -149,6 +150,13 @@ export default {
         ];
       } else {
         this.expandedKeys.pop();
+      }
+    },
+    rightClick({ node }) {
+      if (this.currentSelect === node.dataRef) {
+        this.currentSelect = null;
+      } else {
+        this.currentSelect = node.dataRef;
       }
     },
     check(key, { checked, node }) {

@@ -77,7 +77,12 @@ const actions = {
     if (!treeData[""]) {
       treeData[""] = [];
     }
-    treeData[""].forEach(item => (item.isLeaf = item.type === 0));
+    Object.values(treeData).forEach(item =>
+      item.forEach(item1 => {
+        item1.isLeaf = item.type === 0;
+        item1.class = "treeNodeItem";
+      })
+    );
     context.commit(TOTAL_TREE_DATA, treeData);
     await localforage.setItem(TOTAL_TREE_DATA, treeData);
     let userInfo = await httpUtil.get("/user/currentUserInfo");
@@ -94,7 +99,6 @@ const actions = {
     await localforage.removeItem(VERSION);
   },
   async moveNode(context, info) {
-    debugger;
     let data = context.state[TOTAL_TREE_DATA];
     const target = info.node.dataRef;
     const current = info.dragNode.dataRef;

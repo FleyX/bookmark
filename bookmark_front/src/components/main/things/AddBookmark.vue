@@ -69,9 +69,9 @@ export default {
   created() {
     console.log(this.isAdd, this.targetNode);
     if (!this.isAdd) {
-      this.form.type = this.targetNode.type;
+      this.form.type = this.targetNode.type.toString();
       this.form.name = this.targetNode.name;
-      this.form.url = this.form.type === "bookmark" ? this.targetNode.url : "";
+      this.form.url = this.form.type === "0" ? this.targetNode.url : "";
     }
     this.token = window.token;
     this.form.path = this.targetNode == null ? "" : this.targetNode.path + (this.isAdd ? "." + this.targetNode.bookmarkId : "");

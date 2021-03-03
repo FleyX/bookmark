@@ -11,11 +11,13 @@
       allowClear
       @blur.prevent="inputBlur"
       @focus="inputFocus"
+      @keydown="keyPress"
     />
     <div v-if="focused" class="searchContent">
       <a-empty v-if="list.length == 0" />
       <div
         class="listItem"
+        :class="{ itemActive: index == hoverIndex || index == selectIndex }"
         v-for="(item, index) in list"
         :key="item.bookmarkId"
         @mouseenter="mouseEnterOut(index, 'enter')"
@@ -23,7 +25,13 @@
         @mouseup="onMouse"
         @click="itemClick(item)"
       >
-        <a style="min-width: 4em" :href="item.url" target="_blank">
+        <a
+          class="listItemUrl"
+          style="padding-right: 1em; max-width: calc(100% - 2em)"
+          :id="'bookmark:' + item.bookmarkId"
+          :href="item.url"
+          target="_blank"
+        >
           {{ item.name }}
         </a>
         <a-tooltip v-if="showActions && hoverIndex === index" title="定位到书签树中">
@@ -31,6 +39,7 @@
         </a-tooltip>
       </div>
     </div>
+    <a ref="targetA" style="left: 1000000px" target="_blank" />
   </div>
 </template>
 
@@ -50,7 +59,10 @@ export default {
       list: [],
       //计时器结束列表的显示
       timer: null,
+      //鼠标悬浮选中
       hoverIndex: null,
+      //上下选中
+      selectIndex: null,
     };
   },
   computed: {
@@ -102,6 +114,26 @@ export default {
     location(item) {
       this.$emit("location", item);
     },
+    //上下事件
+    keyPress(e) {
+      switch (e.key) {
+        case "ArrowUp":
+          this.selectIndex = this.selectIndex == null ? this.list.length - 1 : this.selectIndex == 0 ? null : this.selectIndex - 1;
+          break;
+        case "ArrowDown":
+          this.selectIndex = this.selectIndex == null ? 0 : this.selectIndex == this.list.length - 1 ? null : this.selectIndex + 1;
+          break;
+        case "Enter":
+          if (this.selectIndex == null) {
+            this.targetUrl = "https://www.baidu.com/s?ie=UTF-8&wd=" + encodeURIComponent(this.value);
+          } else {
+            this.targetUrl = this.list[this.selectIndex].url;
+          }
+          let a = this.$refs["targetA"];
+          a.href = this.targetUrl;
+          a.click();
+      }
+    },
     dealSearch(content) {
       let res = [];
       let arrs = Object.values(this.totalTreeData);
@@ -137,7 +169,16 @@ export default {
       font-size: 0.16rem;
       display: flex;
       height: 0.3rem;
+      line-height: 0.3rem;
       align-items: center;
+      .listItemUrl {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+    .itemActive {
+      background-color: #f8f8f8;
     }
   }
 }
