@@ -4,30 +4,37 @@
       <search :showActions="true" @location="location" />
     </div>
     <div class="actions">
-      <span class="myBookmark">我的书签</span>
-      <a-tooltip title="刷新书签缓存">
-        <a-button @click="refresh(true)" type="primary" shape="circle" icon="sync" />
-      </a-tooltip>
-      <a-tooltip title="多选">
-        <a-button type="primary" shape="circle" icon="check" @click="switchMul" />
-      </a-tooltip>
-      <a-tooltip v-if="
+      <div class="left">
+        <span class="myBookmark">我的书签</span>
+        <a-tooltip title="刷新书签缓存">
+          <a-button @click="refresh(true)" type="primary" shape="circle" icon="sync" />
+        </a-tooltip>
+        <a-tooltip title="多选">
+          <a-button type="primary" shape="circle" icon="check" @click="switchMul" />
+        </a-tooltip>
+        <a-tooltip v-if="
           (checkedKeys.length === 0 && (currentSelect == null || currentSelect.type === 1)) ||
           (checkedKeys.length === 1 && checkedNodes[0].type === 1)
         " title="添加书签">
-        <a-button type="primary" shape="circle" icon="plus" @click="addData" />
-      </a-tooltip>
-      <a-tooltip v-if="currentSelect || checkedKeys.length === 1" title="编辑书签">
-        <a-button type="primary" shape="circle" icon="edit" @click="editData" />
-      </a-tooltip>
-      <a-tooltip v-if="moveShow" title="移动书签">
-        <a-button type="primary" shape="circle" icon="scissor" />
-      </a-tooltip>
-      <a-popconfirm v-if="checkedKeys.length > 0 || currentSelect" title="此操作同时也会删除子节点数据，确认？" ok-text="是" cancel-text="否" @confirm="deleteBookmarks">
-        <a-tooltip title="删除书签">
-          <a-button type="danger" shape="circle" icon="delete" />
+          <a-button type="primary" shape="circle" icon="plus" @click="addData" />
         </a-tooltip>
-      </a-popconfirm>
+        <a-tooltip v-if="currentSelect || checkedKeys.length === 1" title="编辑书签">
+          <a-button type="primary" shape="circle" icon="edit" @click="editData" />
+        </a-tooltip>
+        <a-tooltip v-if="moveShow" title="移动书签">
+          <a-button type="primary" shape="circle" icon="scissor" />
+        </a-tooltip>
+        <a-popconfirm v-if="checkedKeys.length > 0 || currentSelect" title="此操作同时也会删除子节点数据，确认？" ok-text="是" cancel-text="否" @confirm="deleteBookmarks">
+          <a-tooltip title="删除书签">
+            <a-button type="danger" shape="circle" icon="delete" />
+          </a-tooltip>
+        </a-popconfirm>
+      </div>
+      <div>
+        <a-tooltip title="导出书签">
+          <a-button @click="exportBookmark" type="primary" shape="circle" icon="export" />
+        </a-tooltip>
+      </div>
     </div>
     <a-empty v-if="treeData.length == 0" description="无数据，点击上方 + 新增"></a-empty>
     <a-tree v-else :tree-data="treeData" :loaded-keys="loadedKeys" :selected-keys="currentSelect ? [currentSelect.bookmarkId] : []" :load-data="loadData" :checked-keys="checkedKeys" :replace-fields="replaceFields" :expandedKeys="expandedKeys" @select="select" @expand="expand" @check="check" blockNode :checkable="mulSelect" checkStrictly :draggable="!isPhone" @drop="onDrop">
@@ -61,7 +68,9 @@ import AddBookmark from "../../../../components/main/things/AddBookmark.vue";
 import Search from "../../../../components/main/Search.vue";
 import HttpUtil from "../../../../util/HttpUtil.js";
 import { mapState, mapActions } from "vuex";
+import { downloadFile } from "../../../../util/FileUtil";
 import ClipboardJS from "clipboard";
+import moment from "moment";
 export default {
   name: "BookmarkManage",
   components: { AddBookmark, Search },
@@ -336,6 +345,52 @@ export default {
         this.editData();
       }
     },
+    /**
+     * 书签文件导出
+     */
+    exportBookmark() {
+      let map = this.totalTreeData;
+      let root = document.createElement("DL");
+      this.dealList(root, map[""], map);
+      let content =
+        `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<!-- This is an automatically generated file.
+     It will be read and overwritten.
+     DO NOT EDIT! -->
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>Bookmarks</TITLE>
+<H1>签签世界导出</H1>` + root.outerHTML;
+      downloadFile(moment().format("YYYY-MM-DD") + "导出书签.html", content);
+    },
+    dealList(root, list, totalMap) {
+      if (!list || list.length == undefined) {
+        return;
+      }
+      list.forEach((item) => {
+        let node = document.createElement("DT");
+        root.appendChild(node);
+        if (item.type === 0) {
+          //说明为书签
+          let url = document.createElement("A");
+          url.setAttribute("HREF", item.url);
+          url.setAttribute("ADD_DATE", parseInt(Date.now() / 1000));
+          url.innerText = item.name;
+          if (item.icon.length > 0) {
+            url.setAttribute("ICON", item.icon);
+          }
+          node.appendChild(url);
+        } else {
+          //说明为文件夹
+          let header = document.createElement("H3");
+          header.setAttribute("ADD_DATE", parseInt(Date.now() / 1000));
+          header.innerText = item.name;
+          node.appendChild(header);
+          let children = document.createElement("DL");
+          node.appendChild(children);
+          this.dealList(children, totalMap[item.path + "." + item.bookmarkId], totalMap);
+        }
+      });
+    },
   },
 };
 </script>
@@ -347,6 +402,12 @@ export default {
   height: 0.42rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+
+  .left {
+    display: flex;
+    justify-items: center;
+  }
 }
 .myBookmark {
   font-size: 0.25rem;

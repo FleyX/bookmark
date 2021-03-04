@@ -14,6 +14,7 @@
     "clipboard": "^2.0.6",
     "core-js": "^3.6.5",
     "localforage": "^1.7.4",
+    "moment": "^2.29.1",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
     "vuex": "^3.4.0"

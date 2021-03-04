@@ -71,15 +71,15 @@ public class BookmarkServiceImpl implements BookmarkService {
         int count = 0;
         List<Bookmark> bookmarks = new ArrayList<>();
         for (int i = 0, length = elements.size(); i < length; i++) {
-            if (i == 0) {
-                Elements firstChildren = elements.get(0).child(1).children();
-                count = firstChildren.size();
-                for (int j = 0; j < count; j++) {
-                    dealBookmark(userId, firstChildren.get(j), path, sortBase + j, bookmarks);
-                }
-            } else {
-                dealBookmark(userId, elements.get(i), path, sortBase + count + i - 1, bookmarks);
-            }
+//            if (i == 0) {
+//                Elements firstChildren = elements.get(0).child(0).children();
+//                count = firstChildren.size();
+//                for (int j = 0; j < count; j++) {
+//                    dealBookmark(userId, firstChildren.get(j), path, sortBase + j, bookmarks);
+//                }
+//            } else {
+                dealBookmark(userId, elements.get(i), path, sortBase+i , bookmarks);
+//            }
         }
         //每一千条处理插入一次
         List<Bookmark> tempList = new ArrayList<>(1000);
