@@ -22,7 +22,7 @@ const routes = [
         component: BookmarkManage
       },
       {
-        path: "personSpakce/userInfo",
+        path: "personSpace/userInfo",
         name: "UserInfo",
         component: UserInfo
       }

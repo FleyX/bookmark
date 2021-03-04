@@ -21,7 +21,6 @@ export default {};
   margin-top: @topHeight;
   min-height: calc(~"100vh" - @sum);
   width: 90%;
-  min-width: 5rem;
   font-size: 0.14rem;
   background-color: white;
 }

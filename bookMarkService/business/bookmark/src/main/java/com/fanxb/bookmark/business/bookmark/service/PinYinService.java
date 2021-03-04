@@ -11,6 +11,19 @@ import java.util.List;
 public interface PinYinService {
 
     /**
+     * 分隔符
+     */
+    static final String PARTITION = "||";
+    /**
+     * 拼音接口路径
+     */
+    static final String PATH = "/pinyinChange";
+    /**
+     * 分页查询页大小
+     */
+    static final int SIZE = 500;
+
+    /**
      * 功能描述: 首次上线用于全量初始化
      *
      * @author fanxb

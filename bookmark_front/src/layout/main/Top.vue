@@ -7,6 +7,9 @@
         <span class="name">{{ userInfo.username }}</span>
       </div>
       <a-menu slot="overlay" :trigger="['hover', 'click']" @click="menuClick">
+        <a-menu-item key="personSpace">
+          <a href="javascript:;">个人中心</a>
+        </a-menu-item>
         <a-menu-item key="logout">
           <a href="javascript:;">退出</a>
         </a-menu-item>
@@ -20,16 +23,18 @@ import { mapState } from "vuex";
 export default {
   name: "Top",
   computed: {
-    ...mapState("globalConfig", ["userInfo"])
+    ...mapState("globalConfig", ["userInfo"]),
   },
   methods: {
     async menuClick({ key }) {
       if (key === "logout") {
         await this.$store.dispatch("globalConfig/clear");
         this.$router.replace("/public/login");
+      } else if (key === "personSpace") {
+        this.$router.push("personSpace/userInfo");
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

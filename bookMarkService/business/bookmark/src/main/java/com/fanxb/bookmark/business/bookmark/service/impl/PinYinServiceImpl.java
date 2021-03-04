@@ -29,18 +29,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class PinYinServiceImpl implements PinYinService {
-    /**
-     * 分隔符
-     */
-    private static final String PARTITION = "^|*|^";
-    /**
-     * 拼音接口路径
-     */
-    private static final String PATH = "/pinyinChange";
-    /**
-     * 分页查询页大小
-     */
-    private static final int SIZE = 500;
+
 
     @Autowired
     private BookmarkDao bookmarkDao;
@@ -79,7 +68,8 @@ public class PinYinServiceImpl implements PinYinService {
         for (int i = 0, size = stringList.size(); i < size; i++) {
             List<String> pinyinList = list.get(i).stream().map(item -> item.toJavaList(String.class).get(0)).collect(Collectors.toList());
             res.add(stringList.get(i).toLowerCase() + PARTITION + CollectionUtil.join(pinyinList, "")
-                    + PARTITION + pinyinList.stream().filter(item -> item.length() > 0).map(item -> item.substring(0, 1)).collect(Collectors.joining()));
+                    + PARTITION + pinyinList.stream().filter(item -> item.length() > 0).map(item -> item.substring(0, 1)).collect(Collectors.joining())
+            );
         }
         return res;
     }

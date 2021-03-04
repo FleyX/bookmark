@@ -396,8 +396,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.search {
-}
 .actions {
   height: 0.42rem;
   display: flex;

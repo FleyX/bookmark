@@ -36,7 +36,7 @@ export default {
     console.log("treeData加载完毕");
     console.log("state数据:", this.$store.state);
     await this.checkVersion();
-    this.timer = setInterval(this.checkVersion, 10 * 1000);
+    this.timer = setInterval(this.checkVersion, 60 * 1000);
   },
   destroyed() {
     if (this.timer != null) {

@@ -24,7 +24,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,15 +43,13 @@ import java.util.stream.Collectors;
 public class BookmarkServiceImpl implements BookmarkService {
 
     private final BookmarkDao bookmarkDao;
-    private final StringRedisTemplate redisTemplate;
-    private final  PinYinService pinYinService;
+    private final PinYinService pinYinService;
     private final UserApi userApi;
     private final EsUtil esUtil;
 
     @Autowired
-    public BookmarkServiceImpl(BookmarkDao bookmarkDao, StringRedisTemplate redisTemplate, PinYinService pinYinService, UserApi userApi, EsUtil esUtil) {
+    public BookmarkServiceImpl(BookmarkDao bookmarkDao, PinYinService pinYinService, UserApi userApi, EsUtil esUtil) {
         this.bookmarkDao = bookmarkDao;
-        this.redisTemplate = redisTemplate;
         this.pinYinService = pinYinService;
         this.userApi = userApi;
         this.esUtil = esUtil;
@@ -68,27 +65,20 @@ public class BookmarkServiceImpl implements BookmarkService {
         if (sortBase == null) {
             sortBase = 0;
         }
-        int count = 0;
         List<Bookmark> bookmarks = new ArrayList<>();
         for (int i = 0, length = elements.size(); i < length; i++) {
-//            if (i == 0) {
-//                Elements firstChildren = elements.get(0).child(0).children();
-//                count = firstChildren.size();
-//                for (int j = 0; j < count; j++) {
-//                    dealBookmark(userId, firstChildren.get(j), path, sortBase + j, bookmarks);
-//                }
-//            } else {
-                dealBookmark(userId, elements.get(i), path, sortBase+i , bookmarks);
-//            }
+            dealBookmark(userId, elements.get(i), path, sortBase + i, bookmarks);
         }
         //每一千条处理插入一次
         List<Bookmark> tempList = new ArrayList<>(1000);
-        for(int i=0;i<bookmarks.size();i++){
+        for (int i = 0; i < bookmarks.size(); i++) {
             tempList.add(bookmarks.get(i));
-            if(tempList.size()==1000 || i==bookmarks.size()-1){
+            if (tempList.size() == 1000 || i == bookmarks.size() - 1) {
                 List<String> resList = pinYinService.changeStrings(bookmarks.stream().map(Bookmark::getName).collect(Collectors.toList()));
-                for(int j=0;i<resList.size();i++){
-                    tempList.get(j).setSearchKey(resList.get(j));
+                for (int j = 0; j < resList.size(); j++) {
+                    int length = tempList.get(j).getUrl().length();
+                    tempList.get(j).setSearchKey(resList.get(j) + PinYinService.PARTITION
+                            + tempList.get(j).getUrl().substring(0, length > 50 ? 50 : length - 1));
                 }
                 bookmarkDao.updateSearchKeyBatch(tempList);
                 tempList.clear();
@@ -205,12 +195,12 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setUserId(userId);
         bookmark.setCreateTime(System.currentTimeMillis());
         bookmark.setAddTime(bookmark.getCreateTime());
-        bookmark.setSearchKey(pinYinService.changeString(bookmark.getName()));
-        bookmarkDao.insertOne(bookmark);
-        //如果是书签，插入到es中
-        if (bookmark.getType() == 0) {
-            RedisUtil.addToMq(RedisConstant.BOOKMARK_INSERT_ES, Collections.singleton(bookmark));
+        if (bookmark.getType() == Bookmark.BOOKMARK_TYPE) {
+            int length = bookmark.getUrl().length();
+            bookmark.setSearchKey(pinYinService.changeString(bookmark.getName()) + PinYinService.PARTITION +
+                    bookmark.getUrl().substring(0, length > 50 ? 50 : length - 1));
         }
+        bookmarkDao.insertOne(bookmark);
         userApi.versionPlus(userId);
         return bookmark;
     }
@@ -219,11 +209,12 @@ public class BookmarkServiceImpl implements BookmarkService {
     @Transactional(rollbackFor = Exception.class)
     public void updateOne(int userId, Bookmark bookmark) {
         bookmark.setUserId(userId);
-        bookmark.setSearchKey(pinYinService.changeString(bookmark.getName()));
-        bookmarkDao.editBookmark(bookmark);
         if (bookmark.getType() == 0) {
-            RedisUtil.addToMq(RedisConstant.BOOKMARK_INSERT_ES, Collections.singleton(bookmark));
+            int urlLength = bookmark.getUrl().length();
+            bookmark.setSearchKey(pinYinService.changeString(bookmark.getName()) + PinYinService.PARTITION
+                    + bookmark.getUrl().substring(0, urlLength > 50 ? 50 : urlLength - 1));
         }
+        bookmarkDao.editBookmark(bookmark);
         userApi.versionPlus(userId);
     }
 
