@@ -185,6 +185,14 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
     void updateSearchKey(@Param("bookmarkId") int bookmarkId, @Param("searchKey") String searchKey);
 
     /**
+     * 批量更新searchKey
+     *
+     * @author fanxb
+     * @date 2020/3/22 22:08
+     */
+    void updateSearchKeyBatch(List<Bookmark> list);
+
+    /**
      * 分页获取所有的书签
      *
      * @param size       大小

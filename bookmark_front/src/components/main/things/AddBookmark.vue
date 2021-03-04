@@ -16,13 +16,7 @@
         </div>
       </template>
       <div v-else prop="file">
-        <a-upload-dragger
-          name="file"
-          :data="{ path: form.path }"
-          :headers="{ 'jwt-token': token }"
-          action="/bookmark/api/bookmark/uploadBookmarkFile"
-          @change="fileChange"
-        >
+        <a-upload-dragger name="file" :data="{ path: form.path }" :headers="{ 'jwt-token': token }" action="/bookmark/api/bookmark/uploadBookmarkFile" @change="fileChange">
           <p class="ant-upload-drag-icon">
             <a-icon type="inbox" />
           </p>
@@ -77,6 +71,9 @@ export default {
     this.form.path = this.targetNode == null ? "" : this.targetNode.path + (this.isAdd ? "." + this.targetNode.bookmarkId : "");
   },
   methods: {
+    /**
+     * 文件提交不走这儿
+     */
     submit() {
       //名称校验
       this.loading = true;
@@ -88,27 +85,29 @@ export default {
         let res = null;
         if (this.isAdd) {
           res = await HttpUtil.put("/bookmark", null, this.form);
-          res.isLeaf = res.type === 0;
+          await this.$store.dispatch("treeData/addNode", { sourceNode: this.targetNode, targetNode: res });
         } else {
           this.form.bookmarkId = this.targetNode.bookmarkId;
           await HttpUtil.post("/bookmark/updateOne", null, this.form);
-          this.targetNode.name = this.form.name;
-          this.targetNode.url = this.form.url;
+          await this.$store.dispatch("treeData/editNode", { node: this.targetNode, newName: this.form.name, newUrl: this.form.url });
         }
         this.$message.success("操作成功");
-        this.$emit("close", res);
+        this.$emit("close", false);
         this.loading = false;
       });
     },
     fileChange(info) {
-      if (info.file.status === "error") {
-        this.$notification.error({
-          message: "异常",
-          description: "文件内容无法解析，确保该文件为书签文件",
-        });
-      } else if (info.file.status === "done") {
-        this.$message.success("解析成功");
-        this.$emit("close", null);
+      console.log(info);
+      if (info.file.status === "done") {
+        if (info.file.response.code === 0) {
+          this.$notification.error({
+            message: "异常",
+            description: "文件内容无法解析，确保该文件为书签文件",
+          });
+        } else {
+          this.$message.success("解析成功");
+          this.$emit("close", true);
+        }
       }
     },
   },

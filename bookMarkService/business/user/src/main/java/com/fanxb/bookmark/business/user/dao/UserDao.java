@@ -124,7 +124,7 @@ public interface UserDao {
      * @date 2020/1/26 下午3:47
      */
     @Update("update user set version=version+1 where userId=#{userId}")
-    void updateLastBookmarkUpdateTime(int userId);
+    void updateUserVersion(int userId);
 
     /**
      * 功能描述: 更新所有用户的更新时间

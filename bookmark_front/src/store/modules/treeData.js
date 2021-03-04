@@ -44,7 +44,7 @@ const actions = {
     }
     context.commit("isIniting", true);
     let data = await localforage.getItem(TOTAL_TREE_DATA);
-    if (data == null) {
+    if (!data) {
       await context.dispatch("refresh");
     } else {
       context.commit(TOTAL_TREE_DATA, data);
@@ -62,7 +62,6 @@ const actions = {
         try {
           if (context.state.isInit && context.state.isIniting == false) {
             clearInterval(timer);
-            console.log(timer);
             resolve();
           }
         } catch (err) {
@@ -79,15 +78,15 @@ const actions = {
     }
     Object.values(treeData).forEach(item =>
       item.forEach(item1 => {
-        item1.isLeaf = item.type === 0;
+        item1.isLeaf = item1.type === 0;
         item1.class = "treeNodeItem";
+        item1.scopedSlots = { title: "nodeTitle" };
       })
     );
+    let userInfo = await httpUtil.get("/user/currentUserInfo");
+    await context.dispatch("updateVersion", userInfo.version);
     context.commit(TOTAL_TREE_DATA, treeData);
     await localforage.setItem(TOTAL_TREE_DATA, treeData);
-    let userInfo = await httpUtil.get("/user/currentUserInfo");
-    context.commit(VERSION, userInfo.version);
-    await localforage.setItem(VERSION, userInfo.version);
   },
   //清除缓存数据
   async clear(context) {
@@ -98,6 +97,9 @@ const actions = {
     await localforage.removeItem(TOTAL_TREE_DATA);
     await localforage.removeItem(VERSION);
   },
+  /**
+   * 移动节点
+   */
   async moveNode(context, info) {
     let data = context.state[TOTAL_TREE_DATA];
     const target = info.node.dataRef;
@@ -161,13 +163,85 @@ const actions = {
         list.forEach(item1 => (item1.path = newPathStr));
       });
     }
+    context.commit(TOTAL_TREE_DATA, context.state[TOTAL_TREE_DATA]);
+    await context.dispatch("updateVersion", null);
+    await localforage.setItem(TOTAL_TREE_DATA, state[TOTAL_TREE_DATA]);
     return body;
+  },
+  /**
+   * 更新版本数据
+   */
+  async updateVersion({ commit, state }, version) {
+    commit(VERSION, version == null ? state[VERSION] + 1 : version);
+    await localforage.setItem(VERSION, state[VERSION]);
+  },
+  /**
+   * 新增书签、文件夹
+   */
+  async addNode(context, { sourceNode, targetNode }) {
+    if (sourceNode === null) {
+      if (context.state[TOTAL_TREE_DATA][""] === undefined) {
+        context.state[TOTAL_TREE_DATA][""] = [];
+      }
+      context.state[TOTAL_TREE_DATA][""].push(targetNode);
+    } else {
+      if (sourceNode.children === undefined) {
+        sourceNode.children = [];
+      }
+      sourceNode.children.push(targetNode);
+    }
+    if (targetNode.type === 0) {
+      context.state[TOTAL_TREE_DATA][targetNode.path + "." + targetNode.bookmarkId] = [];
+    }
+    targetNode.isLeaf = targetNode.type === 0;
+    targetNode.class = "treeNodeItem";
+    targetNode.scopedSlots = { title: "nodeTitle" };
+    context.commit(TOTAL_TREE_DATA, context.state[TOTAL_TREE_DATA]);
+    await context.dispatch("updateVersion", null);
+    await localforage.setItem(TOTAL_TREE_DATA, state[TOTAL_TREE_DATA]);
+  },
+  /**
+   * 删除节点数据
+   */
+  async deleteData(context, { pathList, bookmarkIdList }) {
+    //待删除的书签
+    let bookmarkIdSet = new Set();
+    bookmarkIdList.forEach(item => bookmarkIdSet.add(item));
+    //删除子节点
+    pathList.forEach(item => {
+      delete state[TOTAL_TREE_DATA][item];
+      Object.keys(context.state[TOTAL_TREE_DATA])
+        .filter(key => key.startsWith(item + "."))
+        .forEach(key => delete state[TOTAL_TREE_DATA][key]);
+      bookmarkIdSet.add(parseInt(item.split(".").reverse()));
+    });
+    //删除直接选中的节点
+    Object.keys(context.state[TOTAL_TREE_DATA]).forEach(item => {
+      let list = context.state[TOTAL_TREE_DATA][item];
+      for (let i = list.length - 1; i >= 0; i--) {
+        if (bookmarkIdSet.has(list[i].bookmarkId)) {
+          list.splice(i, 1);
+        }
+      }
+    });
+    context.commit(TOTAL_TREE_DATA, context.state[TOTAL_TREE_DATA]);
+    await context.dispatch("updateVersion", null);
+    await localforage.setItem(TOTAL_TREE_DATA, state[TOTAL_TREE_DATA]);
+  },
+  /**
+   * 编辑书签节点
+   */
+  async editNode({ dispatch, state, commit }, { node, newName, newUrl }) {
+    node.name = newName;
+    node.url = newUrl;
+    commit(TOTAL_TREE_DATA, state[TOTAL_TREE_DATA]);
+    await dispatch("updateVersion", null);
+    await localforage.setItem(TOTAL_TREE_DATA, state[TOTAL_TREE_DATA]);
   }
 };
 
 const mutations = {
   totalTreeData(state, totalTreeData) {
-    localforage.setItem(TOTAL_TREE_DATA, totalTreeData);
     state.totalTreeData = totalTreeData;
   },
   isInit(state, isInit) {
@@ -176,60 +250,9 @@ const mutations = {
   isIniting(state, isIniting) {
     state.isIniting = isIniting;
   },
-  deleteData(state, { pathList, bookmarkIdList }) {
-    //待删除的书签
-    let bookmarkIdSet = new Set();
-    bookmarkIdList.forEach(item => bookmarkIdSet.add(item));
-    //删除子节点
-    pathList.forEach(item => {
-      delete state[TOTAL_TREE_DATA][item];
-      Object.keys(state[TOTAL_TREE_DATA])
-        .filter(key => key.startsWith(item + "."))
-        .forEach(key => delete state[TOTAL_TREE_DATA][key]);
-      bookmarkIdSet.add(parseInt(item.split(".").reverse()));
-    });
-    //删除直接选中的节点
-    Object.keys(state.totalTreeData).forEach(item => {
-      let list = state.totalTreeData[item];
-      for (let i = list.length - 1; i >= 0; i--) {
-        if (bookmarkIdSet.has(list[i].bookmarkId)) {
-          list.splice(i, 1);
-        }
-      }
-    });
-    localforage.setItem(TOTAL_TREE_DATA, state[TOTAL_TREE_DATA]);
-  },
-  /**
-   * 新增书签、文件夹
-   */
-  addNode(state, { sourceNode, targetNode }) {
-    if (sourceNode === null) {
-      if (state[TOTAL_TREE_DATA][""] === undefined) {
-        state[TOTAL_TREE_DATA][""] = [];
-      }
-      state[TOTAL_TREE_DATA][""].push(targetNode);
-    } else {
-      if (sourceNode.children === undefined) {
-        sourceNode.children = [];
-      }
-      sourceNode.children.push(targetNode);
-    }
-    if (targetNode.type === 0) {
-      state[TOTAL_TREE_DATA][targetNode.path + "." + targetNode.bookmarkId] = [];
-    }
-    localforage.setItem(TOTAL_TREE_DATA, state[TOTAL_TREE_DATA]);
-  },
-  /**
-   * 更新版本文件
-   */
+
   version(state, version) {
-    console.log("version:", version);
-    if (version == null && state.version != null) {
-      state.version = state.version + 1;
-    } else {
-      state.version = version;
-    }
-    localforage.setItem(VERSION, state[VERSION]);
+    state[VERSION] = version;
   }
 };
 

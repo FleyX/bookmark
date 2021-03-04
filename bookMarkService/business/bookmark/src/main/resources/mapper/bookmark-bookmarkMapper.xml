@@ -111,5 +111,15 @@
         limit ${start}, ${size}
     </select>
 
+    <update id="updateSearchKeyBatch">
+        UPDATE `bookmark` a JOIN
+            (
+            <foreach collection="list" item="item" separator="union">
+                select #{item.bookmarkId} as bookmarkId,#{item.searchKey} as searchKey
+            </foreach>
+            ) b USING(bookmarkId)
+        SET a.searchKey=b.searchKey;
+    </update>
+
 
 </mapper>
