@@ -17,7 +17,7 @@ import javax.validation.constraints.Pattern;
 @Data
 public class EmailUpdateBody {
     @NotNull(message = "参数不为空")
-    private String actionId;
+    private String oldPassword;
     @Email(message = "请输入有效邮箱地址")
     private String email;
 }

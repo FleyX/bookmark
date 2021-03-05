@@ -1,6 +1,6 @@
 <template>
   <div class="main">
-    <img class="ico" src="/static/img/bookmarkLogo.png" />
+    <a class="ico" href="/"><img src="/static/img/bookmarkLogo.png" /></a>
     <a-dropdown>
       <div class="user">
         <img :src="userInfo.icon" class="userIcon" />
@@ -52,6 +52,7 @@ export default {
   background-color: rgba(197, 190, 198, 0.4);
   z-index: 100;
   .ico {
+    display: flex;
     height: 100%;
   }
   .user {

@@ -1,4 +1,5 @@
 import localforage from "localforage";
+import HttpUtil from "../../util/HttpUtil";
 /**
  * 存储全局配置
  */
@@ -35,6 +36,11 @@ const actions = {
     context.commit("setToken", token);
     context.commit("isInit", true);
     context.commit("isPhone", /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent));
+  },
+  async refreshUserInfo({ commit }) {
+    let userInfo = await HttpUtil.get("/user/currentUserInfo");
+    await localforage.setItem("userInfo", userInfo);
+    commit("setUserInfo", userInfo);
   },
   //登出清除数据
   async clear(context) {

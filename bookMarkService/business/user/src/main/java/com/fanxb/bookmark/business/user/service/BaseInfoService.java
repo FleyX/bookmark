@@ -1,5 +1,6 @@
 package com.fanxb.bookmark.business.user.service;
 
+import cn.hutool.core.util.StrUtil;
 import com.fanxb.bookmark.business.user.constant.RedisConstant;
 import com.fanxb.bookmark.business.user.dao.UserDao;
 import com.fanxb.bookmark.business.user.entity.EmailUpdateBody;
@@ -39,10 +40,9 @@ public class BaseInfoService {
 
     public void changePassword(UpdatePasswordBody body) {
         int userId = UserContextHolder.get().getUserId();
-        String checkAuthKey = com.fanxb.bookmark.common.constant.RedisConstant.getPasswordCheckKey(userId, body.getActionId());
-        String str = RedisUtil.get(checkAuthKey, String.class);
-        if (str == null) {
-            throw new CustomException("密码校验失败，无法更新密码");
+        String password = userDao.selectByUserId(userId).getPassword();
+        if (!StrUtil.equals(password, HashUtil.getPassword(body.getOldPassword()))) {
+            throw new CustomException("旧密码错误");
         }
         userDao.updatePasswordByUserId(userId, HashUtil.getPassword(body.getPassword()));
     }
@@ -69,12 +69,10 @@ public class BaseInfoService {
     @Transactional(rollbackFor = Exception.class)
     public void updateEmail(EmailUpdateBody body) {
         int userId = UserContextHolder.get().getUserId();
-        String checkAuthKey = com.fanxb.bookmark.common.constant.RedisConstant.getPasswordCheckKey(userId, body.getActionId());
-        String str = RedisUtil.get(checkAuthKey, String.class);
-        if (str == null) {
+        String oldPassword = userDao.selectByUserId(userId).getPassword();
+        if (!StrUtil.equals(oldPassword, HashUtil.getPassword(body.getOldPassword()))) {
             throw new CustomException("密码校验失败，无法更新email");
         }
-        RedisUtil.delete(checkAuthKey);
         String secret = UUID.randomUUID().toString().replaceAll("-", "");
         String url = VERIFY_EMAIL.replaceAll("XXXX", Constant.serviceAddress + VERIFY_EMAIL_PATH + secret);
         log.debug(url);
