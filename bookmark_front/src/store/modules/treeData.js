@@ -43,12 +43,14 @@ const actions = {
       return;
     }
     context.commit("isIniting", true);
+    let userInfo = await httpUtil.get("/user/currentUserInfo");
     let data = await localforage.getItem(TOTAL_TREE_DATA);
-    if (!data) {
+    let version = await localforage.getItem(VERSION);
+    if (!data || userInfo.version > version) {
       await context.dispatch("refresh");
     } else {
       context.commit(TOTAL_TREE_DATA, data);
-      context.commit(VERSION, await localforage.getItem(VERSION));
+      context.commit(VERSION, version);
     }
     context.commit("isIniting", false);
     context.commit("isInit", true);

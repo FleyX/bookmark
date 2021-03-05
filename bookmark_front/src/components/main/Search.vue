@@ -1,37 +1,10 @@
 <template>
   <div class="search">
-    <a-input-search
-      ref="searchInput"
-      size="large"
-      style="width: 100%"
-      v-model="value"
-      enter-button
-      @change="search"
-      @search="searchClick"
-      allowClear
-      @blur.prevent="inputBlur"
-      @focus="inputFocus"
-      @keydown="keyPress"
-    />
+    <a-input-search id="searchInput" ref="searchInput" size="large" style="width: 100%" v-model="value" enter-button @change="search" @search="searchClick" allowClear @blur.prevent="inputBlur" @focus="inputFocus" @keydown="keyPress" />
     <div v-if="focused" class="searchContent">
       <a-empty v-if="list.length == 0" />
-      <div
-        class="listItem"
-        :class="{ itemActive: index == hoverIndex || index == selectIndex }"
-        v-for="(item, index) in list"
-        :key="item.bookmarkId"
-        @mouseenter="mouseEnterOut(index, 'enter')"
-        @mouseleave="mouseEnterOut(index, 'leave')"
-        @mouseup="onMouse"
-        @click="itemClick(item)"
-      >
-        <a
-          class="listItemUrl"
-          style="padding-right: 1em; max-width: calc(100% - 2em)"
-          :id="'bookmark:' + item.bookmarkId"
-          :href="item.url"
-          target="_blank"
-        >
+      <div class="listItem" :class="{ itemActive: index == hoverIndex || index == selectIndex }" v-for="(item, index) in list" :key="item.bookmarkId" @mouseenter="mouseEnterOut(index, 'enter')" @mouseleave="mouseEnterOut(index, 'leave')" @mouseup="onMouse" @click="itemClick(item)">
+        <a class="listItemUrl" style="padding-right: 1em; max-width: calc(100% - 2em)" :id="'bookmark:' + item.bookmarkId" :href="item.url" @click="itemClick($event,item.bookmarkId)" target="_blank">
           {{ item.name }}
         </a>
         <a-tooltip v-if="showActions && hoverIndex === index" title="定位到书签树中">
@@ -79,6 +52,7 @@ export default {
       }
       let time1 = Date.now();
       this.list = this.dealSearch(content);
+      this.selectIndex = null;
       console.info("搜索耗时：" + (Date.now() - time1));
     },
     searchClick() {
@@ -86,12 +60,26 @@ export default {
         clearTimeout(this.timer);
       }
     },
-    itemClick(item) {
-      HttpUtil.post("/bookmark/visitNum", { id: item.bookmarkId });
+    itemClick(e, id) {
+      console.log(e, id);
+      this.stopDefault(e);
+      if (!id) {
+        return;
+      }
+      HttpUtil.post("/bookmark/visitNum", { id });
+      if (this.selectIndex == null) {
+        this.targetUrl = "https://www.baidu.com/s?ie=UTF-8&wd=" + encodeURIComponent(this.value);
+      } else {
+        this.targetUrl = this.list[this.selectIndex].url;
+      }
+      let a = this.$refs["targetA"];
+      a.href = this.targetUrl;
+      a.click();
+      return false;
     },
     inputBlur() {
       console.log("blur");
-      this.timer = setTimeout(() => (this.focused = false), 300);
+      this.timer = setTimeout(() => (this.focused = false), 250);
     },
     inputFocus() {
       this.focused = true;
@@ -103,7 +91,6 @@ export default {
       this.$refs["searchInput"].focus();
     },
     mouseEnterOut(item, type) {
-      console.log(item, type);
       if (type === "enter") {
         this.hoverIndex = item;
       } else {
@@ -116,22 +103,19 @@ export default {
     },
     //上下事件
     keyPress(e) {
+      let input = document.getElementById("searchInput");
       switch (e.key) {
         case "ArrowUp":
           this.selectIndex = this.selectIndex == null ? this.list.length - 1 : this.selectIndex == 0 ? null : this.selectIndex - 1;
+          this.stopDefault();
           break;
         case "ArrowDown":
           this.selectIndex = this.selectIndex == null ? 0 : this.selectIndex == this.list.length - 1 ? null : this.selectIndex + 1;
+          this.stopDefault();
           break;
         case "Enter":
-          if (this.selectIndex == null) {
-            this.targetUrl = "https://www.baidu.com/s?ie=UTF-8&wd=" + encodeURIComponent(this.value);
-          } else {
-            this.targetUrl = this.list[this.selectIndex].url;
-          }
-          let a = this.$refs["targetA"];
-          a.href = this.targetUrl;
-          a.click();
+          this.itemClick();
+          break;
       }
     },
     dealSearch(content) {
@@ -153,6 +137,18 @@ export default {
       }
       return res;
     },
+    /**
+     * 阻止默认事件
+     */
+    stopDefault(e) {
+      //阻止默认浏览器动作(W3C)
+      if (e && e.preventDefault) {
+        e.preventDefault();
+      } else {
+        window.event.returnValue = false;
+      }
+      return false;
+    },
   },
 };
 </script>
@@ -165,6 +161,10 @@ export default {
     width: 100%;
     background: white;
     z-index: 1;
+    border: 1px solid black;
+    border-top: 0;
+    padding: 5px;
+    border-radius: 5px;
     .listItem {
       font-size: 0.16rem;
       display: flex;
@@ -178,7 +178,7 @@ export default {
       }
     }
     .itemActive {
-      background-color: #f8f8f8;
+      background-color: #aca6a6;
     }
   }
 }
