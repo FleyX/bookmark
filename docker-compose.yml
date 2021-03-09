@@ -6,6 +6,8 @@ services:
       - bookmark
     volumes:
       - ./data/mysql/data:/var/lib/mysql
+      # mysql文件备份目录
+      - ./data/mysql/backup:/backup
       - ./data/mysql/temp:/var/lib/mysql-files
       - ./data/mysql/my.cnf:/etc/mysql/my.cnf
       - /etc/localtime:/etc/localtime

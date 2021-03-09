@@ -1,4 +1,5 @@
 .idea
 mysql/data
+mysql/backup
 maven/mavenRep
 files
