@@ -1,15 +1,13 @@
 package com.fanxb.bookmark.business.user.controller;
 
-import com.fanxb.bookmark.business.user.entity.EmailUpdateBody;
-import com.fanxb.bookmark.business.user.entity.UpdatePasswordBody;
-import com.fanxb.bookmark.business.user.entity.UsernameBody;
+import com.fanxb.bookmark.business.user.vo.EmailUpdateBody;
+import com.fanxb.bookmark.business.user.vo.UpdatePasswordBody;
+import com.fanxb.bookmark.business.user.vo.UsernameBody;
 import com.fanxb.bookmark.business.user.service.BaseInfoService;
 import com.fanxb.bookmark.common.entity.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 
 /**

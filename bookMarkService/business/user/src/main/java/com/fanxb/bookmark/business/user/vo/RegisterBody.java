@@ -1,4 +1,4 @@
-package com.fanxb.bookmark.business.user.entity;
+package com.fanxb.bookmark.business.user.vo;
 
 import lombok.Data;
 

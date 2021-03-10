@@ -1,4 +1,4 @@
-package com.fanxb.bookmark.business.user.apiImpl;
+package com.fanxb.bookmark.business.user.service.impl;
 
 import com.fanxb.bookmark.business.api.UserApi;
 import com.fanxb.bookmark.business.user.dao.UserDao;

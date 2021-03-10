@@ -1,4 +1,4 @@
-package com.fanxb.bookmark.business.user.entity;
+package com.fanxb.bookmark.business.user.vo;
 
 import com.fanxb.bookmark.business.user.constant.ValidatedConstant;
 import lombok.Data;

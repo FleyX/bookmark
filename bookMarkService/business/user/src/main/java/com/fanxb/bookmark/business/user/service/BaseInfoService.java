@@ -3,20 +3,17 @@ package com.fanxb.bookmark.business.user.service;
 import cn.hutool.core.util.StrUtil;
 import com.fanxb.bookmark.business.user.constant.RedisConstant;
 import com.fanxb.bookmark.business.user.dao.UserDao;
-import com.fanxb.bookmark.business.user.entity.EmailUpdateBody;
-import com.fanxb.bookmark.business.user.entity.UpdatePasswordBody;
+import com.fanxb.bookmark.business.user.vo.EmailUpdateBody;
+import com.fanxb.bookmark.business.user.vo.UpdatePasswordBody;
 import com.fanxb.bookmark.common.constant.Constant;
 import com.fanxb.bookmark.common.entity.MailInfo;
 import com.fanxb.bookmark.common.exception.CustomException;
-import com.fanxb.bookmark.common.exception.FormDataException;
 import com.fanxb.bookmark.common.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.UUID;
 
 /**

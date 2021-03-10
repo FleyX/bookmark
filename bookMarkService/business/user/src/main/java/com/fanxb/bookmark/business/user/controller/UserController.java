@@ -1,8 +1,8 @@
 package com.fanxb.bookmark.business.user.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.fanxb.bookmark.business.user.entity.LoginBody;
-import com.fanxb.bookmark.business.user.entity.RegisterBody;
+import com.fanxb.bookmark.business.user.vo.LoginBody;
+import com.fanxb.bookmark.business.user.vo.RegisterBody;
 import com.fanxb.bookmark.business.user.service.UserService;
 import com.fanxb.bookmark.common.entity.Result;
 import com.fanxb.bookmark.common.util.UserContextHolder;
