@@ -76,3 +76,18 @@ fileSavePath: ./
 
 # 服务部署地址
 serviceAddress: http://localhost
+
+# 第三方登陆相关
+OAuth:
+  github:
+    # 客户端id
+    clientId:
+    # 客户端密钥
+    secret:
+
+# 网络代理（有配置就用代理，未配置不使用代理)
+proxy:
+  ip:
+  port:
+
+

@@ -1,5 +1,5 @@
 import * as http from "axios";
-import { getToken } from "./UserUtil";
+import vuex from "../store/index.js";
 import router from "../router/index";
 
 /**
@@ -19,7 +19,7 @@ async function request(url, method, params, body, isForm, redirect) {
     method,
     params,
     headers: {
-      "jwt-token": await getToken()
+      "jwt-token": vuex.state.globalConfig.token
     }
   };
   if (isForm) {

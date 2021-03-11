@@ -1,5 +1,8 @@
 import localforage from "localforage";
 import HttpUtil from "../../util/HttpUtil";
+const USER_INFO = "userInfo";
+const TOKEN = "token";
+
 /**
  * 存储全局配置
  */
@@ -7,11 +10,11 @@ const state = {
   /**
    * 用户信息
    */
-  userInfo: {},
+  [USER_INFO]: {},
   /**
    * token
    */
-  token: null,
+  [TOKEN]: null,
   /**
    * 是否已经初始化完成,避免多次重复初始化
    */
@@ -30,36 +33,43 @@ const actions = {
     if (context.state.isInit) {
       return;
     }
-    context.commit("setUserInfo", await localforage.getItem("userInfo"));
-    const token = await localforage.getItem("token");
-    window.token = token;
-    context.commit("setToken", token);
+    const token = await localforage.getItem(TOKEN);
+    await context.dispatch("setToken", token);
+
+    let userInfo = await localforage.getItem(USER_INFO);
+    if (userInfo === null || userInfo === "") {
+      await context.dispatch("refreshUserInfo");
+    } else {
+      context.commit(USER_INFO, userInfo);
+    }
+
     context.commit("isInit", true);
     context.commit("isPhone", /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent));
   },
   async refreshUserInfo({ commit }) {
     let userInfo = await HttpUtil.get("/user/currentUserInfo");
-    await localforage.setItem("userInfo", userInfo);
-    commit("setUserInfo", userInfo);
+    await localforage.setItem(USER_INFO, userInfo);
+    commit(USER_INFO, userInfo);
+  },
+  async setToken({ commit }, token) {
+    await localforage.setItem(TOKEN, token);
+    commit(TOKEN, token);
   },
   //登出清除数据
   async clear(context) {
     await localforage.removeItem("userInfo");
     await localforage.removeItem("token");
-    delete window.token;
-    context.commit("setUserInfo", {});
-    context.commit("setToken", null);
+    context.commit(USER_INFO, null);
+    context.commit(TOKEN, null);
+    context.commit("isInit", false);
   }
 };
 
 const mutations = {
-  setUserInfo(state, userInfo) {
-    localforage.setItem("userInfo", userInfo);
+  userInfo(state, userInfo) {
     state.userInfo = userInfo;
   },
-  setToken(state, token) {
-    localforage.setItem("token", token);
-    window.token = token;
+  token(state, token) {
     state.token = token;
   },
   isInit(state, isInit) {

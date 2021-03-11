@@ -19,10 +19,18 @@ import java.util.Map;
 public class User {
 
     private int userId;
+    /**
+     * 第三方github登陆id,-1说明非github登陆
+     */
+    private Long githubId;
     private String username;
     private String email;
     private String newEmail;
     private String icon;
+    /**
+     * 是否未设置密码
+     */
+    private Boolean noPassword;
     @JSONField(serialize = false)
     private String password;
     private long createTime;
@@ -34,4 +42,5 @@ public class User {
      * 书签同步版本
      */
     private int version;
+
 }

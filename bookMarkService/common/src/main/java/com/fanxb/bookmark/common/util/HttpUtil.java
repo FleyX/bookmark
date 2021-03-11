@@ -1,11 +1,17 @@
 package com.fanxb.bookmark.common.util;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fanxb.bookmark.common.exception.CustomException;
 import okhttp3.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -17,12 +23,29 @@ import java.util.concurrent.TimeUnit;
  * @author fanxb
  * @date 2019/4/4 15:53
  */
+@Component
 public class HttpUtil {
+    @Value("${proxy.ip}")
+    private String proxyIp;
+    @Value("${proxy.port}")
+    private int proxyPort;
+
     private static final int IP_LENGTH = 15;
 
-    public static final OkHttpClient CLIENT = new OkHttpClient.Builder().connectTimeout(3, TimeUnit.SECONDS)
-            .readTimeout(300, TimeUnit.SECONDS).build();
+    private static OkHttpClient CLIENT;
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+
+    @PostConstruct
+    public void init() {
+
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        if (StrUtil.isNotBlank(proxyIp)) {
+            builder.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyIp, proxyPort)));
+        }
+        CLIENT = builder.connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .build();
+    }
 
     /**
      * 功能描述: get
@@ -142,6 +165,8 @@ public class HttpUtil {
                 String str = res.body().string();
                 if (typeClass.getCanonicalName().equals(JSONObject.class.getCanonicalName())) {
                     return (T) JSONObject.parseObject(str);
+                } else if (typeClass.getCanonicalName().equals(String.class.getCanonicalName())) {
+                    return (T) str;
                 } else {
                     return (T) JSONArray.parseArray(str);
                 }

@@ -4,23 +4,16 @@
 
 
     <insert id="addOne" useGeneratedKeys="true" keyColumn="userId" keyProperty="userId">
-        insert into user (username, email, icon, password, createTime, lastLoginTime,version)
-        value
-        (#{username}, #{email}, #{icon}, #{password}, #{createTime}, #{lastLoginTime},#{version})
+        insert into user (username, email, icon, password, createTime, lastLoginTime, version)
+            value
+            (#{username}, #{email}, #{icon}, #{password}, #{createTime}, #{lastLoginTime}, #{version})
     </insert>
 
     <select id="selectByUsernameOrEmail" resultType="com.fanxb.bookmark.common.entity.User">
-        select
-        userId,
-        username,
-        email,
-        icon,
-        password,
-        createTime,
-        lastLoginTime,
-        version
+        select *
         from user
-        where username = #{name} or email = #{email}
+        where username = #{name}
+           or email = #{email}
         limit 1
     </select>
 
@@ -36,10 +29,11 @@
         where email = #{email}
     </update>
 
-    <select id="selectByUserId" resultType="com.fanxb.bookmark.common.entity.User">
+    <select id="selectByUserIdOrGithubId" resultType="com.fanxb.bookmark.common.entity.User">
         select *
         from user
         where userId = #{userId}
+           or githubId = #{githubId}
     </select>
 
 

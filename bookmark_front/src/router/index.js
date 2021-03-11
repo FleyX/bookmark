@@ -8,6 +8,7 @@ import Public from "../views/public/Public.vue";
 import Login from "../views/public/pages/Login.vue";
 import Register from "../views/public/pages/Register.vue";
 import ResetPassword from "../views/public/pages/ResetPassword.vue";
+import GithubOauth from "../views/public/pages/oauth/Github.vue";
 
 Vue.use(VueRouter);
 
@@ -47,12 +48,18 @@ const routes = [
         path: "resetPassword",
         name: "ResetPassword",
         component: ResetPassword
+      },
+      {
+        path: "oauth/github",
+        name: "GithubRedirect",
+        component: GithubOauth
       }
     ]
   }
 ];
 
 const router = new VueRouter({
+  mode: "history",
   routes
 });
 

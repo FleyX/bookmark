@@ -39,14 +39,14 @@ const getters = {
 const actions = {
   //从缓存初始化数据
   async init(context) {
-    if (context.state.isInit) {
+    if (context.state.isInit || context.state.isIniting) {
       return;
     }
     context.commit("isIniting", true);
-    let userInfo = await httpUtil.get("/user/currentUserInfo");
+    let realVersion = await httpUtil.get("/user/version");
     let data = await localforage.getItem(TOTAL_TREE_DATA);
     let version = await localforage.getItem(VERSION);
-    if (!data || userInfo.version > version) {
+    if (!data || realVersion > version) {
       await context.dispatch("refresh");
     } else {
       context.commit(TOTAL_TREE_DATA, data);
@@ -85,8 +85,8 @@ const actions = {
         item1.scopedSlots = { title: "nodeTitle" };
       })
     );
-    let userInfo = await httpUtil.get("/user/currentUserInfo");
-    await context.dispatch("updateVersion", userInfo.version);
+    let version = await httpUtil.get("/user/version");
+    await context.dispatch("updateVersion", version);
     context.commit(TOTAL_TREE_DATA, treeData);
     await localforage.setItem(TOTAL_TREE_DATA, treeData);
   },
@@ -243,7 +243,7 @@ const actions = {
 };
 
 const mutations = {
-  totalTreeData(state, totalTreeData) {
+  [TOTAL_TREE_DATA]: (state, totalTreeData) => {
     state.totalTreeData = totalTreeData;
   },
   isInit(state, isInit) {
@@ -253,7 +253,7 @@ const mutations = {
     state.isIniting = isIniting;
   },
 
-  version(state, version) {
+  [VERSION]: (state, version) => {
     state[VERSION] = version;
   }
 };

@@ -3,6 +3,7 @@
     <img class="ico" src="/static/img/bookmarkLogo.png" />
     <div class="main-body">
       <router-view />
+
     </div>
   </div>
 </template>
@@ -34,7 +35,7 @@ export default {
     width: 2rem;
   }
   .main-body {
-    width: 5rem;
+    min-width: 5rem;
     min-height: 3.5rem;
     background-color: @publicBgColor;
     border-radius: 5px;

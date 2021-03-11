@@ -52,10 +52,9 @@ export default {
         return;
       }
       this.count = 0;
-      let userInfo = await httpUtil.get("/user/currentUserInfo");
-      this.$store.commit("globalConfig/setUserInfo", userInfo);
+      let version = await httpUtil.get("/user/version");
       const _this = this;
-      if (this.$store.state.treeData.version < userInfo.version) {
+      if (this.$store.state.treeData.version < version) {
         this.isOpen = true;
         this.$confirm({
           title: "书签数据有更新，是否立即刷新？",

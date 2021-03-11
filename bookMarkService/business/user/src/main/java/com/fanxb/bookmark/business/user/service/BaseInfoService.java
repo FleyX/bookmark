@@ -37,7 +37,7 @@ public class BaseInfoService {
 
     public void changePassword(UpdatePasswordBody body) {
         int userId = UserContextHolder.get().getUserId();
-        String password = userDao.selectByUserId(userId).getPassword();
+        String password = userDao.selectByUserIdOrGithubId(userId, null).getPassword();
         if (!StrUtil.equals(password, HashUtil.getPassword(body.getOldPassword()))) {
             throw new CustomException("旧密码错误");
         }
@@ -66,7 +66,7 @@ public class BaseInfoService {
     @Transactional(rollbackFor = Exception.class)
     public void updateEmail(EmailUpdateBody body) {
         int userId = UserContextHolder.get().getUserId();
-        String oldPassword = userDao.selectByUserId(userId).getPassword();
+        String oldPassword = userDao.selectByUserIdOrGithubId(userId, null).getPassword();
         if (!StrUtil.equals(oldPassword, HashUtil.getPassword(body.getOldPassword()))) {
             throw new CustomException("密码校验失败，无法更新email");
         }

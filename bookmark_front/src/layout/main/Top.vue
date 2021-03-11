@@ -1,5 +1,5 @@
 <template>
-  <div class="main">
+  <div class="main" v-if="userInfo">
     <a class="ico" href="/"><img src="/static/img/bookmarkLogo.png" /></a>
     <a-dropdown>
       <div class="user">
@@ -31,7 +31,7 @@ export default {
         await this.$store.dispatch("globalConfig/clear");
         this.$router.replace("/public/login");
       } else if (key === "personSpace") {
-        this.$router.push("personSpace/userInfo");
+        this.$router.push("/personSpace/userInfo");
       }
     },
   },

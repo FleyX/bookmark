@@ -1,0 +1,1 @@
+INSERT INTO `bookmark`.`url`(`method`, `url`, `type`) VALUES ('POST', '/user/oAuthLogin', 0);
