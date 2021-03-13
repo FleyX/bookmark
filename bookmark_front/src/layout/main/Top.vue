@@ -1,6 +1,6 @@
 <template>
   <div class="main" v-if="userInfo">
-    <a class="ico" href="/"><img src="/static/img/bookmarkLogo.png" /></a>
+    <a class="ico" href="/"><img src="/static/img/bookmarkLogo.png" style="height:100%" /></a>
     <a-dropdown>
       <div class="user">
         <img :src="userInfo.icon" class="userIcon" />

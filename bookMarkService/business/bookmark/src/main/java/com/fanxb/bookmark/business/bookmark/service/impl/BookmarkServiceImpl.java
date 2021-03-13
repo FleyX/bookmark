@@ -283,7 +283,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         }
         try {
             URL urlObj = new URL(url);
-            byte[] data = HttpUtil.download(urlIconAddress + "/icon?url=" + urlObj.getHost() + "&size=15..32..120");
+            byte[] data = HttpUtil.download(urlIconAddress + "/icon?url=" + urlObj.getHost() + "&size=8..16..32");
             String base64 = new String(Base64.getEncoder().encode(data));
             if (StrUtil.isEmpty(base64)) {
                 return "data:image/png;base64," + base64;

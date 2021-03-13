@@ -41,7 +41,7 @@
       <a-dropdown :trigger="['contextmenu']" slot="nodeTitle" slot-scope="rec">
         <div class="titleContext">
           <a-icon type="folder" v-if="!rec.dataRef.isLeaf" />
-          <img v-else-if="rec.dataRef.icon.length>0" :src="rec.dataRef.icon" style="width:1.2em" />
+          <img v-else-if="rec.dataRef.icon.length>0" :src="rec.dataRef.icon" style="width:16px" />
           <a-icon type="book" v-else />
           <span @click.prevent style="display:inline-block;min-width:50%;padding-left:0.4em">
             {{rec.dataRef.name}}
