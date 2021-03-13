@@ -154,5 +154,18 @@ public class UserController {
         return Result.success(userService.getCurrentUserVersion(UserContextHolder.get().getUserId()));
     }
 
+    /**
+     * 更新所有人的icon数据
+     *
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2021/3/13
+     **/
+    @PostMapping("/updateAllUserIcon")
+    public Result updateAllUserIcon() {
+        userService.updateAllUserIcon();
+        return Result.success(null);
+    }
+
 
 }

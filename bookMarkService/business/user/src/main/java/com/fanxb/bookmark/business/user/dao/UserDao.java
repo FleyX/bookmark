@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * 类功能简述：
  * 类功能详述：
@@ -120,7 +122,7 @@ public interface UserDao {
     /**
      * 功能描述: 更新用户上次更新书签时间
      *
-     * @param item item
+     * @param userId userId
      * @author fanxb
      * @date 2020/1/26 下午3:47
      */
@@ -130,8 +132,7 @@ public interface UserDao {
     /**
      * 功能描述: 更新所有用户的更新时间
      *
-     * @param time time
-     * @author 123
+     * @author fanxb
      * @date 2020/3/29 18:18
      */
     @Update("update user set version=version+1")
@@ -168,4 +169,16 @@ public interface UserDao {
      **/
     @Select("select version from user where userId=#{userId}")
     int getUserVersion(int userId);
+
+    /**
+     * 分页查询用户id列表
+     *
+     * @param start 开始
+     * @param size  页大小
+     * @return java.util.List<java.lang.Integer>
+     * @author fanxb
+     * @date 2021/3/13
+     **/
+    @Select("select userId from user order by userId limit #{start},#{size}")
+    List<Integer> selectUserIdPage(@Param("start") int start, @Param("size") int size);
 }

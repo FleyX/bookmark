@@ -122,4 +122,13 @@ public interface BookmarkService {
      * @date 2020/8/26 15:54
      */
     List<Bookmark> userPopular(int num);
+
+    /**
+     * 更新某个用户的icon数据
+     *
+     * @param userId 用户id
+     * @author fanxb
+     * @date 2021/3/11
+     **/
+    void updateUserBookmarkIcon(int userId);
 }

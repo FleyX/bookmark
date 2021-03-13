@@ -77,8 +77,8 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
     /**
      * Description: 删除某用户某个书签路径下所有数据,不包含文件夹自身
      *
-     * @param userId   用户id
-     * @param path 文件夹id
+     * @param userId 用户id
+     * @param path   文件夹id
      * @author fanxb
      * @date 2019/7/12 14:13
      */
@@ -214,6 +214,27 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
     void updateVisitNum(VisitNumPlus item);
 
     @Select("select bookmarkId,name,url,icon from bookmark where userId=#{userId} and type=0 order by visitNum desc limit 0,#{num}")
-    List<Bookmark> selectPopular(@Param("userId") int userId,@Param("num") int num);
+    List<Bookmark> selectPopular(@Param("userId") int userId, @Param("num") int num);
+
+    /**
+     * 获取某用户无icon的条目
+     *
+     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @author fanxb
+     * @date 2021/3/11
+     **/
+    @Select("select userId,bookmarkId,url,icon from bookmark where userId=#{userId} and icon='' order by bookmarkId asc limit #{start},#{size}")
+    List<Bookmark> selectUserNoIcon(@Param("userId") int userId, @Param("start") int start, @Param("size") int size);
+
+    /**
+     * 更新icon
+     *
+     * @param bookmarkId bookmarkId
+     * @param icon       icon
+     * @author fanxb
+     * @date 2021/3/13
+     **/
+    @Update("update bookmark set icon=#{icon} where bookmarkId=#{bookmarkId}")
+    void updateIcon(@Param("bookmarkId") int bookmarkId, @Param("icon") String icon);
 
 }

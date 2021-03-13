@@ -18,4 +18,9 @@ public class UserApiImpl implements UserApi {
     public void versionPlus(int userId) {
         userDao.updateUserVersion(userId);
     }
+
+    @Override
+    public void allUserVersionPlus() {
+        userDao.updateAllBookmarkUpdateVersion();
+    }
 }

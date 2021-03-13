@@ -90,4 +90,9 @@ proxy:
   ip:
   port:
 
+# url icon服务提供地址
+urlIconAddress: http://localhost:11001
+
+# 管理员用户id(因为目前尚未设计分角色权限系统，须指定管理员用户id)
+manageUserId:
 

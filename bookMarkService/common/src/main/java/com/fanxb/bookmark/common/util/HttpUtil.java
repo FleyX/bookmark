@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Map;
@@ -45,6 +47,26 @@ public class HttpUtil {
         CLIENT = builder.connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
                 .build();
+    }
+
+    /***
+     * 下载文件
+     * @author fanxb
+     * @param url 下载链接
+     * @return java.io.InputStream
+     * @date 2021/3/12
+     **/
+    public static byte[] download(String url) {
+        try (Response res = CLIENT.newCall(new Request.Builder().url(url).build()).execute()) {
+            assert res.body() != null;
+            if (checkIsOk(res.code())) {
+                return res.body().byteStream().readAllBytes();
+            } else {
+                throw new CustomException("下载出现问题:" + res.body().string());
+            }
+        } catch (Exception e) {
+            throw new CustomException(e);
+        }
     }
 
     /**
@@ -142,7 +164,6 @@ public class HttpUtil {
      * 构造request，获取响应
      *
      * @param request request
-     * @return
      */
     public static <T> T request(Request request, Class<T> typeClass) {
         try (Response res = CLIENT.newCall(request).execute()) {
@@ -155,13 +176,17 @@ public class HttpUtil {
     /**
      * 解析响应
      *
-     * @param res
-     * @return
+     * @param res res
      */
     @SuppressWarnings("unchecked")
     public static <T> T parseResponse(Response res, Class<T> typeClass) {
         try {
+            assert res.body() != null;
             if (checkIsOk(res.code())) {
+                if (typeClass.getCanonicalName().equals(InputStream.class.getCanonicalName())) {
+                    return (T) res.body().byteStream();
+                }
+
                 String str = res.body().string();
                 if (typeClass.getCanonicalName().equals(JSONObject.class.getCanonicalName())) {
                     return (T) JSONObject.parseObject(str);
@@ -191,7 +216,7 @@ public class HttpUtil {
      * @date 2019/6/12 15:36
      */
     public static String getIpAddr(HttpServletRequest request) {
-        String ipAddress = null;
+        String ipAddress;
         try {
             ipAddress = request.getHeader("x-forwarded-for");
             if (ipAddress == null || ipAddress.length() == 0) {

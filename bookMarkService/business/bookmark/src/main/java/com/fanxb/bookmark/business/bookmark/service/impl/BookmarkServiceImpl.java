@@ -1,6 +1,7 @@
 package com.fanxb.bookmark.business.bookmark.service.impl;
 
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.fanxb.bookmark.business.api.UserApi;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
@@ -13,6 +14,7 @@ import com.fanxb.bookmark.common.constant.EsConstant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.Bookmark;
 import com.fanxb.bookmark.common.util.EsUtil;
+import com.fanxb.bookmark.common.util.HttpUtil;
 import com.fanxb.bookmark.common.util.RedisUtil;
 import com.fanxb.bookmark.common.util.UserContextHolder;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +26,14 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,6 +47,8 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class BookmarkServiceImpl implements BookmarkService {
+    @Value("${urlIconAddress}")
+    private String urlIconAddress;
 
     private final BookmarkDao bookmarkDao;
     private final PinYinService pinYinService;
@@ -261,5 +269,42 @@ public class BookmarkServiceImpl implements BookmarkService {
         return bookmarkDao.selectPopular(UserContextHolder.get().getUserId(), num);
     }
 
+    @Override
+    public void updateUserBookmarkIcon(int userId) {
+        log.info("开始更新:{}", userId);
+        int size = 100;
+        int start = 0;
+        List<Bookmark> deal;
+        while ((deal = bookmarkDao.selectUserNoIcon(userId, start, size)).size() > 0) {
+            start += size;
+            deal.forEach(item -> {
+                String icon = getIconBase64(item.getUrl());
+                if (StrUtil.isNotEmpty(icon)) {
+                    bookmarkDao.updateIcon(item.getBookmarkId(), icon);
+                }
+            });
+        }
+        userApi.versionPlus(userId);
+    }
 
+    private String getIconBase64(String url) {
+        if (StrUtil.isEmpty(url)) {
+            return "";
+        }
+        try {
+            URL urlObj = new URL(url);
+            byte[] data = HttpUtil.download(urlIconAddress + "/icon?url=" + urlObj.getHost() + "&size=15..32..120");
+            String base64 = new String(Base64.getEncoder().encode(data));
+            if (StrUtil.isEmpty(base64)) {
+                return "data:image/png;base64," + base64;
+            } else {
+                log.warn("url无法获取icon:{}", url);
+            }
+        } catch (MalformedURLException e) {
+            log.warn("url无法解析出domain:{}", url);
+        } catch (Exception e) {
+            log.error("url获取icon故障:{}", url, e);
+        }
+        return "";
+    }
 }

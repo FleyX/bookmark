@@ -185,4 +185,16 @@ public class BookmarkController {
         return Result.success(bookmarkService.userPopular(10));
     }
 
+    /**
+     * 更新所有的icon
+     *
+     * @author fanxb
+     * @date 2021/3/11
+     **/
+    @PostMapping("/updateCurrentUserIcon")
+    public Result updateCurrentUserIcon() {
+        bookmarkService.updateUserBookmarkIcon(UserContextHolder.get().getUserId());
+        return Result.success(null);
+    }
+
 }

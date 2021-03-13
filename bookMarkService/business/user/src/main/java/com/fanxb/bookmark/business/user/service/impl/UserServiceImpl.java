@@ -2,6 +2,7 @@ package com.fanxb.bookmark.business.user.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import com.fanxb.bookmark.business.api.BookmarkApi;
 import com.fanxb.bookmark.business.user.constant.FileConstant;
 import com.fanxb.bookmark.business.user.dao.UserDao;
 import com.fanxb.bookmark.business.user.service.UserService;
@@ -13,8 +14,10 @@ import com.fanxb.bookmark.common.constant.NumberConstant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.MailInfo;
 import com.fanxb.bookmark.common.entity.User;
+import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.exception.FormDataException;
 import com.fanxb.bookmark.common.util.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -23,10 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,12 +37,19 @@ import java.util.concurrent.TimeUnit;
  * @date 2019/7/5 17:39
  */
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
+    private final UserDao userDao;
+    private final StringRedisTemplate redisTemplate;
+    private final BookmarkApi bookmarkApi;
+
     @Autowired
-    private UserDao userDao;
-    @Autowired
-    private StringRedisTemplate redisTemplate;
+    public UserServiceImpl(UserDao userDao, StringRedisTemplate redisTemplate, BookmarkApi bookmarkApi) {
+        this.userDao = userDao;
+        this.redisTemplate = redisTemplate;
+        this.bookmarkApi = bookmarkApi;
+    }
 
     /**
      * Description: 向目标发送验证码
@@ -215,5 +222,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public int getCurrentUserVersion(int userId) {
         return userDao.getUserVersion(userId);
+    }
+
+    @Override
+    public void updateAllUserIcon() {
+        if (!UserContextHolder.get().getManageUser()) {
+            throw new CustomException("非管理员用户，无法执行操作");
+        }
+        ThreadPoolUtil.execute(() -> {
+            log.info("开始更新所有人icon");
+            int start = 0, size = 1000;
+            List<Integer> ids;
+            while ((ids = userDao.selectUserIdPage(start, size)).size() > 0) {
+                start += size;
+                ids.forEach(bookmarkApi::updateUserBookmarkIcon);
+            }
+            log.info("结束更新所有人icon");
+        });
     }
 }

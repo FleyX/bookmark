@@ -3,15 +3,19 @@ package com.fanxb.bookmark.business.bookmark.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.fanxb.bookmark.business.api.UserApi;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.business.bookmark.entity.PinYinBody;
 import com.fanxb.bookmark.business.bookmark.service.PinYinService;
 import com.fanxb.bookmark.common.constant.Constant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.Bookmark;
+import com.fanxb.bookmark.common.entity.UserContext;
 import com.fanxb.bookmark.common.entity.redis.UserBookmarkUpdate;
+import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.HttpUtil;
 import com.fanxb.bookmark.common.util.RedisUtil;
+import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,12 +35,20 @@ import java.util.stream.Collectors;
 public class PinYinServiceImpl implements PinYinService {
 
 
-    @Autowired
-    private BookmarkDao bookmarkDao;
+    private final BookmarkDao bookmarkDao;
+    private final UserApi userApi;
 
+    @Autowired
+    public PinYinServiceImpl(BookmarkDao bookmarkDao, UserApi userApi) {
+        this.bookmarkDao = bookmarkDao;
+        this.userApi = userApi;
+    }
 
     @Override
     public void changeAll() {
+        if (!UserContextHolder.get().getManageUser()) {
+            throw new CustomException("非管理员用户，无法执行本操作");
+        }
         int i = 0;
         while (true) {
             List<Bookmark> bookmarks = bookmarkDao.selectPinyinEmpty(i, SIZE);
@@ -49,8 +61,8 @@ public class PinYinServiceImpl implements PinYinService {
             }
             i = bookmarks.get(SIZE - 1).getBookmarkId();
         }
-        //更新所有用户的上次刷新时间
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_UPDATE_VERSION, -1);
+        //更新所有用户版本数据
+        userApi.allUserVersionPlus();
     }
 
     @Override
