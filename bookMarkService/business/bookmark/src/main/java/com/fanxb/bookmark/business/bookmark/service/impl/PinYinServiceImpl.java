@@ -51,10 +51,9 @@ public class PinYinServiceImpl implements PinYinService {
         }
         int i = 0;
         while (true) {
-            List<Bookmark> bookmarks = bookmarkDao.selectPinyinEmpty(i, SIZE);
-            List<String> resList = changeStrings(bookmarks.stream().map(Bookmark::getName).collect(Collectors.toList()));
-            for (int j = 0, size = bookmarks.size(); j < size; j++) {
-                bookmarkDao.updateSearchKey(bookmarks.get(j).getBookmarkId(), resList.get(j));
+            List<Bookmark> bookmarks = changeBookmarks(bookmarkDao.selectPinyinEmpty(i, SIZE));
+            for (Bookmark bookmark : bookmarks) {
+                bookmarkDao.updateSearchKey(bookmark.getBookmarkId(), bookmark.getSearchKey());
             }
             if (bookmarks.size() < SIZE) {
                 break;
@@ -66,8 +65,19 @@ public class PinYinServiceImpl implements PinYinService {
     }
 
     @Override
-    public String changeString(String str) {
-        return changeStrings(Collections.singletonList(str)).get(0);
+    public Bookmark changeBookmark(Bookmark bookmark) {
+        return changeBookmarks(Collections.singletonList(bookmark)).get(0);
+    }
+
+    @Override
+    public List<Bookmark> changeBookmarks(List<Bookmark> bookmarks) {
+        List<String> resList = changeStrings(bookmarks.stream().map(Bookmark::getName).collect(Collectors.toList()));
+        for (int j = 0, size = bookmarks.size(); j < size; j++) {
+            Bookmark bookmark = bookmarks.get(j);
+            int length = bookmark.getUrl().length();
+            bookmark.setSearchKey(resList.get(j) + PARTITION + bookmarks.get(j).getUrl().substring(0, length > 50 ? 50 : length - 1));
+        }
+        return bookmarks;
     }
 
     @Override

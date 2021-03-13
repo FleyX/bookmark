@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -82,12 +81,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         for (int i = 0; i < bookmarks.size(); i++) {
             tempList.add(bookmarks.get(i));
             if (tempList.size() == 1000 || i == bookmarks.size() - 1) {
-                List<String> resList = pinYinService.changeStrings(bookmarks.stream().map(Bookmark::getName).collect(Collectors.toList()));
-                for (int j = 0; j < resList.size(); j++) {
-                    int length = tempList.get(j).getUrl().length();
-                    tempList.get(j).setSearchKey(resList.get(j) + PinYinService.PARTITION
-                            + tempList.get(j).getUrl().substring(0, length > 50 ? 50 : length - 1));
-                }
+                tempList = pinYinService.changeBookmarks(tempList);
                 bookmarkDao.updateSearchKeyBatch(tempList);
                 tempList.clear();
             }
@@ -204,9 +198,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setCreateTime(System.currentTimeMillis());
         bookmark.setAddTime(bookmark.getCreateTime());
         if (bookmark.getType() == Bookmark.BOOKMARK_TYPE) {
-            int length = bookmark.getUrl().length();
-            bookmark.setSearchKey(pinYinService.changeString(bookmark.getName()) + PinYinService.PARTITION +
-                    bookmark.getUrl().substring(0, length > 50 ? 50 : length - 1));
+            pinYinService.changeBookmark(bookmark);
         }
         bookmarkDao.insertOne(bookmark);
         userApi.versionPlus(userId);
@@ -218,9 +210,7 @@ public class BookmarkServiceImpl implements BookmarkService {
     public void updateOne(int userId, Bookmark bookmark) {
         bookmark.setUserId(userId);
         if (bookmark.getType() == 0) {
-            int urlLength = bookmark.getUrl().length();
-            bookmark.setSearchKey(pinYinService.changeString(bookmark.getName()) + PinYinService.PARTITION
-                    + bookmark.getUrl().substring(0, urlLength > 50 ? 50 : urlLength - 1));
+            pinYinService.changeBookmark(bookmark);
         }
         bookmarkDao.editBookmark(bookmark);
         userApi.versionPlus(userId);
