@@ -42,5 +42,9 @@ public class User {
      * 书签同步版本
      */
     private int version;
+    /**
+     * 默认搜索引擎
+     */
+    private String defaultSearchEngine;
 
 }

@@ -181,4 +181,15 @@ public interface UserDao {
      **/
     @Select("select userId from user order by userId limit #{start},#{size}")
     List<Integer> selectUserIdPage(@Param("start") int start, @Param("size") int size);
+
+    /**
+     * 更新用户搜索引擎
+     *
+     * @param userId userId
+     * @param engine engine
+     * @author fanxb
+     * @date 2021/3/14
+     **/
+    @Update("update user set defaultSearchEngine=#{engine} where userId=#{userId}")
+    void updateSearchEngine(@Param("userId") int userId, @Param("engine") String engine);
 }

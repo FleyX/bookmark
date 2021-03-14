@@ -37,12 +37,14 @@ const actions = {
     await context.dispatch("setToken", token);
 
     let userInfo = await localforage.getItem(USER_INFO);
-    if (userInfo === null || userInfo === "") {
-      await context.dispatch("refreshUserInfo");
-    } else {
+    if (userInfo) {
       context.commit(USER_INFO, userInfo);
     }
-
+    try {
+      await context.dispatch("refreshUserInfo");
+    } catch (err) {
+      console.error(err);
+    }
     context.commit("isInit", true);
     context.commit("isPhone", /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent));
   },

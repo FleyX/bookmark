@@ -1,49 +1,25 @@
 package com.fanxb.bookmark.business.user.service;
 
-import cn.hutool.core.util.StrUtil;
-import com.fanxb.bookmark.business.user.constant.RedisConstant;
-import com.fanxb.bookmark.business.user.dao.UserDao;
 import com.fanxb.bookmark.business.user.vo.EmailUpdateBody;
 import com.fanxb.bookmark.business.user.vo.UpdatePasswordBody;
-import com.fanxb.bookmark.common.constant.Constant;
-import com.fanxb.bookmark.common.entity.MailInfo;
-import com.fanxb.bookmark.common.exception.CustomException;
-import com.fanxb.bookmark.common.util.*;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
+import com.fanxb.bookmark.common.entity.User;
 
 /**
- * 类功能简述：
- * 类功能详述：
+ * 个人信息修改
  *
  * @author fanxb
- * @date 2019/9/18 15:54
- */
-@Service
-@Slf4j
-public class BaseInfoService {
+ * @date 2021/3/14
+ **/
+public interface BaseInfoService {
 
-    private static final String VERIFY_EMAIL = FileUtil.streamToString(BaseInfoService.class
-            .getClassLoader().getResourceAsStream("verifyEmail.html"));
-
-    private static final String VERIFY_EMAIL_PATH = "/public/verifyEmail?key=";
-
-    @Autowired
-    private UserDao userDao;
-
-    public void changePassword(UpdatePasswordBody body) {
-        int userId = UserContextHolder.get().getUserId();
-        String password = userDao.selectByUserIdOrGithubId(userId, null).getPassword();
-        if (!StrUtil.equals(password, HashUtil.getPassword(body.getOldPassword()))) {
-            throw new CustomException("旧密码错误");
-        }
-        userDao.updatePasswordByUserId(userId, HashUtil.getPassword(body.getPassword()));
-    }
-
+    /**
+     * 修改密码
+     *
+     * @param body body
+     * @author fanxb
+     * @date 2021/3/14
+     **/
+    void changePassword(UpdatePasswordBody body);
 
     /**
      * Description: 修改用户名
@@ -52,9 +28,7 @@ public class BaseInfoService {
      * @author fanxb
      * @date 2019/9/20 16:18
      */
-    public void updateUsername(String username) {
-        userDao.updateUsernameByUserId(UserContextHolder.get().getUserId(), username);
-    }
+    void updateUsername(String username);
 
     /**
      * 功能描述: 预备更新email，需要校验密码
@@ -63,21 +37,7 @@ public class BaseInfoService {
      * @author fanxb
      * @date 2019/9/26 17:27
      */
-    @Transactional(rollbackFor = Exception.class)
-    public void updateEmail(EmailUpdateBody body) {
-        int userId = UserContextHolder.get().getUserId();
-        String oldPassword = userDao.selectByUserIdOrGithubId(userId, null).getPassword();
-        if (!StrUtil.equals(oldPassword, HashUtil.getPassword(body.getOldPassword()))) {
-            throw new CustomException("密码校验失败，无法更新email");
-        }
-        String secret = UUID.randomUUID().toString().replaceAll("-", "");
-        String url = VERIFY_EMAIL.replaceAll("XXXX", Constant.serviceAddress + VERIFY_EMAIL_PATH + secret);
-        log.debug(url);
-        MailInfo info = new MailInfo(body.getEmail(), "验证邮箱", url);
-        MailUtil.sendMail(info, true);
-        RedisUtil.set(RedisConstant.getUpdateEmailKey(secret), String.valueOf(userId), TimeUtil.DAY_MS);
-        userDao.updateNewEmailByUserId(userId, body.getEmail());
-    }
+    void updateEmail(EmailUpdateBody body);
 
     /**
      * 功能描述: 校验新邮箱，校验成功就更新
@@ -86,13 +46,14 @@ public class BaseInfoService {
      * @author fanxb
      * @date 2019/11/11 23:24
      */
-    public void verifyEmail(String secret) {
-        String key = RedisConstant.getUpdateEmailKey(secret);
-        Integer userId = RedisUtil.get(key, Integer.class);
-        RedisUtil.delete(key);
-        if (userId == null) {
-            throw new CustomException("校验失败,请重试");
-        }
-        userDao.updateEmailByUserId(userId);
-    }
+    void verifyEmail(String secret);
+
+    /**
+     * 修改用户默认搜索引擎
+     *
+     * @param user user
+     * @author fanxb
+     * @date 2021/3/14
+     **/
+    void changeDefaultSearchEngine(User user);
 }

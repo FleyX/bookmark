@@ -16,12 +16,24 @@ export SMTP_HOST=
 export SMTP_USERNAME=
 # smtp密码
 export SMTP_PASSWORD=
-# 部署后前端访问地址
+# 外网访问域名
 export BOOKMARK_HOST=localhost
-# 文件存储地址
+# 文件存储地址（比如用户上传的icon文件）
 export BOOKMARK_FILE_SAVE_PATH=./data/files
 # jwt密钥
 export JWT_SECRET=123456
+# http网络代理ip(github api调用可能需要)
+export PROXY_IP=localhost
+# http网络代理端口
+export PROXY_PORT=8888
+# 如果要支持github登陆需要配置以下两个参数
+# github clientId 
+export GITHUB_CLIENT_ID=
+# github secret
+export GITHUB_SECRET=
+# 管理员用户id
+export MANAGE_USER_ID=-1
+
 
 # 前端打包
 docker run -it --rm --name buildBookmark -v $base/bookmark_front:/opt/front node:lts-buster-slim  bash -c "cd /opt/front &&   yarn --registry https://registry.npm.taobao.org && yarn build"

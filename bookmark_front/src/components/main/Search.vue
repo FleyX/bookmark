@@ -1,7 +1,11 @@
 <template>
   <div class="search">
-    <a-input-search id="searchInput" ref="searchInput" size="large" style="width: 100%" v-model="value" enter-button @change="search" @search="searchClick" allowClear @blur.prevent="inputBlur" @focus="inputFocus" @keydown="keyPress" />
-    <div v-if="focused" class="searchContent">
+    <a-input-search id="searchInput" ref="searchInput" size="large" style="width: 100%" v-model="value" @change="search" @search="searchClick" allowClear @blur.prevent="inputBlur" @focus="inputFocus" @keydown="keyPress">
+      <a-tooltip :title="searchBookmark?'搜索书签':'全网搜索'" slot="enterButton">
+        <a-button :icon="searchBookmark?'book':'search'" type="primary" />
+      </a-tooltip>
+    </a-input-search>
+    <div v-if="focused && searchBookmark" class="searchContent">
       <a-empty v-if="list.length == 0" />
       <div class="listItem" :class="{ itemActive: index == hoverIndex || index == selectIndex }" v-for="(item, index) in list" :key="item.bookmarkId" @mouseenter="mouseEnterOut(index, 'enter')" @mouseleave="mouseEnterOut(index, 'leave')" @mouseup="onMouse" @click="itemClick(item)">
         <a class="listItemUrl" style="padding-right: 1em; max-width: calc(100% - 2em)" :id="'bookmark:' + item.bookmarkId" :href="item.url" @click="itemClick($event,item.bookmarkId)" target="_blank">
@@ -36,10 +40,13 @@ export default {
       hoverIndex: null,
       //上下选中
       selectIndex: null,
+      //是否搜索书签
+      searchBookmark: true,
     };
   },
   computed: {
     ...mapState("treeData", ["totalTreeData"]),
+    ...mapState("globalConfig", ["userInfo"]),
   },
   methods: {
     search(content) {
@@ -52,17 +59,39 @@ export default {
       }
       let time1 = Date.now();
       this.list = this.dealSearch(content);
-      this.selectIndex = null;
+      this.selectIndex = 0;
       console.info("搜索耗时：" + (Date.now() - time1));
+    },
+    /**
+     * 初始化数据
+     */
+    init() {
+      this.focused = false;
+      this.value = "";
+      this.list = [];
+      this.selectIndex = null;
     },
     searchClick() {
       if (this.timer != null) {
         clearTimeout(this.timer);
       }
+      if (!this.searchBookmark) {
+        switch (this.userInfo.defaultSearchEngine) {
+          case "bing":
+            window.open("https://www.bing.com/search?q=" + encodeURIComponent(this.value));
+            break;
+          case "google":
+            window.open("https://www.google.com/search?q=" + encodeURIComponent(this.value));
+            break;
+          default:
+            window.open("https://www.baidu.com/s?ie=UTF-8&wd=" + encodeURIComponent(this.value));
+        }
+      }
     },
     itemClick(e, id) {
-      console.log(e, id);
-      this.stopDefault(e);
+      if (e) {
+        this.stopDefault(e);
+      }
       if (!id) {
         return;
       }
@@ -101,9 +130,10 @@ export default {
     location(item) {
       this.$emit("location", item);
     },
-    //上下事件
+    /**
+     * 键盘事件处理
+     */
     keyPress(e) {
-      let input = document.getElementById("searchInput");
       switch (e.key) {
         case "ArrowUp":
           this.selectIndex = this.selectIndex == null ? this.list.length - 1 : this.selectIndex == 0 ? null : this.selectIndex - 1;
@@ -114,8 +144,15 @@ export default {
           this.stopDefault();
           break;
         case "Enter":
-          this.itemClick();
+          this.itemClick(e, this.list[this.selectIndex].bookmarkId);
           break;
+        case "Tab":
+          this.searchBookmark = !this.searchBookmark;
+          this.stopDefault();
+          break;
+        case "Escape":
+          this.init();
+          this.$refs["searchInput"].blur();
       }
     },
     dealSearch(content) {

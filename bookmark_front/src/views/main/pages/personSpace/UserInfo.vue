@@ -55,6 +55,28 @@
         </div>
       </div>
 
+      <div class="item">
+        <a-tooltip title="搜索框默认搜索引擎">
+          <span style="width:5em">搜索</span>
+        </a-tooltip>
+        <a-tooltip title="点击修改" v-if="currentAction!='defaultSearchEngine'">
+          <span style="cursor: pointer;" @click="()=>this.currentAction='defaultSearchEngine'">{{defaultSearchEngine}}</span>
+        </a-tooltip>
+        <div class="inputGroup" v-else-if="currentAction==='defaultSearchEngine'">
+          <a-select :default-value="userInfo.defaultSearchEngine" style="width:100%" @change="submit">
+            <a-select-option value="baidu">
+              百度
+            </a-select-option>
+            <a-select-option value="google">
+              谷歌
+            </a-select-option>
+            <a-select-option value="bing">
+              Bing
+            </a-select-option>
+          </a-select>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -76,6 +98,17 @@ export default {
   },
   computed: {
     ...mapState("globalConfig", ["userInfo"]),
+    defaultSearchEngine() {
+      switch (this.userInfo.defaultSearchEngine) {
+        case "baidu":
+          return "百度";
+        case "google":
+          return "谷歌";
+        case "bing":
+          return "Bing";
+      }
+      return "";
+    },
   },
   methods: {
     async changeIcon(e) {
@@ -89,7 +122,7 @@ export default {
       let res = await HttpUtil.post("/user/icon", null, formData, true);
       this.$set(this.userInfo, "icon", res);
     },
-    async submit() {
+    async submit(e) {
       let url, body;
       if (this.currentAction === "name") {
         url = "/baseInfo/username";
@@ -104,9 +137,12 @@ export default {
           oldPassword: this.oldPassword,
           password: this.password,
         };
-      } else {
+      } else if (this.currentAction === "email") {
         url = "/baseInfo/email";
         body = { oldPassword: this.oldPassword, email: this.email };
+      } else if (this.currentAction === "defaultSearchEngine") {
+        url = "/baseInfo/updateSearchEngine";
+        body = { defaultSearchEngine: e };
       }
       await HttpUtil.post(url, null, body);
       await this.$store.dispatch("globalConfig/refreshUserInfo");
