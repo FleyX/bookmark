@@ -13,10 +13,7 @@ import com.fanxb.bookmark.business.bookmark.service.PinYinService;
 import com.fanxb.bookmark.common.constant.EsConstant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.Bookmark;
-import com.fanxb.bookmark.common.util.EsUtil;
-import com.fanxb.bookmark.common.util.HttpUtil;
-import com.fanxb.bookmark.common.util.RedisUtil;
-import com.fanxb.bookmark.common.util.UserContextHolder;
+import com.fanxb.bookmark.common.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -76,7 +73,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         for (int i = 0, length = elements.size(); i < length; i++) {
             dealBookmark(userId, elements.get(i), path, sortBase + i, bookmarks);
         }
-        //每一千条处理插入一次
+        //每一千条处理插入一次,批量更新搜索字段
         List<Bookmark> tempList = new ArrayList<>(1000);
         for (int i = 0; i < bookmarks.size(); i++) {
             tempList.add(bookmarks.get(i));
@@ -87,6 +84,12 @@ public class BookmarkServiceImpl implements BookmarkService {
             }
         }
         userApi.versionPlus(userId);
+
+        //异步更新icon
+        ThreadPoolUtil.execute(() -> {
+            updateUserBookmarkIcon(userId);
+            userApi.versionPlus(userId);
+        });
     }
 
     /**
@@ -199,6 +202,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setAddTime(bookmark.getCreateTime());
         if (bookmark.getType() == Bookmark.BOOKMARK_TYPE) {
             pinYinService.changeBookmark(bookmark);
+            bookmark.setIcon(getIconBase64(bookmark.getUrl()));
         }
         bookmarkDao.insertOne(bookmark);
         userApi.versionPlus(userId);
@@ -211,6 +215,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setUserId(userId);
         if (bookmark.getType() == 0) {
             pinYinService.changeBookmark(bookmark);
+            bookmark.setIcon(getIconBase64(bookmark.getUrl()));
         }
         bookmarkDao.editBookmark(bookmark);
         userApi.versionPlus(userId);
