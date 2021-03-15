@@ -3,11 +3,11 @@ base=$(cd "$(dirname "$0")";pwd)
 cd $base
 
 #Mysql地址
-export MYSQL_ADDRESS=localhost:3306
+export MYSQL_ADDRESS=mysql:3306
 #Mysql密码
 export MYSQL_PASSWORD=123456
 #redis地址
-export REDIS_HOST=localhost
+export REDIS_HOST=redis
 #redis端口
 export REDIS_PORT=6379
 # smtp地址
