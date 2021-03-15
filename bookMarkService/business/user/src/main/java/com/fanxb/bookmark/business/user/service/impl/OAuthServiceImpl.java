@@ -101,6 +101,9 @@ public class OAuthServiceImpl implements OAuthService {
             other.setPassword("");
             other.setCreateTime(System.currentTimeMillis());
             other.setLastLoginTime(System.currentTimeMillis());
+            other.setIcon(UserService.DEFAULT_ICON);
+            other.setCreateTime(System.currentTimeMillis());
+            other.setLastLoginTime(System.currentTimeMillis());
             other.setVersion(0);
             userDao.addOne(other);
             return other;

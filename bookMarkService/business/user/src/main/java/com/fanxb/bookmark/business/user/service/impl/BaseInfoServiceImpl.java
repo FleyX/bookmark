@@ -45,7 +45,7 @@ public class BaseInfoServiceImpl implements BaseInfoService {
     public void changePassword(UpdatePasswordBody body) {
         int userId = UserContextHolder.get().getUserId();
         String password = userDao.selectByUserIdOrGithubId(userId, null).getPassword();
-        if (!StrUtil.equals(password, HashUtil.getPassword(body.getOldPassword()))) {
+        if (StrUtil.isNotEmpty(password) && !StrUtil.equals(password, HashUtil.getPassword(body.getOldPassword()))) {
             throw new CustomException("旧密码错误");
         }
         userDao.updatePasswordByUserId(userId, HashUtil.getPassword(body.getPassword()));

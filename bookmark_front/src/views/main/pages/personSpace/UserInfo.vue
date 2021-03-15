@@ -27,10 +27,10 @@
       <div class="item">
         <span style="width:5em">密码</span>
         <a-tooltip title="点击修改" v-if="currentAction!='password'">
-          <span style="cursor: pointer;" @click="()=>this.currentAction='password'">**********</span>
+          <span style="cursor: pointer;" @click="()=>this.currentAction='password'">{{userInfo.noPassword?'设置密码' : '**********'}}</span>
         </a-tooltip>
         <div class="inputGroup" v-else-if="currentAction==='password'">
-          <a-input type="password" v-model="oldPassword" placeholder="旧密码" />
+          <a-input type="password" v-model="oldPassword" placeholder="旧密码(如无置空)" />
           <a-input type="password" v-model="password" placeholder="新密码" />
           <a-input type="password" v-model="rePassword" placeholder="重复新密码" />
           <div style="padding-top:0.2em">
