@@ -56,13 +56,13 @@ public class OAuthServiceImpl implements OAuthService {
             Map<String, String> header = new HashMap<>(2);
             header.put("accept", "application/json");
             String url = "https://github.com/login/oauth/access_token?client_id=" + githubClientId + "&client_secret=" + githubSecret + "&code=" + body.getCode();
-            JSONObject obj = HttpUtil.get(url, header);
+            JSONObject obj = HttpUtil.getObj(url, header, true);
             String accessToken = obj.getString("access_token");
             if (StrUtil.isEmpty(accessToken)) {
                 throw new CustomException("github登陆失败，请稍后重试");
             }
             header.put("Authorization", "token " + accessToken);
-            JSONObject userInfo = HttpUtil.get("https://api.github.com/user", header);
+            JSONObject userInfo = HttpUtil.getObj("https://api.github.com/user", header, true);
             other.setGithubId(userInfo.getLong("id"));
             if (other.getGithubId() == null) {
                 log.error("github返回异常:{}", userInfo.toString());

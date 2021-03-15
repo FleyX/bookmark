@@ -1,6 +1,5 @@
 import localforage from "localforage";
-import httpUtil from "../../util/HttpUtil";
-import { getUesrInfo } from "../../util/UserUtil";
+import HttpUtil from "../../util/HttpUtil";
 
 const TOTAL_TREE_DATA = "totalTreeData";
 const VERSION = "version";
@@ -42,18 +41,21 @@ const actions = {
     if (context.state.isInit || context.state.isIniting) {
       return;
     }
-    context.commit("isIniting", true);
-    let realVersion = await httpUtil.get("/user/version");
-    let data = await localforage.getItem(TOTAL_TREE_DATA);
-    let version = await localforage.getItem(VERSION);
-    if (!data || realVersion > version) {
-      await context.dispatch("refresh");
-    } else {
-      context.commit(TOTAL_TREE_DATA, data);
-      context.commit(VERSION, version);
+    try {
+      context.commit("isIniting", true);
+      let realVersion = await HttpUtil.get("/user/version");
+      let data = await localforage.getItem(TOTAL_TREE_DATA);
+      let version = await localforage.getItem(VERSION);
+      if (!data || realVersion > version) {
+        await context.dispatch("refresh");
+      } else {
+        context.commit(TOTAL_TREE_DATA, data);
+        context.commit(VERSION, version);
+      }
+      context.commit("isInit", true);
+    } finally {
+      context.commit("isIniting", false);
     }
-    context.commit("isIniting", false);
-    context.commit("isInit", true);
   },
   /**
    * 确保数据加载完毕
@@ -74,7 +76,7 @@ const actions = {
   },
   //刷新缓存数据
   async refresh(context) {
-    let treeData = await httpUtil.get("/bookmark/currentUser");
+    let treeData = await HttpUtil.get("/bookmark/currentUser");
     if (!treeData[""]) {
       treeData[""] = [];
     }
@@ -85,7 +87,7 @@ const actions = {
         item1.scopedSlots = { title: "nodeTitle" };
       })
     );
-    let version = await httpUtil.get("/user/version");
+    let version = await HttpUtil.get("/user/version");
     await context.dispatch("updateVersion", version);
     context.commit(TOTAL_TREE_DATA, treeData);
     await localforage.setItem(TOTAL_TREE_DATA, treeData);

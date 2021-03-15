@@ -84,7 +84,7 @@ public class PinYinServiceImpl implements PinYinService {
     public List<String> changeStrings(List<String> stringList) {
         Map<String, String> header = Collections.singletonMap("token", Constant.pinyinToken);
         PinYinBody body = PinYinBody.builder().strs(stringList).config(new PinYinBody.Config(false, false, 1)).build();
-        JSONArray result = HttpUtil.post(Constant.pinyinBaseUrl + PATH, JSON.toJSONString(body), header, JSONArray.class);
+        JSONArray result = HttpUtil.postArray(Constant.pinyinBaseUrl + PATH, JSON.toJSONString(body), header, false);
         List<List<JSONArray>> list = result.toJavaList(JSONArray.class).stream().map(item -> item.toJavaList(JSONArray.class)).collect(Collectors.toList());
         List<String> res = new ArrayList<>(stringList.size());
         for (int i = 0, size = stringList.size(); i < size; i++) {
