@@ -36,8 +36,25 @@ export MANAGE_USER_ID=-1
 
 
 # 前端打包
-docker run -it --rm --name buildBookmark -v $base/bookmark_front:/opt/front node:lts-buster-slim  bash -c "cd /opt/front &&   yarn --registry https://registry.npm.taobao.org && yarn build"
+docker run -it --rm --name buildBookmark --user ${UID} -v $base/bookmark_front:/opt/front node:lts-buster-slim  bash -c "cd /opt/front &&   yarn --registry https://registry.npm.taobao.org && yarn build"
 # 后端打包
-docker run -it --rm --name buildBookmark  -v $base/data/maven/mavenRep:/root/.m2 -v $base/data/maven/settings.xml:/usr/share/maven/conf/settings.xml -v $base/bookMarkService:/code maven:latest bash -c "cd /code && mvn clean install"
+docker run -it --rm --name buildBookmark --user ${UID} -v $base/data/maven/mavenRep:/var/maven/.m2: -v $base/data/maven/settings.xml:/usr/share/maven/conf/settings.xml -v $base/bookMarkService:/code maven:latest bash -c "cd /code && mvn clean install"
 
-docker-compose up -d
+start="start"
+stop="stop"
+restart="restart"
+delete="delete"
+
+if [  -z $1 ] || [ $1 == $start ];then
+  echo "start"
+  docker-compose up -d
+elif [ $1 == $stop ];then
+  echo "stop"
+  docker-compose stop 
+elif [ $1 == $restart ];then
+  echo "restart"
+  docker-compose restart 
+elif [ $1 == $delete ];then
+  echo "delete"
+  docker-compose down
+fi

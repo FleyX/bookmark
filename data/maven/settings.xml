@@ -51,6 +51,7 @@ under the License.
    |
    | Default: ${user.home}/.m2/repository 
    -->
+  <localRepository>/var/maven/.m2/repository</localRepository>
 
   <!-- interactiveMode
    | This will determine whether maven prompts you when it needs input. If set to false,

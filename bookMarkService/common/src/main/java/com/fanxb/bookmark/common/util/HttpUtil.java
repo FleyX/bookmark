@@ -212,7 +212,7 @@ public class HttpUtil {
                 if (typeClass.getCanonicalName().equals(JSONObject.class.getCanonicalName())) {
                     return (T) JSONObject.parseObject(str);
                 } else if (typeClass.getCanonicalName().equals(JSONArray.class.getCanonicalName())) {
-                    return (T) str;
+                    return (T) JSONArray.parseArray(str);
                 } else {
                     throw new CustomException("仅支持JSONObject,JSONArray");
                 }

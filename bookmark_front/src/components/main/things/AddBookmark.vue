@@ -67,7 +67,7 @@ export default {
       this.form.name = this.targetNode.name;
       this.form.url = this.form.type === "0" ? this.targetNode.url : "";
     }
-    this.token = window.token;
+    this.token = this.$store.state.globalConfig.token;
     this.form.path = this.targetNode == null ? "" : this.targetNode.path + (this.isAdd ? "." + this.targetNode.bookmarkId : "");
   },
   methods: {
