@@ -70,7 +70,7 @@ public interface BookmarkService {
      * @author fanxb
      * @date 2019/7/17 14:42
      */
-    void updateOne(int userId, Bookmark bookmark);
+    String updateOne(int userId, Bookmark bookmark);
 
     /**
      * Description: 批量删除书签

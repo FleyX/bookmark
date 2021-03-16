@@ -88,8 +88,8 @@ export default {
           await this.$store.dispatch("treeData/addNode", { sourceNode: this.targetNode, targetNode: res });
         } else {
           this.form.bookmarkId = this.targetNode.bookmarkId;
-          await HttpUtil.post("/bookmark/updateOne", null, this.form);
-          await this.$store.dispatch("treeData/editNode", { node: this.targetNode, newName: this.form.name, newUrl: this.form.url });
+          let newIcon = await HttpUtil.post("/bookmark/updateOne", null, this.form);
+          await this.$store.dispatch("treeData/editNode", { node: this.targetNode, newName: this.form.name, newUrl: this.form.url, newIcon });
         }
         this.$message.success("操作成功");
         this.$emit("close", false);

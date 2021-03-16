@@ -4,6 +4,8 @@ services:
     image: mysql:8.0.16
     networks:
       - bookmark
+    ports:
+      - 13454:3306
     volumes:
       - ./data/mysql/data:/var/lib/mysql
       # mysql文件备份目录
@@ -34,10 +36,9 @@ services:
       - ./data/timezone:/etc/timezone
       - ./bookmark_front/dist:/opt/dist
       - ./data/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./data/nginx/log:/var/log/nginx
       - ${BOOKMARK_FILE_SAVE_PATH}/files/public:/opt/files/public
     ports:
-      - 8083:8080
+      - 8080:8080
 
   pinyin:
     image: node:lts-buster-slim
@@ -62,6 +63,8 @@ services:
     image: matthiasluedtke/iconserver:latest
     networks:
       - bookmark
+    ports:
+      - 19843:8080
     restart: unless-stopped
 
   backend:

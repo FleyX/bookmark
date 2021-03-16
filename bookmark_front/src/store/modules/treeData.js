@@ -235,9 +235,10 @@ const actions = {
   /**
    * 编辑书签节点
    */
-  async editNode({ dispatch, state, commit }, { node, newName, newUrl }) {
+  async editNode({ dispatch, state, commit }, { node, newName, newUrl, newIcon }) {
     node.name = newName;
     node.url = newUrl;
+    node.icon = newIcon;
     commit(TOTAL_TREE_DATA, state[TOTAL_TREE_DATA]);
     await dispatch("updateVersion", null);
     await localforage.setItem(TOTAL_TREE_DATA, state[TOTAL_TREE_DATA]);

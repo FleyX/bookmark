@@ -211,7 +211,7 @@ public class BookmarkServiceImpl implements BookmarkService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateOne(int userId, Bookmark bookmark) {
+    public String updateOne(int userId, Bookmark bookmark) {
         bookmark.setUserId(userId);
         if (bookmark.getType() == 0) {
             pinYinService.changeBookmark(bookmark);
@@ -219,6 +219,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         }
         bookmarkDao.editBookmark(bookmark);
         userApi.versionPlus(userId);
+        return bookmark.getIcon();
     }
 
 
@@ -288,9 +289,9 @@ public class BookmarkServiceImpl implements BookmarkService {
         }
         try {
             URL urlObj = new URL(url);
-            byte[] data = HttpUtil.download(urlIconAddress + "/icon?url=" + urlObj.getHost() + "&size=8..16..32", false);
+            byte[] data = HttpUtil.download(urlIconAddress + "/icon?url=" + urlObj.getHost() + "&size=8..16..64", false);
             String base64 = new String(Base64.getEncoder().encode(data));
-            if (StrUtil.isEmpty(base64)) {
+            if (StrUtil.isNotEmpty(base64)) {
                 return "data:image/png;base64," + base64;
             } else {
                 log.warn("url无法获取icon:{}", url);

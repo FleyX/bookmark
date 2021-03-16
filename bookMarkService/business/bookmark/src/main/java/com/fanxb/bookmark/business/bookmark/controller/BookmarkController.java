@@ -97,8 +97,7 @@ public class BookmarkController {
      */
     @PostMapping("/updateOne")
     public Result editCurrentUserBookmark(@RequestBody Bookmark bookmark) {
-        bookmarkService.updateOne(UserContextHolder.get().getUserId(), bookmark);
-        return Result.success(null);
+        return Result.success(bookmarkService.updateOne(UserContextHolder.get().getUserId(), bookmark));
     }
 
     /**
