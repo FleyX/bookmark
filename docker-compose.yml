@@ -1,0 +1,108 @@
+version: "2"
+services:
+  mysql:
+    image: mysql:8.0.16
+    networks:
+      - bookmark
+    ports:
+      - 13454:3306
+    volumes:
+      - ./data/mysql/data:/var/lib/mysql
+      # mysql文件备份目录
+      - ./data/mysql/backup:/backup
+      - ./data/mysql/temp:/var/lib/mysql-files
+      - ./data/mysql/my.cnf:/etc/mysql/my.cnf
+      - /etc/localtime:/etc/localtime
+      - ./data/timezone:/etc/timezone
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=bookmark
+
+  # redis未设置密码，如端口暴露可能会被攻击
+  redis:
+    image: redis:3.2.10
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./data/timezone:/etc/timezone
+    networks:
+      - bookmark
+
+  front:
+    image: nginx
+    networks:
+      - bookmark
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./data/timezone:/etc/timezone
+      - ./bookmark_front/dist:/opt/dist
+      - ./data/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ${BOOKMARK_FILE_SAVE_PATH}/files/public:/opt/files/public
+    ports:
+      - 8080:8080
+
+  pinyin:
+    image: node:lts-buster-slim
+    networks:
+      - bookmark
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./data/timezone:/etc/timezone
+      - ./pinyinService:/opt/app
+    working_dir: /opt/app
+    command:
+      - /bin/bash
+      - -c
+      - |
+        ls -l && \
+        cd /opt/app && \
+        npm --registry https://registry.npm.taobao.org install && \
+        node index.js 8012 123456321
+
+  # icon服务(默认端口8080)
+  iconserver:
+    image: matthiasluedtke/iconserver:latest
+    networks:
+      - bookmark
+    ports:
+      - 19843:8080
+    restart: unless-stopped
+
+  backend:
+    image: openjdk:11.0
+    networks:
+      - bookmark
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./data/timezone:/etc/timezone
+      - ./bookMarkService/web/target/bookmark-web-1.0-SNAPSHOT.jar:/opt/app/service.jar
+      - ${BOOKMARK_FILE_SAVE_PATH}:/opt/files
+    working_dir: /opt/app
+    command:
+      - /bin/bash
+      - -c
+      - |
+        sleep 20 && \
+        ls -l && \
+        java -jar -Dspring.profiles.active=prd \
+        -DjwtSecret='${JWT_SECRET}' \
+        -Dmybatis-plus.configuration.log-impl=org.apache.ibatis.logging.nologging.NoLoggingImpl \
+        -Dspring.mail.host=${SMTP_HOST} \
+        -Dspring.mail.username='${SMTP_USERNAME}' \
+        -Dspring.mail.password='${SMTP_PASSWORD}' \
+        -Dspring.datasource.druid.password='${MYSQL_PASSWORD}' \
+        -Dspring.datasource.druid.url=jdbc:mysql://${MYSQL_ADDRESS}/bookmark?useUnicode=true\&characterEncoding=utf-8\&useSSL=false\&useJDBCCompliantTimezoneShift=true\&useLegacyDatetimeCode=false\&serverTimezone=UTC \
+        -Dspring.redis.host=${REDIS_HOST} \
+        -Des.host=bookmark-es \
+        -DserviceAddress=${BOOKMARK_HOST} \
+        -DfileSavePath=/opt/files \
+        -Dpinyin.base-url=http://pinyin:8012 \
+        -Dpinyin.token=123456321 \
+        -DurlIconAddress=http://iconserver:8080 \
+        -Dproxy.ip=${PROXY_IP} \
+        -Dproxy.port=${PROXY_PORT} \
+        -DOAuth.github.clientId=${GITHUB_CLIENT_ID} \
+        -DOAuth.github.secret=${GITHUB_SECRET} \
+        -DmanageUserId=${MANAGE_USER_ID} \
+        service.jar
+networks:
+  bookmark:

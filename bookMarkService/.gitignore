@@ -17,6 +17,7 @@ static
 *.iws
 *.iml
 *.ipr
+node_modules
 
 ### NetBeans ###
 /nbproject/private/

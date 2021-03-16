@@ -75,14 +75,14 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
     List<Bookmark> getListByUserIdAndPath(@Param("userId") int userId, @Param("path") String path);
 
     /**
-     * Description: 删除某用户某个书签文件下所有数据
+     * Description: 删除某用户某个书签路径下所有数据,不包含文件夹自身
      *
-     * @param userId   用户id
-     * @param folderId 文件夹id
+     * @param userId 用户id
+     * @param path   文件夹id
      * @author fanxb
      * @date 2019/7/12 14:13
      */
-    void deleteUserFolder(@Param("userId") int userId, @Param("folderId") int folderId);
+    void deleteUserFolder(@Param("userId") int userId, @Param("path") String path);
 
     /**
      * Description: 删除用户书签
@@ -138,15 +138,15 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
     void updatePathAndSort(@Param("userId") int userId, @Param("bookmarkId") int bookmarkId, @Param("path") String path, @Param("sort") int sort);
 
     /**
-     * Description: 获取某个文件夹下所有的节点id
+     * Description: 获取某个路径下所有的节点id
      *
-     * @param userId   userId
-     * @param folderId folderId
+     * @param userId userId
+     * @param path   path
      * @return java.util.List<java.lang.Integer>
      * @author fanxb
      * @date 2019/7/25 14:14
      */
-    List<Integer> getChildrenBookmarkId(@Param("userId") int userId, @Param("folderId") int folderId);
+    List<Integer> getChildrenBookmarkId(@Param("userId") int userId, @Param("path") String path);
 
     /**
      * Description: 根据用户id，类别，分页查找书签
@@ -185,6 +185,14 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
     void updateSearchKey(@Param("bookmarkId") int bookmarkId, @Param("searchKey") String searchKey);
 
     /**
+     * 批量更新searchKey
+     *
+     * @author fanxb
+     * @date 2020/3/22 22:08
+     */
+    void updateSearchKeyBatch(List<Bookmark> list);
+
+    /**
      * 分页获取所有的书签
      *
      * @param size       大小
@@ -204,5 +212,29 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      */
     @Update("update bookmark set visitNum=visitNum+1 where userId=#{userId} and bookmarkId=#{bookmarkId}")
     void updateVisitNum(VisitNumPlus item);
+
+    @Select("select bookmarkId,name,url,icon from bookmark where userId=#{userId} and type=0 order by visitNum desc limit 0,#{num}")
+    List<Bookmark> selectPopular(@Param("userId") int userId, @Param("num") int num);
+
+    /**
+     * 获取某用户无icon的条目
+     *
+     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @author fanxb
+     * @date 2021/3/11
+     **/
+    @Select("select userId,bookmarkId,url,icon from bookmark where userId=#{userId} and icon='' order by bookmarkId asc limit #{start},#{size}")
+    List<Bookmark> selectUserNoIcon(@Param("userId") int userId, @Param("start") int start, @Param("size") int size);
+
+    /**
+     * 更新icon
+     *
+     * @param bookmarkId bookmarkId
+     * @param icon       icon
+     * @author fanxb
+     * @date 2021/3/13
+     **/
+    @Update("update bookmark set icon=#{icon} where bookmarkId=#{bookmarkId}")
+    void updateIcon(@Param("bookmarkId") int bookmarkId, @Param("icon") String icon);
 
 }

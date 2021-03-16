@@ -20,11 +20,11 @@ public class UserInfoUpdateConsumer implements RedisConsumer {
 
     @Override
     public void deal(String message) {
-        int userId = Integer.parseInt(message);
-        if (userId == -1) {
-            userDao.updateAllBookmarkUpdateVersion();
-        } else {
-            userDao.updateLastBookmarkUpdateTime(userId);
-        }
+//        int userId = Integer.parseInt(message);
+//        if (userId == -1) {
+//            userDao.updateAllBookmarkUpdateVersion();
+//        } else {
+//            userDao.updateLastBookmarkUpdateTime(userId);
+//        }
     }
 }

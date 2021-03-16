@@ -13,6 +13,12 @@ import java.util.List;
  */
 @Data
 public class BatchDeleteBody{
-    private List<Integer> folderIdList;
+    /**
+     * 要删除的书签路径
+     */
+    private List<String> pathList;
+    /**
+     * 要删除的书签id
+     */
     private List<Integer> bookmarkIdList;
 }

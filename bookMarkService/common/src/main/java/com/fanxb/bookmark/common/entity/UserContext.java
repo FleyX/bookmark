@@ -13,5 +13,9 @@ import lombok.Data;
 public class UserContext {
 
     private int userId;
+    /**
+     * 是否管理员用户
+     */
+    private Boolean manageUser;
     private String jwt;
 }

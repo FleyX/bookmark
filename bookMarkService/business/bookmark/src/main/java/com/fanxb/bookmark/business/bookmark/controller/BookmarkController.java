@@ -66,7 +66,7 @@ public class BookmarkController {
      * @author fanxb
      * @date 2019/7/8 15:17
      */
-    @PutMapping("/uploadBookmarkFile")
+    @RequestMapping("/uploadBookmarkFile")
     public Result uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("path") String path) throws Exception {
         bookmarkService.parseBookmarkFile(UserContextHolder.get().getUserId(), file.getInputStream(), path);
         return Result.success(null);
@@ -97,8 +97,7 @@ public class BookmarkController {
      */
     @PostMapping("/updateOne")
     public Result editCurrentUserBookmark(@RequestBody Bookmark bookmark) {
-        bookmarkService.updateOne(UserContextHolder.get().getUserId(), bookmark);
-        return Result.success(null);
+        return Result.success(bookmarkService.updateOne(UserContextHolder.get().getUserId(), bookmark));
     }
 
     /**
@@ -111,7 +110,7 @@ public class BookmarkController {
      */
     @PostMapping("/batchDelete")
     public Result batchDelete(@RequestBody BatchDeleteBody body) {
-        bookmarkService.batchDelete(UserContextHolder.get().getUserId(), body.getFolderIdList(), body.getBookmarkIdList());
+        bookmarkService.batchDelete(UserContextHolder.get().getUserId(), body.getPathList(), body.getBookmarkIdList());
         return Result.success(null);
     }
 
@@ -172,6 +171,28 @@ public class BookmarkController {
     @PostMapping("/visitNum")
     public Result visitNum(int id) {
         bookmarkService.visitNumPlus(id);
+        return Result.success(null);
+    }
+
+    /**
+     * 功能描述: 获取用户访问次数前10的书签
+     *
+     * @author fanxb
+     */
+    @GetMapping("/user/popular")
+    public Result currentUserPopular() {
+        return Result.success(bookmarkService.userPopular(10));
+    }
+
+    /**
+     * 更新所有的icon
+     *
+     * @author fanxb
+     * @date 2021/3/11
+     **/
+    @PostMapping("/updateCurrentUserIcon")
+    public Result updateCurrentUserIcon() {
+        bookmarkService.updateUserBookmarkIcon(UserContextHolder.get().getUserId());
         return Result.success(null);
     }
 

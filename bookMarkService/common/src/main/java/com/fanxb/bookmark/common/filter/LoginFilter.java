@@ -45,18 +45,21 @@ public class LoginFilter implements Filter {
     @Value("${server.servlet.context-path}")
     private String urlPrefix;
 
+    @Value("${manageUserId}")
+    private int manageUserId;
+
     @Value("${jwtSecret}")
     private String secret;
 
     @Autowired
     private UrlDao urlDao;
 
-    private static AntPathMatcher matcher = new AntPathMatcher();
+    private static final AntPathMatcher matcher = new AntPathMatcher();
 
     volatile private static List<Url> publicUrl;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
     }
 
     @Override
@@ -89,7 +92,6 @@ public class LoginFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
-        UserContextHolder.remove();
         List<Url> publicUrl = this.getPublicUrl();
         for (Url url : publicUrl) {
             if (url.getMethod().equalsIgnoreCase(requestMethod) && matcher.match(url.getUrl(), requestUrl)) {
@@ -97,8 +99,13 @@ public class LoginFilter implements Filter {
                 return;
             }
         }
+        //登陆用户
         if (this.checkJwt(request.getHeader(Constant.JWT_KEY))) {
-            filterChain.doFilter(servletRequest, servletResponse);
+            try {
+                filterChain.doFilter(servletRequest, servletResponse);
+            } finally {
+                UserContextHolder.remove();
+            }
         } else {
             response.setStatus(HttpStatus.OK.value());
             response.setContentType("application/json");
@@ -130,6 +137,7 @@ public class LoginFilter implements Filter {
             UserContext context = new UserContext();
             context.setJwt(jwt);
             context.setUserId(userId);
+            context.setManageUser(userId == manageUserId);
             UserContextHolder.set(context);
             return true;
         } catch (Exception e) {

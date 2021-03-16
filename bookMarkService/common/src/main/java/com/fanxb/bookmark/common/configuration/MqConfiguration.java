@@ -5,6 +5,7 @@ import com.fanxb.bookmark.common.entity.redis.RedisConsumer;
 import com.fanxb.bookmark.common.factory.ThreadPoolFactory;
 import com.fanxb.bookmark.common.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -27,7 +28,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Component
 @Slf4j
-public class MqConfiguration implements ApplicationRunner {
+public class MqConfiguration implements ApplicationRunner, DisposableBean {
+    /**
+     * 是否运行
+     */
+    private static volatile boolean isRun = true;
 
     /**
      * 订阅对象与执行方法关系（支持广播模式）
@@ -58,9 +63,16 @@ public class MqConfiguration implements ApplicationRunner {
         threadPoolExecutor.execute(loop());
     }
 
+    @Override
+    public void destroy() {
+        log.info("进程结束，关闭redis");
+        isRun = false;
+        ThreadPoolFactory.shutdown(threadPoolExecutor);
+    }
+
     private Runnable loop() {
         return () -> {
-            while (true) {
+            while (isRun) {
                 AtomicInteger count = new AtomicInteger(0);
                 topicMap.forEach((k, v) -> {
                     try {

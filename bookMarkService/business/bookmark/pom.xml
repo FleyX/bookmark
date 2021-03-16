@@ -12,6 +12,11 @@
     <artifactId>bookmark-business-bookmark</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>com.fanxb</groupId>
+            <artifactId>bookmark-business-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         <!--html文件解析-->
         <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
         <dependency>

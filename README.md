@@ -1,10 +1,9 @@
 本项目是一个云书签的项目，取名为：签签世界。
 
-部署教程：[docker-compose部署](https://github.com/FleyX/bookmark/blob/master/bookMarkDocker/README.md)
+部署教程：[docker-compose部署](https://github.com/FleyX/bookmark/blob/master/DEPLOY.md)
 
-demo地址:[bm.tapme.top](http://bm.tapme.top)
+自用地址（你们也可以用，长期提供服务）:[bm.tapme.top](http://bm.tapme.top)
 
-web端已经完成。
 
 # 缘由
 
@@ -22,39 +21,9 @@ web端已经完成。
 
 # 主要功能
 
-## 查
-
-1. 节点树展示书签
-   ![](https://raw.githubusercontent.com/FleyX/files/master/blogImg/20190801185846.png)
-   采用懒加载方式加载每一层数据，即使大量数据也不会卡顿。
-
-2. 全文检索<br>
-    支持拼音、拼音首字母、关键词查找
-
-- 可对`书签名`和`链接`进行全文检索
-- 支持方向键-上/下切换，回车确认
-- 可直接搜索 google/baidu,tab 键切换。
-  ![](https://raw.githubusercontent.com/FleyX/files/master/blogImg/20190801190720.png)
-- 支持右键复制 url(移动端不支持右键，需点击编辑-->菜单键)
-  ![](https://raw.githubusercontent.com/FleyX/files/master/blogImg/20190801191010.png)
-
-## 增
-
-![](https://raw.githubusercontent.com/FleyX/files/master/blogImg/20190801191452.png)
-
-1. 手动编辑导入
-   ![](https://raw.githubusercontent.com/FleyX/files/master/blogImg/20190801191601.png)
-2. 谷歌、火狐浏览器书签备份文件直接导入，相同名称的将都保留
-   ![](https://raw.githubusercontent.com/FleyX/files/master/blogImg/20190801191721.png)
-
-## 改
-
-1. 修改节点内容，右键->编辑。（移动端长按相当于右键）
-2. 修改书签顺序，所属文件夹，直接拖拽书签到目标位置
-
 ## TODO
 
 - 浏览器插件
-- ~~拼音检索~~
+- 拼音检索 Ok!
+- 书签导出 OK！
 - 侧边栏显示
-- 书签数据导出

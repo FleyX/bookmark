@@ -1,11 +1,19 @@
 package com.fanxb.bookmark.common.util;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fanxb.bookmark.common.exception.CustomException;
 import okhttp3.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -17,23 +25,57 @@ import java.util.concurrent.TimeUnit;
  * @author fanxb
  * @date 2019/4/4 15:53
  */
+@Component
 public class HttpUtil {
+    @Value("${proxy.ip}")
+    private String proxyIp;
+    @Value("${proxy.port}")
+    private int proxyPort;
+
     private static final int IP_LENGTH = 15;
 
-    public static final OkHttpClient CLIENT = new OkHttpClient.Builder().connectTimeout(3, TimeUnit.SECONDS)
-            .readTimeout(300, TimeUnit.SECONDS).build();
+    /**
+     * 使用代理环境
+     */
+    private static OkHttpClient PROXY_CLIENT;
+    /**
+     * 无代理环境
+     */
+    private static final OkHttpClient CLIENT = new OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .build();
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
-    /**
-     * 功能描述: get
-     *
-     * @param url url
-     * @return com.alibaba.fastjson.JSONObject
+    @PostConstruct
+    public void init() {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        if (StrUtil.isNotBlank(proxyIp)) {
+            builder.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyIp, proxyPort)));
+        }
+        PROXY_CLIENT = builder.connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .build();
+    }
+
+    /***
+     * 下载文件
      * @author fanxb
-     * @date 2020/3/22 21:11
-     */
-    public static JSONObject get(String url) {
-        return get(url, null, JSONObject.class);
+     * @param url 下载链接
+     * @param proxy 是否使用代理
+     * @return java.io.InputStream
+     * @date 2021/3/12
+     **/
+    public static byte[] download(String url, boolean proxy) {
+        try (Response res = (proxy ? PROXY_CLIENT : CLIENT).newCall(new Request.Builder().url(url).build()).execute()) {
+            assert res.body() != null;
+            if (checkIsOk(res.code())) {
+                return res.body().byteStream().readAllBytes();
+            } else {
+                throw new CustomException("下载出现问题:" + res.body().string());
+            }
+        } catch (Exception e) {
+            throw new CustomException(e);
+        }
     }
 
     /**
@@ -41,11 +83,27 @@ public class HttpUtil {
      *
      * @param url     url
      * @param headers header
+     * @param proxy   是否使用代理
+     * @return T
      * @author fanxb
      * @date 2020/3/22 21:07
      */
-    public static JSONObject get(String url, Map<String, String> headers) {
-        return get(url, headers, JSONObject.class);
+    public static JSONObject getObj(String url, Map<String, String> headers, boolean proxy) {
+        return get(url, headers, JSONObject.class, proxy);
+    }
+
+    /**
+     * 功能描述: get请求
+     *
+     * @param url     url
+     * @param headers header
+     * @param proxy   是否使用代理
+     * @return T
+     * @author fanxb
+     * @date 2020/3/22 21:07
+     */
+    public static JSONArray getArray(String url, Map<String, String> headers, boolean proxy) {
+        return get(url, headers, JSONArray.class, proxy);
     }
 
     /**
@@ -54,11 +112,12 @@ public class HttpUtil {
      * @param url       url
      * @param headers   header
      * @param typeClass type
+     * @param proxy     是否使用代理
      * @return T
      * @author fanxb
      * @date 2020/3/22 21:07
      */
-    public static <T> T get(String url, Map<String, String> headers, Class<T> typeClass) {
+    private static <T> T get(String url, Map<String, String> headers, Class<T> typeClass, boolean proxy) {
         Request.Builder builder = new Request.Builder().url(url);
         if (headers != null && headers.size() > 0) {
             Set<String> keys = headers.keySet();
@@ -66,44 +125,50 @@ public class HttpUtil {
                 builder = builder.addHeader(key, headers.get(key));
             }
         }
-        return request(builder.build(), typeClass);
+        return request(builder.build(), typeClass, proxy);
     }
 
     /**
-     * 功能描述:不带header，返回jsonObject的post方法
-     *
-     * @param url     url
-     * @param jsonObj body
-     * @return com.alibaba.fastjson.JSONObject
-     * @author fanxb
-     * @date 2020/3/22 21:05
-     */
-    public static JSONObject post(String url, String jsonObj) {
-        return post(url, jsonObj, null, JSONObject.class);
-    }
-
-    /**
-     * 功能描述:返回jsonObject的post方法
-     *
-     * @param url     url
-     * @param jsonObj body
-     * @param headers headers
-     * @return com.alibaba.fastjson.JSONObject
-     * @author fanxb
-     * @date 2020/3/22 21:05
-     */
-    public static JSONObject post(String url, String jsonObj, Map<String, String> headers) {
-        return post(url, jsonObj, headers, JSONObject.class);
-    }
-
-    /**
-     * 发送post请求，带header
+     * POST请求,返回jsonObj
      *
      * @param url     url
      * @param jsonObj 请求体
      * @param headers 请求头
-     */
-    public static <T> T post(String url, String jsonObj, Map<String, String> headers, Class<T> typeClass) {
+     * @param proxy   是否使用代理
+     * @author fanxb
+     * @date 2021/3/15
+     **/
+    public static JSONObject postObj(String url, String jsonObj, Map<String, String> headers, boolean proxy) {
+        return post(url, jsonObj, headers, JSONObject.class, proxy);
+    }
+
+    /**
+     * POST请求,返回jsonArray
+     *
+     * @param url     url
+     * @param jsonObj 请求体
+     * @param headers 请求头
+     * @param proxy   是否使用代理
+     * @author fanxb
+     * @date 2021/3/15
+     **/
+    public static JSONArray postArray(String url, String jsonObj, Map<String, String> headers, boolean proxy) {
+        return post(url, jsonObj, headers, JSONArray.class, proxy);
+    }
+
+    /**
+     * POST请求
+     *
+     * @param url       url
+     * @param jsonObj   请求体
+     * @param headers   请求头
+     * @param typeClass 响应类
+     * @param proxy     是否使用代理
+     * @return T
+     * @author fanxb
+     * @date 2021/3/15
+     **/
+    private static <T> T post(String url, String jsonObj, Map<String, String> headers, Class<T> typeClass, boolean proxy) {
         RequestBody body = RequestBody.create(JSON, jsonObj);
         Request.Builder builder = new Request.Builder().url(url).post(body);
         if (headers != null) {
@@ -112,17 +177,21 @@ public class HttpUtil {
                 builder = builder.addHeader(key, headers.get(key));
             }
         }
-        return request(builder.build(), typeClass);
+        return request(builder.build(), typeClass, proxy);
     }
 
     /**
      * 构造request，获取响应
      *
-     * @param request request
-     * @return
-     */
-    public static <T> T request(Request request, Class<T> typeClass) {
-        try (Response res = CLIENT.newCall(request).execute()) {
+     * @param request   请求request
+     * @param typeClass 相应类型
+     * @param proxy     是否使用代理
+     * @return T
+     * @author fanxb
+     * @date 2021/3/15
+     **/
+    public static <T> T request(Request request, Class<T> typeClass, boolean proxy) {
+        try (Response res = (proxy ? PROXY_CLIENT : CLIENT).newCall(request).execute()) {
             return parseResponse(res, typeClass);
         } catch (Exception e) {
             throw new CustomException(e);
@@ -132,18 +201,20 @@ public class HttpUtil {
     /**
      * 解析响应
      *
-     * @param res
-     * @return
+     * @param res res
      */
     @SuppressWarnings("unchecked")
     public static <T> T parseResponse(Response res, Class<T> typeClass) {
         try {
+            assert res.body() != null;
             if (checkIsOk(res.code())) {
                 String str = res.body().string();
                 if (typeClass.getCanonicalName().equals(JSONObject.class.getCanonicalName())) {
                     return (T) JSONObject.parseObject(str);
-                } else {
+                } else if (typeClass.getCanonicalName().equals(JSONArray.class.getCanonicalName())) {
                     return (T) JSONArray.parseArray(str);
+                } else {
+                    throw new CustomException("仅支持JSONObject,JSONArray");
                 }
             } else {
                 throw new CustomException("http请求出错:" + res.body().string());
@@ -166,7 +237,7 @@ public class HttpUtil {
      * @date 2019/6/12 15:36
      */
     public static String getIpAddr(HttpServletRequest request) {
-        String ipAddress = null;
+        String ipAddress;
         try {
             ipAddress = request.getHeader("x-forwarded-for");
             if (ipAddress == null || ipAddress.length() == 0) {

@@ -57,10 +57,7 @@
         bookmark
         WHERE
         userId = #{userId}
-        and path LIKE (SELECT a.path
-        FROM (SELECT CONCAT(path, '.', '${folderId}', '%') AS path
-        FROM bookmark
-        WHERE bookmarkId = #{folderId}) a);
+        and (path = #{path} or path like concat(#{path},".%"))
     </delete>
 
     <select id="getChildrenBookmarkId" resultType="integer">
@@ -68,10 +65,7 @@
         from bookmark
         where
         userId = #{userId}
-        and path LIKE (SELECT a.path
-        FROM (SELECT CONCAT(path, '.', '${folderId}', '%') AS path
-        FROM bookmark
-        WHERE bookmarkId = #{folderId}) a);
+        and (path =#{path} or path like concat(#{path},".%") );
     </select>
 
     <delete id="deleteUserBookmark">
@@ -83,7 +77,7 @@
 
     <update id="editBookmark" parameterType="com.fanxb.bookmark.common.entity.Bookmark">
         update bookmark
-        set name = #{name}, url = #{url},searchKey = #{searchKey}
+        set name = #{name}, url = #{url},searchKey = #{searchKey},icon=#{icon}
         where bookmarkId = #{bookmarkId} and userId = #{userId}
     </update>
 
@@ -116,6 +110,16 @@
         order by bookmarkId
         limit ${start}, ${size}
     </select>
+
+    <update id="updateSearchKeyBatch">
+        UPDATE `bookmark` a JOIN
+            (
+            <foreach collection="list" item="item" separator="union">
+                select #{item.bookmarkId} as bookmarkId,#{item.searchKey} as searchKey
+            </foreach>
+            ) b USING(bookmarkId)
+        SET a.searchKey=b.searchKey;
+    </update>
 
 
 </mapper>

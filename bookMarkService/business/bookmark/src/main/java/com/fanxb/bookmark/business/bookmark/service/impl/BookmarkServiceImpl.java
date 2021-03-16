@@ -1,6 +1,9 @@
 package com.fanxb.bookmark.business.bookmark.service.impl;
 
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
+import com.fanxb.bookmark.business.api.UserApi;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
@@ -10,10 +13,7 @@ import com.fanxb.bookmark.business.bookmark.service.PinYinService;
 import com.fanxb.bookmark.common.constant.EsConstant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.Bookmark;
-import com.fanxb.bookmark.common.entity.redis.UserBookmarkUpdate;
-import com.fanxb.bookmark.common.util.EsUtil;
-import com.fanxb.bookmark.common.util.RedisUtil;
-import com.fanxb.bookmark.common.util.UserContextHolder;
+import com.fanxb.bookmark.common.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -23,11 +23,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,17 +43,21 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class BookmarkServiceImpl implements BookmarkService {
+    @Value("${urlIconAddress}")
+    private String urlIconAddress;
+
+    private final BookmarkDao bookmarkDao;
+    private final PinYinService pinYinService;
+    private final UserApi userApi;
+    private final EsUtil esUtil;
 
     @Autowired
-    private BookmarkDao bookmarkDao;
-    @Autowired
-    private StringRedisTemplate redisTemplate;
-    @Autowired
-    private PinYinService pinYinService;
-
-    @Autowired
-    private EsUtil esUtil;
-
+    public BookmarkServiceImpl(BookmarkDao bookmarkDao, PinYinService pinYinService, UserApi userApi, EsUtil esUtil) {
+        this.bookmarkDao = bookmarkDao;
+        this.pinYinService = pinYinService;
+        this.userApi = userApi;
+        this.esUtil = esUtil;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -63,23 +69,27 @@ public class BookmarkServiceImpl implements BookmarkService {
         if (sortBase == null) {
             sortBase = 0;
         }
-        int count = 0;
         List<Bookmark> bookmarks = new ArrayList<>();
         for (int i = 0, length = elements.size(); i < length; i++) {
-            if (i == 0) {
-                Elements firstChildren = elements.get(0).child(1).children();
-                count = firstChildren.size();
-                for (int j = 0; j < count; j++) {
-                    dealBookmark(userId, firstChildren.get(j), path, sortBase + j, bookmarks);
-                }
-            } else {
-                dealBookmark(userId, elements.get(i), path, sortBase + count + i - 1, bookmarks);
+            dealBookmark(userId, elements.get(i), path, sortBase + i, bookmarks);
+        }
+        //每一千条处理插入一次,批量更新搜索字段
+        List<Bookmark> tempList = new ArrayList<>(1000);
+        for (int i = 0; i < bookmarks.size(); i++) {
+            tempList.add(bookmarks.get(i));
+            if (tempList.size() == 1000 || i == bookmarks.size() - 1) {
+                tempList = pinYinService.changeBookmarks(tempList);
+                bookmarkDao.updateSearchKeyBatch(tempList);
+                tempList.clear();
             }
         }
-        updateVersion(userId);
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_INSERT_ES, bookmarks);
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_PINYIN_CHANGE, bookmarks);
+        userApi.versionPlus(userId);
 
+        //异步更新icon
+        ThreadPoolUtil.execute(() -> {
+            updateUserBookmarkIcon(userId);
+            userApi.versionPlus(userId);
+        });
     }
 
     /**
@@ -163,19 +173,22 @@ public class BookmarkServiceImpl implements BookmarkService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void batchDelete(int userId, List<Integer> folderIdList, List<Integer> bookmarkIdList) {
+    public void batchDelete(int userId, List<String> pathList, List<Integer> bookmarkIdList) {
+        //所有要删除的书签id
         Set<String> set = new HashSet<>();
-        for (Integer item : folderIdList) {
-            set.addAll(bookmarkDao.getChildrenBookmarkId(userId, item).stream().map(String::valueOf).collect(Collectors.toSet()));
-            bookmarkDao.deleteUserFolder(userId, item);
-            bookmarkIdList.add(item);
+        for (String path : pathList) {
+            Integer id = Integer.parseInt(ArrayUtil.reverse(path.split("\\."))[0]);
+            set.addAll(bookmarkDao.getChildrenBookmarkId(userId, path).stream().map(String::valueOf).collect(Collectors.toSet()));
+            //删除此文件夹所有的子节点
+            bookmarkDao.deleteUserFolder(userId, path);
+            bookmarkIdList.add(id);
         }
         if (bookmarkIdList.size() > 0) {
             bookmarkDao.deleteUserBookmark(userId, bookmarkIdList);
+            set.addAll(bookmarkIdList.stream().map(String::valueOf).collect(Collectors.toSet()));
         }
-        set.addAll(bookmarkIdList.stream().map(String::valueOf).collect(Collectors.toSet()));
         RedisUtil.addToMq(RedisConstant.BOOKMARK_DELETE_ES, set);
-        updateVersion(userId);
+        userApi.versionPlus(userId);
     }
 
     @Override
@@ -187,26 +200,26 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setUserId(userId);
         bookmark.setCreateTime(System.currentTimeMillis());
         bookmark.setAddTime(bookmark.getCreateTime());
-        bookmark.setSearchKey(pinYinService.changeString(bookmark.getName()));
-        bookmarkDao.insertOne(bookmark);
-        //如果是书签，插入到es中
-        if (bookmark.getType() == 0) {
-            RedisUtil.addToMq(RedisConstant.BOOKMARK_INSERT_ES, Collections.singleton(bookmark));
+        if (bookmark.getType() == Bookmark.BOOKMARK_TYPE) {
+            pinYinService.changeBookmark(bookmark);
+            bookmark.setIcon(getIconBase64(bookmark.getUrl()));
         }
-        updateVersion(userId);
+        bookmarkDao.insertOne(bookmark);
+        userApi.versionPlus(userId);
         return bookmark;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateOne(int userId, Bookmark bookmark) {
+    public String updateOne(int userId, Bookmark bookmark) {
         bookmark.setUserId(userId);
-        bookmark.setSearchKey(pinYinService.changeString(bookmark.getName()));
-        bookmarkDao.editBookmark(bookmark);
         if (bookmark.getType() == 0) {
-            RedisUtil.addToMq(RedisConstant.BOOKMARK_INSERT_ES, Collections.singleton(bookmark));
+            pinYinService.changeBookmark(bookmark);
+            bookmark.setIcon(getIconBase64(bookmark.getUrl()));
         }
-        updateVersion(userId);
+        bookmarkDao.editBookmark(bookmark);
+        userApi.versionPlus(userId);
+        return bookmark.getIcon();
     }
 
 
@@ -227,7 +240,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         }
         //更新被移动节点的path和sort
         bookmarkDao.updatePathAndSort(userId, body.getBookmarkId(), body.getTargetPath(), body.getSort());
-        updateVersion(userId);
+        userApi.versionPlus(userId);
     }
 
     @Override
@@ -247,16 +260,47 @@ public class BookmarkServiceImpl implements BookmarkService {
         RedisUtil.addToMq(RedisConstant.BOOKMARK_VISIT_NUM_PLUS, JSON.toJSONString(item));
     }
 
-    /**
-     * 功能描述: 向mq发送消息通知，数据更新
-     *
-     * @param userId userId
-     * @author fanxb
-     * @date 2020/5/10 12:07
-     */
-    private void updateVersion(int userId) {
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_UPDATE_VERSION, userId);
+    @Override
+    public List<Bookmark> userPopular(int num) {
+        return bookmarkDao.selectPopular(UserContextHolder.get().getUserId(), num);
     }
 
+    @Override
+    public void updateUserBookmarkIcon(int userId) {
+        log.info("开始更新:{}", userId);
+        int size = 100;
+        int start = 0;
+        List<Bookmark> deal;
+        while ((deal = bookmarkDao.selectUserNoIcon(userId, start, size)).size() > 0) {
+            start += size;
+            deal.forEach(item -> {
+                String icon = getIconBase64(item.getUrl());
+                if (StrUtil.isNotEmpty(icon)) {
+                    bookmarkDao.updateIcon(item.getBookmarkId(), icon);
+                }
+            });
+        }
+        userApi.versionPlus(userId);
+    }
 
+    private String getIconBase64(String url) {
+        if (StrUtil.isEmpty(url)) {
+            return "";
+        }
+        try {
+            URL urlObj = new URL(url);
+            byte[] data = HttpUtil.download(urlIconAddress + "/icon?url=" + urlObj.getHost() + "&size=8..16..64", false);
+            String base64 = new String(Base64.getEncoder().encode(data));
+            if (StrUtil.isNotEmpty(base64)) {
+                return "data:image/png;base64," + base64;
+            } else {
+                log.warn("url无法获取icon:{}", url);
+            }
+        } catch (MalformedURLException e) {
+            log.warn("url无法解析出domain:{}", url);
+        } catch (Exception e) {
+            log.error("url获取icon故障:{}", url, e);
+        }
+        return "";
+    }
 }

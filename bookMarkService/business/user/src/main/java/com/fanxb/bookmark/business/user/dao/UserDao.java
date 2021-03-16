@@ -3,8 +3,11 @@ package com.fanxb.bookmark.business.user.dao;
 import com.fanxb.bookmark.common.entity.User;
 import com.fanxb.bookmark.common.entity.redis.UserBookmarkUpdate;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 类功能简述：
@@ -64,7 +67,7 @@ public interface UserDao {
      * @author fanxb
      * @date 2019/7/30 16:08
      */
-    User selectByUserId(int userId);
+    User selectByUserIdOrGithubId(@Param("userId") Integer userId, @Param("githubId") Long githubId);
 
     /**
      * Description: 更新用户icon
@@ -102,11 +105,11 @@ public interface UserDao {
     /**
      * 更新用户新邮箱
      *
-     * @param userId      userId
-     * @param newPassword userId
+     * @param userId   userId
+     * @param newEmail email
      */
-    @Update("update user set newEmail=#{newPassword} where userId= #{userId}")
-    void updateNewEmailByUserId(@Param("userId") int userId, @Param("newPassword") String newPassword);
+    @Update("update user set newEmail=#{newEmail} where userId= #{userId}")
+    void updateNewEmailByUserId(@Param("userId") int userId, @Param("newEmail") String newEmail);
 
     /**
      * 新邮箱校验成功，更新邮箱
@@ -119,20 +122,74 @@ public interface UserDao {
     /**
      * 功能描述: 更新用户上次更新书签时间
      *
-     * @param item item
+     * @param userId userId
      * @author fanxb
      * @date 2020/1/26 下午3:47
      */
     @Update("update user set version=version+1 where userId=#{userId}")
-    void updateLastBookmarkUpdateTime(int userId);
+    void updateUserVersion(int userId);
 
     /**
      * 功能描述: 更新所有用户的更新时间
      *
-     * @param time time
-     * @author 123
+     * @author fanxb
      * @date 2020/3/29 18:18
      */
     @Update("update user set version=version+1")
     void updateAllBookmarkUpdateVersion();
+
+    /**
+     * 判断用户名是否存在
+     *
+     * @param name name
+     * @return boolean
+     * @author fanxb
+     * @date 2021/3/11
+     **/
+    @Select("select count(1) from user where username=#{name}")
+    boolean usernameExist(String name);
+
+    /**
+     * 更新githubId
+     *
+     * @param user user
+     * @author fanxb
+     * @date 2021/3/11
+     **/
+    @Update("update user set githubId=#{githubId},email=#{email} where userId=#{userId}")
+    void updateEmailAndGithubId(User user);
+
+    /**
+     * 获取用户版本
+     *
+     * @param userId userId
+     * @return int
+     * @author fanxb
+     * @date 2021/3/11
+     **/
+    @Select("select version from user where userId=#{userId}")
+    int getUserVersion(int userId);
+
+    /**
+     * 分页查询用户id列表
+     *
+     * @param start 开始
+     * @param size  页大小
+     * @return java.util.List<java.lang.Integer>
+     * @author fanxb
+     * @date 2021/3/13
+     **/
+    @Select("select userId from user order by userId limit #{start},#{size}")
+    List<Integer> selectUserIdPage(@Param("start") int start, @Param("size") int size);
+
+    /**
+     * 更新用户搜索引擎
+     *
+     * @param userId userId
+     * @param engine engine
+     * @author fanxb
+     * @date 2021/3/14
+     **/
+    @Update("update user set defaultSearchEngine=#{engine} where userId=#{userId}")
+    void updateSearchEngine(@Param("userId") int userId, @Param("engine") String engine);
 }

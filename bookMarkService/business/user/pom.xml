@@ -11,5 +11,12 @@
 
     <artifactId>bookmark-business-user</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.fanxb</groupId>
+            <artifactId>bookmark-business-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 </project>

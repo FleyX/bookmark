@@ -1,15 +1,15 @@
 package com.fanxb.bookmark.business.user.controller;
 
-import com.fanxb.bookmark.business.user.entity.EmailUpdateBody;
-import com.fanxb.bookmark.business.user.entity.UpdatePasswordBody;
-import com.fanxb.bookmark.business.user.entity.UsernameBody;
 import com.fanxb.bookmark.business.user.service.BaseInfoService;
+import com.fanxb.bookmark.business.user.vo.EmailUpdateBody;
+import com.fanxb.bookmark.business.user.vo.UpdatePasswordBody;
+import com.fanxb.bookmark.business.user.vo.UsernameBody;
 import com.fanxb.bookmark.common.entity.Result;
+import com.fanxb.bookmark.common.entity.User;
+import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 
 /**
@@ -23,8 +23,12 @@ import javax.validation.Valid;
 @Validated
 public class BaseInfoController {
 
+    private final BaseInfoService baseInfoService;
+
     @Autowired
-    private BaseInfoService baseInfoService;
+    public BaseInfoController(BaseInfoService baseInfoService) {
+        this.baseInfoService = baseInfoService;
+    }
 
     /**
      * Description: 修改密码
@@ -80,6 +84,19 @@ public class BaseInfoController {
     @GetMapping("/verifyEmail")
     public Result verifyEmail(String secret) {
         baseInfoService.verifyEmail(secret);
+        return Result.success(null);
+    }
+
+    /**
+     * 修改用户默认搜索引擎
+     *
+     * @author fanxb
+     * @date 2021/3/14
+     **/
+    @PostMapping("/updateSearchEngine")
+    public Result updateSearchEngine(@RequestBody User user) {
+        user.setUserId(UserContextHolder.get().getUserId());
+        baseInfoService.changeDefaultSearchEngine(user);
         return Result.success(null);
     }
 }
