@@ -12,9 +12,6 @@
 export default {
   name: "Public",
   async created() {
-    //进入注册、登录页需要清理掉所有的缓存数据
-    await this.$store.dispatch("treeData/clear");
-    await this.$store.dispatch("globalConfig/clear");
   },
 };
 </script>
@@ -42,7 +39,7 @@ export default {
 
   @media screen and (min-width: 500px) {
     .main-body {
-      width: 5rem;
+      min-width: 5rem;
     }
   }
 

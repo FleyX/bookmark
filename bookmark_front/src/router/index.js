@@ -53,8 +53,17 @@ const routes = [
         path: "oauth/github",
         name: "GithubRedirect",
         component: GithubOauth
+      },
+      {
+        path: "notFound",
+        name: "NOTFOUND",
+        component: () => import("@/views/public/pages/NotFound")
       }
     ]
+  },
+  {
+    path: "*",
+    redirect: "/public/notFound"
   }
 ];
 
