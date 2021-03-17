@@ -1,5 +1,6 @@
 package com.fanxb.bookmark.business.bookmark.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.fanxb.bookmark.business.bookmark.entity.BatchDeleteBody;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
@@ -194,6 +195,19 @@ public class BookmarkController {
     public Result updateCurrentUserIcon() {
         bookmarkService.updateUserBookmarkIcon(UserContextHolder.get().getUserId());
         return Result.success(null);
+    }
+
+    /**
+     * 检查/删除无父节点的数据
+     *
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2021/3/17
+     **/
+    @PostMapping("/dealBadBookmark")
+    public Result dealBadBookmark(@RequestBody JSONObject obj) {
+        return Result.success(bookmarkService.dealBadBookmark(obj.getBoolean("delete"), UserContextHolder.get().getUserId()));
+
     }
 
 }

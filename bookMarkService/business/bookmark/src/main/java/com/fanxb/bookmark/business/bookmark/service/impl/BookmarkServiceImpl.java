@@ -3,6 +3,7 @@ package com.fanxb.bookmark.business.bookmark.service.impl;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fanxb.bookmark.business.api.UserApi;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
@@ -281,6 +282,28 @@ public class BookmarkServiceImpl implements BookmarkService {
             });
         }
         userApi.versionPlus(userId);
+    }
+
+    @Override
+    public Set<String> dealBadBookmark(boolean delete, int userId) {
+        List<Bookmark> bookmarks = bookmarkDao.selectBookmarkIdPathByUserId(userId);
+        Set<Integer> idSet = new HashSet<>(bookmarks.size());
+        bookmarks.forEach(item -> idSet.add(item.getBookmarkId()));
+        Set<String> resPath = new HashSet<>();
+        bookmarks.forEach(item -> {
+            if (StrUtil.isEmpty(item.getPath())) {
+                return;
+            }
+            String parentId = item.getPath().substring(item.getPath().lastIndexOf(".") + 1);
+            if (!idSet.contains(Integer.valueOf(parentId))) {
+                resPath.add(item.getPath());
+            }
+        });
+        if (delete && resPath.size() > 0) {
+            resPath.forEach(item -> bookmarkDao.deleteUserFolder(userId, item));
+            userApi.versionPlus(userId);
+        }
+        return resPath;
     }
 
     private String getIconBase64(String url) {

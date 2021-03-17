@@ -240,4 +240,26 @@ public class UserServiceImpl implements UserService {
             log.info("结束更新所有人icon");
         });
     }
+
+    @Override
+    public Map<Integer, Set<String>> dealAllUserBookmark(boolean delete) {
+        if (!UserContextHolder.get().getManageUser()) {
+            throw new CustomException("非管理员用户，无法执行操作");
+        }
+        log.info("开始处理所有问题书签数据");
+        int start = 0, size = 1000;
+        List<Integer> ids;
+        Map<Integer, Set<String>> res = new HashMap<>(1000);
+        while ((ids = userDao.selectUserIdPage(start, size)).size() > 0) {
+            start += size;
+            ids.forEach(id -> {
+                Set<String> oneUser = bookmarkApi.dealBadBookmark(delete, id);
+                if (oneUser.size() > 0) {
+                    res.put(id, oneUser);
+                }
+            });
+        }
+        log.info("处理完毕");
+        return res;
+    }
 }

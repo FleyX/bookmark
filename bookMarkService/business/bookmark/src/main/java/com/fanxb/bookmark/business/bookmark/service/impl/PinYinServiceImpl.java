@@ -52,8 +52,8 @@ public class PinYinServiceImpl implements PinYinService {
         int i = 0;
         while (true) {
             List<Bookmark> bookmarks = changeBookmarks(bookmarkDao.selectPinyinEmpty(i, SIZE));
-            for (Bookmark bookmark : bookmarks) {
-                bookmarkDao.updateSearchKey(bookmark.getBookmarkId(), bookmark.getSearchKey());
+            if (bookmarks.size() > 0) {
+                bookmarkDao.updateSearchKeyBatch(bookmarks);
             }
             if (bookmarks.size() < SIZE) {
                 break;
@@ -75,7 +75,7 @@ public class PinYinServiceImpl implements PinYinService {
         for (int j = 0, size = bookmarks.size(); j < size; j++) {
             Bookmark bookmark = bookmarks.get(j);
             int length = bookmark.getUrl().length();
-            bookmark.setSearchKey(resList.get(j) + PARTITION + bookmarks.get(j).getUrl().substring(0, length > 50 ? 50 : length - 1));
+            bookmark.setSearchKey(resList.get(j) + (length == 0 ? "" : (PARTITION + bookmark.getUrl().substring(0, length > 50 ? 50 : length - 1))));
         }
         return bookmarks;
     }
