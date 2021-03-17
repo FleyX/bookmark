@@ -34,9 +34,20 @@ export default {
     top: 5%;
     width: 2rem;
   }
+  @media screen and (max-width: 500px) {
+    .main-body {
+      min-width: 100%;
+    }
+  }
+
+  @media screen and (min-width: 500px) {
+    .main-body {
+      width: 5rem;
+    }
+  }
+
   .main-body {
-    min-width: 5rem;
-    min-height: 3.5rem;
+    // min-height: 3.5rem;
     background-color: @publicBgColor;
     border-radius: 5px;
     padding: 0.1rem;
