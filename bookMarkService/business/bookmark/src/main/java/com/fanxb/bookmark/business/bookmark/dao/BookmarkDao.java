@@ -170,7 +170,7 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      * @author fanxb
      * @date 2020/3/22 22:06
      */
-    @Select("select bookmarkId,name from bookmark where bookmarkId>${bookmarkId} order by bookmarkId asc limit 0,${size}")
+    @Select("select bookmarkId,name,url from bookmark where bookmarkId>${bookmarkId} order by bookmarkId asc limit 0,${size}")
     List<Bookmark> selectPinyinEmpty(@Param("bookmarkId") int bookmarkId, @Param("size") int size);
 
     /**
@@ -236,5 +236,15 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      **/
     @Update("update bookmark set icon=#{icon} where bookmarkId=#{bookmarkId}")
     void updateIcon(@Param("bookmarkId") int bookmarkId, @Param("icon") String icon);
+
+    /**
+     * 获取某用户所有的id,bookmark
+     *
+     * @param userId userId
+     * @author fanxb
+     * @date 2021/3/17
+     **/
+    @Select("select bookmarkId,path from bookmark where userId=#{userId}")
+    List<Bookmark> selectBookmarkIdPathByUserId(int userId);
 
 }

@@ -7,6 +7,7 @@ import com.fanxb.bookmark.common.entity.Bookmark;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA
@@ -131,4 +132,14 @@ public interface BookmarkService {
      * @date 2021/3/11
      **/
     void updateUserBookmarkIcon(int userId);
+
+    /***
+     * 检查无父节点的数据
+     * @author fanxb
+     * @param delete 是否删除数据
+     * @param userId 用户id
+     * @return java.util.List<java.lang.String>
+     * @date 2021/3/17
+     **/
+    Set<String> dealBadBookmark(boolean delete, int userId);
 }

@@ -167,5 +167,18 @@ public class UserController {
         return Result.success(null);
     }
 
+    /**
+     * 处理所有的问题书签数据
+     *
+     * @param obj obj
+     * @return com.fanxb.bookmark.common.entity.Result
+     * @author fanxb
+     * @date 2021/3/17
+     **/
+    @PostMapping("/dealAllUserBookmark")
+    public Result dealAllUserBookmark(@RequestBody JSONObject obj) {
+        return Result.success(userService.dealAllUserBookmark(obj.getBoolean("delete")));
+    }
+
 
 }

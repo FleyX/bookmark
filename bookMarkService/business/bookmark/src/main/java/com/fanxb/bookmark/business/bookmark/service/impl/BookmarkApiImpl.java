@@ -5,6 +5,8 @@ import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 /**
  * bookmark模块api暴露
  *
@@ -23,5 +25,10 @@ public class BookmarkApiImpl implements BookmarkApi {
     @Override
     public void updateUserBookmarkIcon(int userId) {
         bookmarkService.updateUserBookmarkIcon(userId);
+    }
+
+    @Override
+    public Set<String> dealBadBookmark(boolean delete, int userId) {
+        return bookmarkService.dealBadBookmark(delete, userId);
     }
 }

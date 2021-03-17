@@ -2,6 +2,9 @@ package com.fanxb.bookmark.business.user.service;
 
 import com.fanxb.bookmark.common.util.TimeUtil;
 
+import java.util.Map;
+import java.util.Set;
+
 /**
  * 用户接口
  *
@@ -48,4 +51,13 @@ public interface UserService {
      * @date 2021/3/13
      **/
     void updateAllUserIcon();
+
+    /**
+     * 检查所有用户的问题书签数据
+     *
+     * @param delete 是否删除问题数据
+     * @author fanxb
+     * @date 2021/3/17
+     **/
+    Map<Integer, Set<String>> dealAllUserBookmark(boolean delete);
 }
