@@ -71,7 +71,11 @@ export default {
       this.list = [];
       this.selectIndex = null;
     },
-    searchClick() {
+    searchClick(value, e) {
+      //如果是enter按键触发的不作处理
+      if (e && e.key) {
+        return;
+      }
       if (this.timer != null) {
         clearTimeout(this.timer);
       }
@@ -90,7 +94,7 @@ export default {
       if (e) {
         this.stopDefault(e);
       }
-      if (!index) {
+      if (index === undefined || index === null) {
         return;
       }
       let bookmark = this.list[index];
