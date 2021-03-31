@@ -1,14 +1,14 @@
 <template>
   <div class="search">
     <a-input-search id="searchInput" ref="searchInput" size="large" style="width: 100%" v-model="value" @change="search" @search="searchClick" allowClear @blur.prevent="inputBlur" @focus="inputFocus" @keydown="keyPress">
-      <a-tooltip :title="searchBookmark?'搜索书签':'全网搜索'" slot="enterButton">
-        <a-button :icon="searchBookmark?'book':'search'" type="primary" />
+      <a-tooltip title="全网搜索" slot="enterButton">
+        <a-button icon="search" type="primary" />
       </a-tooltip>
     </a-input-search>
     <div v-if="focused && searchBookmark" class="searchContent">
       <a-empty v-if="list.length == 0" />
-      <div class="listItem" :class="{ itemActive: index == hoverIndex || index == selectIndex }" v-for="(item, index) in list" :key="item.bookmarkId" @mouseenter="mouseEnterOut(index, 'enter')" @mouseleave="mouseEnterOut(index, 'leave')" @mouseup="onMouse" @click="itemClick(item)">
-        <a class="listItemUrl" style="padding-right: 1em; max-width: calc(100% - 2em)" :id="'bookmark:' + item.bookmarkId" :href="item.url" @click="itemClick($event,item.bookmarkId)" target="_blank">
+      <div class="listItem" :class="{ itemActive: index == hoverIndex || index == selectIndex }" v-for="(item, index) in list" :key="item.bookmarkId" @mouseenter="mouseEnterOut(index, 'enter')" @mouseleave="mouseEnterOut(index, 'leave')" @mouseup="onMouse">
+        <a class="listItemUrl" style="padding-right: 1em;min-width:3em; max-width: calc(100% - 2em)" :id="'bookmark:' + item.bookmarkId" :href="item.url" @click="itemClick($event,index)" target="_blank">
           {{ item.name }}
         </a>
         <a-tooltip v-if="showActions && hoverIndex === index" title="定位到书签树中">
@@ -75,34 +75,28 @@ export default {
       if (this.timer != null) {
         clearTimeout(this.timer);
       }
-      if (!this.searchBookmark) {
-        switch (this.userInfo.defaultSearchEngine) {
-          case "bing":
-            window.open("https://www.bing.com/search?q=" + encodeURIComponent(this.value));
-            break;
-          case "google":
-            window.open("https://www.google.com/search?q=" + encodeURIComponent(this.value));
-            break;
-          default:
-            window.open("https://www.baidu.com/s?ie=UTF-8&wd=" + encodeURIComponent(this.value));
-        }
+      switch (this.userInfo.defaultSearchEngine) {
+        case "bing":
+          window.open("https://www.bing.com/search?q=" + encodeURIComponent(this.value));
+          break;
+        case "google":
+          window.open("https://www.google.com/search?q=" + encodeURIComponent(this.value));
+          break;
+        default:
+          window.open("https://www.baidu.com/s?ie=UTF-8&wd=" + encodeURIComponent(this.value));
       }
     },
-    itemClick(e, id) {
+    itemClick(e, index) {
       if (e) {
         this.stopDefault(e);
       }
-      if (!id) {
+      if (!index) {
         return;
       }
-      HttpUtil.post("/bookmark/visitNum", { id });
-      if (this.selectIndex == null) {
-        this.targetUrl = "https://www.baidu.com/s?ie=UTF-8&wd=" + encodeURIComponent(this.value);
-      } else {
-        this.targetUrl = this.list[this.selectIndex].url;
-      }
+      let bookmark = this.list[index];
+      HttpUtil.post("/bookmark/visitNum", { id: bookmark.bookmarkId });
       let a = this.$refs["targetA"];
-      a.href = this.targetUrl;
+      a.href = bookmark.url;
       a.click();
       return false;
     },
@@ -144,10 +138,19 @@ export default {
           this.stopDefault();
           break;
         case "Enter":
-          this.itemClick(e, this.list[this.selectIndex].bookmarkId);
+          if (this.searchBookmark) {
+            this.itemClick(e, this.selectIndex);
+          } else {
+            this.searchClick();
+          }
           break;
         case "Tab":
           this.searchBookmark = !this.searchBookmark;
+          if (this.searchBookmark) {
+            this.$message.info("书签搜索");
+          } else {
+            this.$message.info("全网搜索");
+          }
           this.stopDefault();
           break;
         case "Escape":
