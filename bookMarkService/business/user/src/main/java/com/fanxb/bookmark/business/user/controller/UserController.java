@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
+
 /**
  * 类功能简述：
  * 类功能详述：
@@ -59,7 +61,7 @@ public class UserController {
      * @date 2019/7/6 16:34
      */
     @PutMapping("")
-    public Result register(@RequestBody RegisterBody body) {
+    public Result register(@Valid @RequestBody RegisterBody body) {
         return Result.success(userServiceImpl.register(body));
     }
 
