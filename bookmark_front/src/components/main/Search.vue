@@ -50,15 +50,14 @@ export default {
   },
   methods: {
     search(content) {
-      content = content.target.value;
-      content = content.toLocaleLowerCase().trim();
-      this.value = content;
-      if (content === "") {
+      this.value = content.target.value;
+      let val = content.target.value.toLocaleLowerCase().trim();
+      if (val === "") {
         this.list = [];
         return;
       }
       let time1 = Date.now();
-      this.list = this.dealSearch(content);
+      this.list = this.dealSearch(val);
       this.selectIndex = 0;
       console.info("搜索耗时：" + (Date.now() - time1));
     },
