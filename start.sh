@@ -47,6 +47,7 @@ delete="delete"
 
 if [  -z $1 ] || [ $1 == $start ];then
   echo "start"
+  docker-compose down
   docker-compose up -d
 elif [ $1 == $stop ];then
   echo "stop"
