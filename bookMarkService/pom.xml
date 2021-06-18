@@ -46,6 +46,12 @@
                 <artifactId>elasticsearch-rest-client</artifactId>
                 <version>7.12.0</version>
             </dependency>
+            <!--减负依赖-->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.20</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
