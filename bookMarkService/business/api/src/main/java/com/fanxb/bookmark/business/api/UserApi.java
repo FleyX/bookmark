@@ -1,5 +1,9 @@
 package com.fanxb.bookmark.business.api;
 
+/**
+ * @author fanxb
+ * @date 2021/8/20 下午2:12
+ */
 public interface UserApi {
     /**
      * 版本自增

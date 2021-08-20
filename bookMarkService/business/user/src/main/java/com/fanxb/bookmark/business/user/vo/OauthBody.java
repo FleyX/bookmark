@@ -9,7 +9,7 @@ import lombok.Data;
  * @date 2021/3/10
  **/
 @Data
-public class OAuthBody {
+public class OauthBody {
     public static final String GITHUB = "github";
     /**
      * 类别

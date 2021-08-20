@@ -1,8 +1,7 @@
 package com.fanxb.bookmark.business.bookmark.service;
 
 /**
- * Created with IntelliJ IDEA
- * Created By Fxb
+ * @author fanxb
  * Date: 2020/3/29
  * Time: 12:43
  */
@@ -20,6 +19,7 @@ public interface BookmarkBackupService {
     /**
      * Description: 将某个用户的书签数据mysql同步到es中
      *
+     * @param userId 用户id
      * @author fanxb
      * @date 2019/7/26 11:27
      */

@@ -3,13 +3,16 @@ package com.fanxb.bookmark.business.user.dao;
 import com.fanxb.bookmark.business.user.entity.Feedback;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Component;
 
 /**
  * Created with IntelliJ IDEA
- * Created By Fxb
+ *
+ * @author fanxb
  * Date: 2020/3/10
  * Time: 23:14
  */
+@Component
 public interface FeedbackDao {
 
     /**

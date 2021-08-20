@@ -6,7 +6,8 @@ import java.util.List;
 
 /**
  * Created with IntelliJ IDEA
- * Created By Fxb
+ *
+ * @author fanxb
  * Date: 2020/3/18
  * Time: 23:47
  */
@@ -15,15 +16,15 @@ public interface PinYinService {
     /**
      * 分隔符
      */
-    static final String PARTITION = "||";
+    String PARTITION = "||";
     /**
      * 拼音接口路径
      */
-    static final String PATH = "/pinyinChange";
+    String PATH = "/pinyinChange";
     /**
      * 分页查询页大小
      */
-    static final int SIZE = 500;
+    int SIZE = 500;
 
     /**
      * 功能描述: 首次上线用于全量初始化

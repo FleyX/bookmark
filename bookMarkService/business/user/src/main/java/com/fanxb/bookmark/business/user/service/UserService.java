@@ -38,6 +38,7 @@ public interface UserService {
     /**
      * 获取当前用户的version
      *
+     * @param userId userId
      * @return int
      * @author fanxb
      * @date 2021/3/11
@@ -56,6 +57,7 @@ public interface UserService {
      * 检查所有用户的问题书签数据
      *
      * @param delete 是否删除问题数据
+     * @return 返回用户删除的数据
      * @author fanxb
      * @date 2021/3/17
      **/

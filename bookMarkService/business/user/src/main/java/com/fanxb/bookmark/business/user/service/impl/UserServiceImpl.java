@@ -39,6 +39,10 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
+    /**
+     * 登陆最大重试次数
+     */
+    private static final int LOGIN_COUNT = 5;
 
     private final UserDao userDao;
     private final StringRedisTemplate redisTemplate;
@@ -115,7 +119,7 @@ public class UserServiceImpl implements UserService {
     public String login(LoginBody body) {
         String key = RedisConstant.getUserFailCountKey(body.getStr());
         String count = redisTemplate.opsForValue().get(key);
-        if (count != null && Integer.parseInt(count) >= 5) {
+        if (count != null && Integer.parseInt(count) >= LOGIN_COUNT) {
             redisTemplate.expire(key, 30, TimeUnit.MINUTES);
             throw new FormDataException("您已连续输错密码5次，请30分钟后再试，或联系管理员处理");
         }

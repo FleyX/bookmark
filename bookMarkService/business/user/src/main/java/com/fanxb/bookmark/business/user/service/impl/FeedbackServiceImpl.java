@@ -9,14 +9,19 @@ import org.springframework.stereotype.Service;
 
 /**
  * Created with IntelliJ IDEA
- * Created By Fxb
+ *
+ * @author fanxb
  * Date: 2020/3/10
  * Time: 23:17
  */
 @Service
 public class FeedbackServiceImpl implements FeedbackService {
+    private final FeedbackDao feedbackDao;
+
     @Autowired
-    private FeedbackDao feedbackDao;
+    public FeedbackServiceImpl(FeedbackDao feedbackDao) {
+        this.feedbackDao = feedbackDao;
+    }
 
     @Override
     public void addOne(Feedback feedback) {

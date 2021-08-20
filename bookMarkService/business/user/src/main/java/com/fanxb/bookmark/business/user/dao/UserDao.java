@@ -62,7 +62,8 @@ public interface UserDao {
     /**
      * Description: 根据用户id查询用户信息
      *
-     * @param userId userId
+     * @param userId   userId
+     * @param githubId githubId
      * @return com.fanxb.bookmark.common.entity.User
      * @author fanxb
      * @date 2019/7/30 16:08

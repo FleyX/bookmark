@@ -187,6 +187,7 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
     /**
      * 批量更新searchKey
      *
+     * @param list list
      * @author fanxb
      * @date 2020/3/22 22:08
      */
@@ -213,16 +214,28 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
     @Update("update bookmark set visitNum=visitNum+1 where userId=#{userId} and bookmarkId=#{bookmarkId}")
     void updateVisitNum(VisitNumPlus item);
 
+    /**
+     * 查询用户最常访问的几个书签
+     *
+     * @param userId 用户id
+     * @param num    num
+     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @author fanxb
+     * @date 2021/8/20 上午11:52
+     */
     @Select("select bookmarkId,name,url,icon from bookmark where userId=#{userId} and type=0 order by visitNum desc limit 0,#{num}")
     List<Bookmark> selectPopular(@Param("userId") int userId, @Param("num") int num);
 
     /**
      * 获取某用户无icon的条目
      *
+     * @param userId userId
+     * @param start  开始
+     * @param size   数量
      * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
      * @author fanxb
-     * @date 2021/3/11
-     **/
+     * @date 2021/8/20 下午12:02
+     */
     @Select("select userId,bookmarkId,url,icon from bookmark where userId=#{userId} and icon='' order by bookmarkId asc limit #{start},#{size}")
     List<Bookmark> selectUserNoIcon(@Param("userId") int userId, @Param("start") int start, @Param("size") int size);
 
@@ -238,12 +251,13 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
     void updateIcon(@Param("bookmarkId") int bookmarkId, @Param("icon") String icon);
 
     /**
-     * 获取某用户所有的id,bookmark
+     * 查询一个用户全部的书签路径
      *
      * @param userId userId
+     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
      * @author fanxb
-     * @date 2021/3/17
-     **/
+     * @date 2021/8/20 上午11:58
+     */
     @Select("select bookmarkId,path from bookmark where userId=#{userId}")
     List<Bookmark> selectBookmarkIdPathByUserId(int userId);
 

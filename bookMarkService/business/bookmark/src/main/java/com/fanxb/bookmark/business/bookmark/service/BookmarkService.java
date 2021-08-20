@@ -11,7 +11,8 @@ import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA
- * Created By Fxb
+ *
+ * @author fanxb
  * Date: 2020/3/29
  * Time: 12:25
  */
@@ -48,6 +49,8 @@ public interface BookmarkService {
      *
      * @param stream 输入流
      * @param path   存放路径
+     * @param userId userId
+     * @throws Exception 各种异常
      * @author fanxb
      * @date 2019/7/9 18:44
      */
@@ -68,6 +71,7 @@ public interface BookmarkService {
      *
      * @param userId   userId
      * @param bookmark bookmark
+     * @return 更新后的icon
      * @author fanxb
      * @date 2019/7/17 14:42
      */
