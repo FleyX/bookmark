@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fanxb.bookmark.common.exception.CustomException;
+import lombok.Getter;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -27,15 +28,22 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class HttpUtil {
+
+    /**
+     * 是否存在代理环境
+     */
+    @Getter
+    private static Boolean proxyExist = false;
+
     @Value("${proxy.ip}")
     private String proxyIp;
     @Value("${proxy.port}")
-    private int proxyPort;
+    private String proxyPort;
 
     private static final int IP_LENGTH = 15;
 
     /**
-     * 使用代理环境
+     * 使用代理环境(如不存在代理配置，那么此客户端也是非代理)
      */
     private static OkHttpClient PROXY_CLIENT;
     /**
@@ -49,8 +57,9 @@ public class HttpUtil {
     @PostConstruct
     public void init() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        if (StrUtil.isNotBlank(proxyIp)) {
-            builder.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyIp, proxyPort)));
+        if (StrUtil.isNotBlank(proxyIp) && StrUtil.isNotBlank(proxyPort)) {
+            builder.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyIp, Integer.parseInt(proxyPort))));
+            proxyExist = true;
         }
         PROXY_CLIENT = builder.connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)

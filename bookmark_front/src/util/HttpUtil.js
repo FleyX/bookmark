@@ -22,6 +22,7 @@ async function request(url, method, params, body, isForm, redirect) {
       "jwt-token": vuex.state.globalConfig.token
     }
   };
+  //如果是表单类型的请求，添加请求头
   if (isForm) {
     options.headers["Content-Type"] = "multipart/form-data";
   }
@@ -40,12 +41,12 @@ async function request(url, method, params, body, isForm, redirect) {
   if (code === 1) {
     return data;
   } else if (code === -1 && redirect) {
-    // 跳转到登陆页
+    //未登陆，根据redirect参数判断是否需要跳转到登陆页
     window.vueInstance.$message.error("您尚未登陆，请先登陆");
     router.replace(`/public/login?redirect=${encodeURIComponent(router.currentRoute.fullPath)}`);
     throw new Error(message);
   } else if (code === 0) {
-    //通用异常，使用
+    //通用异常，使用error提示
     window.vueInstance.$notification.error({
       message: "异常",
       description: message

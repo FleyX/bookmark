@@ -36,7 +36,7 @@ const getters = {
 };
 
 const actions = {
-  //从缓存初始化数据
+  //登陆后的，从缓存初始化数据
   async init(context) {
     if (context.state.isInit || context.state.isIniting) {
       return;

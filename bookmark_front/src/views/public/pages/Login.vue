@@ -24,7 +24,7 @@
           </div>
           <div class="thirdPart">
             <span>第三方登陆</span>
-            <a-tooltip title="github登陆" class="oneIcon" placement="bottom">
+            <a-tooltip v-if="serverConfig.proxyExist" title="github登陆" class="oneIcon" placement="bottom">
               <a-icon type="github" @click="toGithub" style="font-size:1.4em" />
             </a-tooltip>
           </div>
@@ -37,12 +37,15 @@
 <script>
 import Header from "@/components/public/Switch.vue";
 import httpUtil from "../../../util/HttpUtil.js";
-import { mapMutations } from "vuex";
+import { mapMutations ,mapState} from "vuex";
 import HttpUtil from "../../../util/HttpUtil.js";
 export default {
   name: "Login",
   components: {
     Header,
+  },
+  computed:{
+    ...mapState("globalConfig", ["serverConfig"])
   },
   data() {
     return {
