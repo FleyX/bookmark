@@ -2,6 +2,7 @@ import localforage from "localforage";
 import HttpUtil from "../../util/HttpUtil";
 const USER_INFO = "userInfo";
 const TOKEN = "token";
+const SERVER_CONFIG = "serverConfig";
 
 /**
  * 存储全局配置
@@ -22,13 +23,17 @@ const state = {
   /**
    * 是否移动端
    */
-  isPhone: false
+  isPhone: false,
+  /**
+   * 服务端全局配置
+   */
+  [SERVER_CONFIG]: {}
 };
 
 const getters = {};
 
 const actions = {
-  //初始化数据
+  //登陆后的，初始化数据
   async init(context) {
     if (context.state.isInit) {
       return;
@@ -64,6 +69,12 @@ const actions = {
     context.commit(USER_INFO, null);
     context.commit(TOKEN, null);
     context.commit("isInit", false);
+  },
+  /**
+   * 从服务器读取全局配置
+   */
+  async refreshServerConfig({ commit }) {
+    commit(SERVER_CONFIG, await HttpUtil.get("/common/config/global"));
   }
 };
 
@@ -79,6 +90,9 @@ const mutations = {
   },
   isPhone(state, status) {
     state.isPhone = status;
+  },
+  [SERVER_CONFIG](state, serverConfig) {
+    state[SERVER_CONFIG] = serverConfig;
   }
 };
 

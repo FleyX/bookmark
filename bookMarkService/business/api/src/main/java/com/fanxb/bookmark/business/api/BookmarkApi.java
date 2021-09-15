@@ -21,6 +21,7 @@ public interface BookmarkApi {
      * @author fanxb
      * @param delete 是否删除问题数据
      * @param userId userId
+     * @return 返回删除的数据
      * @date 2021/3/17
      **/
     Set<String> dealBadBookmark(boolean delete, int userId);

@@ -1,12 +1,11 @@
 package com.fanxb.bookmark.business.user.service.impl;
 
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.fanxb.bookmark.business.user.dao.UserDao;
-import com.fanxb.bookmark.business.user.service.OAuthService;
+import com.fanxb.bookmark.business.user.service.OauthService;
 import com.fanxb.bookmark.business.user.service.UserService;
-import com.fanxb.bookmark.business.user.vo.OAuthBody;
+import com.fanxb.bookmark.business.user.vo.OauthBody;
 import com.fanxb.bookmark.common.constant.Constant;
 import com.fanxb.bookmark.common.entity.User;
 import com.fanxb.bookmark.common.exception.CustomException;
@@ -33,7 +32,7 @@ import static com.fanxb.bookmark.business.user.service.UserService.SHORT_EXPIRE_
  **/
 @Service
 @Slf4j
-public class OAuthServiceImpl implements OAuthService {
+public class OauthServiceImpl implements OauthService {
 
     @Value("${OAuth.github.clientId}")
     private String githubClientId;
@@ -43,16 +42,16 @@ public class OAuthServiceImpl implements OAuthService {
     private final UserService userService;
 
     @Autowired
-    public OAuthServiceImpl(UserDao userDao, UserService userService) {
+    public OauthServiceImpl(UserDao userDao, UserService userService) {
         this.userDao = userDao;
         this.userService = userService;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String oAuthCheck(OAuthBody body) {
+    public String oAuthCheck(OauthBody body) {
         User current, other = new User();
-        if (StrUtil.equals(body.getType(), OAuthBody.GITHUB)) {
+        if (StrUtil.equals(body.getType(), OauthBody.GITHUB)) {
             Map<String, String> header = new HashMap<>(2);
             header.put("accept", "application/json");
             String url = "https://github.com/login/oauth/access_token?client_id=" + githubClientId + "&client_secret=" + githubSecret + "&code=" + body.getCode();
@@ -65,7 +64,7 @@ public class OAuthServiceImpl implements OAuthService {
             JSONObject userInfo = HttpUtil.getObj("https://api.github.com/user", header, true);
             other.setGithubId(userInfo.getLong("id"));
             if (other.getGithubId() == null) {
-                log.error("github返回异常:{}", userInfo.toString());
+                log.error("github返回异常:{}", userInfo);
                 throw new CustomException("登陆异常，请稍后重试");
             }
             other.setEmail(userInfo.getString("email"));
@@ -78,7 +77,7 @@ public class OAuthServiceImpl implements OAuthService {
         } else {
             throw new CustomException("不支持的登陆方式" + body.getType());
         }
-        User newest = dealOAuth(current, other);
+        User newest = dealOauth(current, other);
         return JwtUtil.encode(Collections.singletonMap("userId", String.valueOf(newest.getUserId())), Constant.jwtSecret
                 , body.isRememberMe() ? LONG_EXPIRE_TIME : SHORT_EXPIRE_TIME);
     }
@@ -92,7 +91,7 @@ public class OAuthServiceImpl implements OAuthService {
      * @author fanxb
      * @date 2021/3/11
      **/
-    private User dealOAuth(User current, User other) {
+    private User dealOauth(User current, User other) {
         if (current == null) {
             //判断用户名是否可用
             if (userDao.usernameExist(other.getUsername())) {

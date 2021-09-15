@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/bookmarkBackup")
 public class BookmarkBackupController {
 
-    private BookmarkBackupService backupService;
+    private final BookmarkBackupService backupService;
 
     @Autowired
     public BookmarkBackupController(BookmarkBackupServiceImpl backupService) {
@@ -31,7 +31,7 @@ public class BookmarkBackupController {
     @PostMapping("/mysqlToEs")
     public Result backupToEs() {
         //异步执行同步任务
-        ThreadPoolUtil.execute(() -> backupService.backupToEs());
+        ThreadPoolUtil.execute(backupService::backupToEs);
         return Result.success(null);
     }
 }

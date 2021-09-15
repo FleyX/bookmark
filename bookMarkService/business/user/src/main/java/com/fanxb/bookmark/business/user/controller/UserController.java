@@ -1,10 +1,10 @@
 package com.fanxb.bookmark.business.user.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.fanxb.bookmark.business.user.service.OAuthService;
+import com.fanxb.bookmark.business.user.service.OauthService;
 import com.fanxb.bookmark.business.user.service.UserService;
 import com.fanxb.bookmark.business.user.vo.LoginBody;
-import com.fanxb.bookmark.business.user.vo.OAuthBody;
+import com.fanxb.bookmark.business.user.vo.OauthBody;
 import com.fanxb.bookmark.business.user.vo.RegisterBody;
 import com.fanxb.bookmark.business.user.service.impl.UserServiceImpl;
 import com.fanxb.bookmark.common.entity.Result;
@@ -28,11 +28,11 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserServiceImpl userServiceImpl;
-    private final OAuthService oAuthService;
+    private final OauthService oAuthService;
     private final UserService userService;
 
     @Autowired
-    public UserController(UserServiceImpl userServiceImpl, OAuthService oAuthService, UserService userService) {
+    public UserController(UserServiceImpl userServiceImpl, OauthService oAuthService, UserService userService) {
         this.userServiceImpl = userServiceImpl;
         this.oAuthService = oAuthService;
         this.userService = userService;
@@ -142,7 +142,7 @@ public class UserController {
      * @date 2021/3/10
      */
     @PostMapping("oAuthLogin")
-    public Result oAuthLogin(@RequestBody OAuthBody body) {
+    public Result oAuthLogin(@RequestBody OauthBody body) {
         return Result.success(oAuthService.oAuthCheck(body));
     }
 
