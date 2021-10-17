@@ -83,7 +83,7 @@ public class OauthServiceImpl implements OauthService {
     }
 
     /**
-     * TODO 方法描述
+     * oauth登陆
      *
      * @param current 当前是否存在该用户
      * @param other   第三方获取的数据

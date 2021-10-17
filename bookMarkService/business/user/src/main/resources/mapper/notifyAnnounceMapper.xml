@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fanxb.bookmark.business.user.dao.NotifyAnnounceDao">
+
+    <select id="queryUserAnnounce" resultType="com.fanxb.bookmark.business.user.vo.UserNotifyAnnounceRes">
+        select b.notifyAnnounceId,b.title,b.content,a.readDate from user_notify_announce a inner join notify_announce b
+        on a.notifyAnnounceId=b.notifyAnnounceId where a.userId=#{userId} and a.status=#{status}
+        <if test="status == 0">
+            and b.startDate&lt;#{date} and b.endDate>#{date}
+        </if>
+    </select>
+
+
+</mapper>

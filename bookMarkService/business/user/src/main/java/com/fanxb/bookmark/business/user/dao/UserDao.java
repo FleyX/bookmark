@@ -193,4 +193,18 @@ public interface UserDao {
      **/
     @Update("update user set defaultSearchEngine=#{engine} where userId=#{userId}")
     void updateSearchEngine(@Param("userId") int userId, @Param("engine") String engine);
+
+    /**
+     * 更新一个字段-一个条件
+     *
+     * @param column     字段名
+     * @param val        字段值
+     * @param termColumn 条件字段名
+     * @param termVal    条件字段值
+     * @author fanxb
+     * @date 2021/10/17 15:03
+     */
+    @Update("update user set ${column} = #{val} where ${termColumn} = #{termVal}")
+    void updateOneColumnByOneTerm(String column, Object val, String termColumn, Object termVal);
+
 }

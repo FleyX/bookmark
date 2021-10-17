@@ -20,7 +20,7 @@ public interface UserService {
     /**
      * 长期jwt失效时间
      */
-    long LONG_EXPIRE_TIME = 30L * TimeUtil.DAY_MS;
+    long LONG_EXPIRE_TIME = 300L * TimeUtil.DAY_MS;
 
     /**
      * 头像文件大小限制 单位：KB
