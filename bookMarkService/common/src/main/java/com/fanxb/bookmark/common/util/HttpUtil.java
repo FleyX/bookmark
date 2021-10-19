@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fanxb.bookmark.common.exception.CustomException;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2019/4/4 15:53
  */
 @Component
+@Slf4j
 public class HttpUtil {
 
     /**
@@ -57,6 +59,7 @@ public class HttpUtil {
     @PostConstruct
     public void init() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        log.info("ip:{},port:{}", proxyPort, proxyPort);
         if (StrUtil.isNotBlank(proxyIp) && StrUtil.isNotBlank(proxyPort)) {
             builder.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyIp, Integer.parseInt(proxyPort))));
             proxyExist = true;
