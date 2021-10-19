@@ -59,7 +59,7 @@ public class HttpUtil {
     @PostConstruct
     public void init() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        log.info("ip:{},port:{}", proxyPort, proxyPort);
+        log.info("代理配置，ip:{},port:{}", proxyIp, proxyPort);
         if (StrUtil.isNotBlank(proxyIp) && StrUtil.isNotBlank(proxyPort)) {
             builder.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyIp, Integer.parseInt(proxyPort))));
             proxyExist = true;
