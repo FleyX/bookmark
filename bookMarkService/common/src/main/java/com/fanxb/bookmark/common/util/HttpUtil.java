@@ -203,7 +203,7 @@ public class HttpUtil {
         try (Response res = (proxy ? PROXY_CLIENT : CLIENT).newCall(request).execute()) {
             return parseResponse(res, typeClass);
         } catch (Exception e) {
-            throw new CustomException(e);
+            throw new CustomException(request.url() + e.getLocalizedMessage(), e);
         }
     }
 
