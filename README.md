@@ -1,8 +1,8 @@
 本项目是一个云书签的项目，取名为：签签世界。
 
-部署教程：[docker-compose部署](https://github.com/FleyX/bookmark/blob/master/DEPLOY.md)
+此地址长期提供服务:[fleyx.com](https://fleyx.com)，也可自己搭建，教程如下：
 
-自用地址（你们也可以用，长期提供服务）:[bm.tapme.top](https://bm.tapme.top)
+部署教程：[docker-compose部署](https://github.com/FleyX/bookmark/blob/master/DEPLOY.md)
 
 
 # 缘由
