@@ -2,4 +2,5 @@
 mysql/data
 mysql/backup
 maven/mavenRep
+redis
 files
