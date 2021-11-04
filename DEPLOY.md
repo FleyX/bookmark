@@ -6,4 +6,4 @@
 
 1. 安装新版的docker和docker-compose
 2. 修改start.sh中的参数
-3. root权限（或者可操作docker的普通用户）运行 `start.sh` 启动服务。
+3. root权限运行 `start.sh` 启动服务。
