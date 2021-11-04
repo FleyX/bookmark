@@ -24,6 +24,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime
       - ./data/timezone:/etc/timezone
+      - ./data/redis:/data
     networks:
       - bookmark
 
