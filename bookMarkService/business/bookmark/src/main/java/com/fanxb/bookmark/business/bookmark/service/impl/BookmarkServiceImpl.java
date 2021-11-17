@@ -201,12 +201,11 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setUserId(userId);
         bookmark.setCreateTime(System.currentTimeMillis());
         bookmark.setAddTime(bookmark.getCreateTime());
-        if (bookmark.getType() == Bookmark.BOOKMARK_TYPE) {
-            pinYinService.changeBookmark(bookmark);
-            bookmark.setIcon(getIconBase64(bookmark.getUrl()));
-        }
+        //文件夹和书签都建立搜索key
+        pinYinService.changeBookmark(bookmark);
         bookmarkDao.insertOne(bookmark);
         userApi.versionPlus(userId);
+        ThreadPoolUtil.execute(() -> bookmarkDao.updateIcon(bookmark.getBookmarkId(), getIconBase64(bookmark.getUrl())));
         return bookmark;
     }
 
