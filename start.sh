@@ -1,5 +1,6 @@
-#/bin/bash
+#!/bin/bash
 base=$(cd "$(dirname "$0")";pwd)
+echo $base
 cd $base
 
 #Mysql地址
@@ -23,9 +24,9 @@ export BOOKMARK_FILE_SAVE_PATH=./data/files
 # jwt密钥
 export JWT_SECRET=123456
 # http网络代理ip(github api调用可能需要)
-export PROXY_IP=localhost
+export PROXY_IP=
 # http网络代理端口
-export PROXY_PORT=8888
+export PROXY_PORT=
 # 如果要支持github登陆需要配置以下两个参数
 # github clientId 
 export GITHUB_CLIENT_ID=
@@ -36,9 +37,9 @@ export MANAGE_USER_ID=-1
 
 
 # 前端打包
-docker run -it --rm --name buildBookmark --user ${UID} -v $base/bookmark_front:/opt/front node:lts-buster-slim  bash -c "cd /opt/front &&   yarn --registry https://registry.npm.taobao.org && yarn build"
+docker run -it --rm --user ${UID} -v $base/bookmark_front:/opt/front node:lts-buster-slim  bash -c "cd /opt/front &&   yarn --registry https://registry.npm.taobao.org && yarn build"
 # 后端打包
-docker run -it --rm --name buildBookmark --user ${UID} -v $base/data/maven/mavenRep:/var/maven/.m2: -v $base/data/maven/settings.xml:/usr/share/maven/conf/settings.xml -v $base/bookMarkService:/code maven:latest bash -c "cd /code && mvn clean install"
+docker run -it --rm --user ${UID} -v $base/data/maven/mavenRep:/var/maven/.m2: -v $base/data/maven/settings.xml:/usr/share/maven/conf/settings.xml -v $base/bookMarkService:/code maven:3-openjdk-11-slim  bash -c "cd /code && mvn clean install"
 
 start="start"
 stop="stop"
