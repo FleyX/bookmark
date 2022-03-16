@@ -35,6 +35,7 @@ export default {
     await this.$store.dispatch("treeData/init");
     console.log("treeData加载完毕");
     console.log("state数据:", this.$store.state);
+	//数据初始化时会检查版本情况，因此循环检查，五分钟后开始
     this.timer = setInterval(this.checkVersion, 5 * 60 * 1000);
   },
   destroyed() {

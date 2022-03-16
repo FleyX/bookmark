@@ -1,8 +1,9 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Main from "../views/main/Main.vue";
+import HOME from "../views/main/pages/home/index";
 import UserInfo from "../views/main/pages/personSpace/UserInfo.vue";
-import BookmarkManage from "../views/main/pages/things/BookmarkManage.vue";
+import BookmarkManage from "../views/main/pages/manage/BookmarkManage.vue";
 
 import Public from "../views/public/Public.vue";
 import Login from "../views/public/pages/Login.vue";
@@ -13,63 +14,68 @@ import GithubOauth from "../views/public/pages/oauth/Github.vue";
 Vue.use(VueRouter);
 
 const routes = [
-  {
-    path: "/",
-    component: Main,
-    children: [
-      {
-        path: "",
-        name: "BookmarkManage",
-        component: BookmarkManage
-      },
-      {
-        path: "personSpace/userInfo",
-        name: "UserInfo",
-        component: UserInfo
-      }
-    ]
-  },
-  {
-    path: "/public",
-    name: "Public",
-    component: Public,
-    children: [
-      {
-        path: "login",
-        name: "Login",
-        component: Login
-      },
-      {
-        path: "register",
-        name: "Register",
-        component: Register
-      },
-      {
-        path: "resetPassword",
-        name: "ResetPassword",
-        component: ResetPassword
-      },
-      {
-        path: "oauth/github",
-        name: "GithubRedirect",
-        component: GithubOauth
-      },
-      {
-        path: "notFound",
-        name: "NOTFOUND",
-        component: () => import("@/views/public/pages/NotFound")
-      }
-    ]
-  },
-  {
-    path: "*",
-    redirect: "/public/notFound"
-  }
+	{
+		path: "/",
+		component: Main,
+		children: [
+			{
+				path: "",
+				name: "HOME",
+				component: HOME
+			},
+			{
+				path: "/manage",
+				name: "BookmarkManage",
+				component: BookmarkManage
+			},
+			{
+				path: "personSpace/userInfo",
+				name: "UserInfo",
+				component: UserInfo
+			}
+		]
+	},
+	{
+		path: "/public",
+		name: "Public",
+		component: Public,
+		children: [
+			{
+				path: "login",
+				name: "Login",
+				component: Login
+			},
+			{
+				path: "register",
+				name: "Register",
+				component: Register
+			},
+			{
+				path: "resetPassword",
+				name: "ResetPassword",
+				component: ResetPassword
+			},
+			{
+				path: "oauth/github",
+				name: "GithubRedirect",
+				component: GithubOauth
+			},
+			{
+				path: "notFound",
+				name: "NOTFOUND",
+				component: () => import("@/views/public/pages/NotFound")
+			}
+		]
+	},
+	{
+		path: "*",
+		redirect: "/public/notFound"
+	}
 ];
 
 const router = new VueRouter({
-  mode: "history",
-  routes
+	mode: "history",
+	routes
 });
 
 export default router;
