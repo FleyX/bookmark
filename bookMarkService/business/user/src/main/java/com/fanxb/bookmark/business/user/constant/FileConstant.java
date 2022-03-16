@@ -1,10 +1,7 @@
 package com.fanxb.bookmark.business.user.constant;
 
-import com.fanxb.bookmark.common.constant.Constant;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.io.File;
 import java.nio.file.Paths;
 
 /**

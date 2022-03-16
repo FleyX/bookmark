@@ -2,7 +2,7 @@ package com.fanxb.bookmark.common.filter;
 
 import com.alibaba.fastjson.JSON;
 import com.auth0.jwt.interfaces.Claim;
-import com.fanxb.bookmark.common.constant.Constant;
+import com.fanxb.bookmark.common.constant.CommonConstant;
 import com.fanxb.bookmark.common.dao.UrlDao;
 import com.fanxb.bookmark.common.entity.Result;
 import com.fanxb.bookmark.common.entity.Url;
@@ -100,7 +100,7 @@ public class LoginFilter implements Filter {
             }
         }
         //登陆用户
-        if (this.checkJwt(request.getHeader(Constant.JWT_KEY))) {
+        if (this.checkJwt(request.getHeader(CommonConstant.JWT_KEY))) {
             try {
                 filterChain.doFilter(servletRequest, servletResponse);
             } finally {
