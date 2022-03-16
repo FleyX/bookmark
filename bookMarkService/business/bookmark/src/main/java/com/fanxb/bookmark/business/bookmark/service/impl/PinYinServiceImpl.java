@@ -1,6 +1,7 @@
 package com.fanxb.bookmark.business.bookmark.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ArrayUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.fanxb.bookmark.business.api.UserApi;
@@ -16,13 +17,12 @@ import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.HttpUtil;
 import com.fanxb.bookmark.common.util.RedisUtil;
 import com.fanxb.bookmark.common.util.UserContextHolder;
+import com.github.houbb.pinyin.constant.enums.PinyinStyleEnum;
+import com.github.houbb.pinyin.util.PinyinHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -76,24 +76,18 @@ public class PinYinServiceImpl implements PinYinService {
         for (int j = 0, size = bookmarks.size(); j < size; j++) {
             Bookmark bookmark = bookmarks.get(j);
             int length = bookmark.getUrl().length();
-            bookmark.setSearchKey(resList.get(j) + (length == 0 ? "" : (PARTITION + bookmark.getUrl().substring(0, length > 50 ? 50 : length - 1))));
+            bookmark.setSearchKey(resList.get(j) + (length == 0 ? "" : (PARTITION + bookmark.getUrl().substring(0, Math.min(length, 50)))));
         }
         return bookmarks;
     }
 
     @Override
     public List<String> changeStrings(List<String> stringList) {
-        Map<String, String> header = Collections.singletonMap("token", Constant.pinyinToken);
-        PinYinBody body = PinYinBody.builder().strs(stringList).config(new PinYinBody.Config(false, false, 1)).build();
-        JSONArray result = HttpUtil.postArray(Constant.pinyinBaseUrl + PATH, JSON.toJSONString(body), header, false);
-        List<List<JSONArray>> list = result.toJavaList(JSONArray.class).stream().map(item -> item.toJavaList(JSONArray.class)).collect(Collectors.toList());
-        List<String> res = new ArrayList<>(stringList.size());
-        for (int i = 0, size = stringList.size(); i < size; i++) {
-            List<String> pinyinList = list.get(i).stream().map(item -> item.toJavaList(String.class).get(0)).collect(Collectors.toList());
-            res.add(stringList.get(i).toLowerCase() + PARTITION + CollectionUtil.join(pinyinList, "")
-                    + PARTITION + pinyinList.stream().filter(item -> item.length() > 0).map(item -> item.substring(0, 1)).collect(Collectors.joining())
-            );
-        }
-        return res;
+        return stringList.stream().map(item -> {
+            List<String> temp = Arrays.stream(PinyinHelper.toPinyin(item.replaceAll(" ", ""), PinyinStyleEnum.NORMAL).split(" "))
+                    .filter(one -> one.length() > 0).collect(Collectors.toList());
+            return item.toLowerCase(Locale.getDefault()) + PARTITION + CollectionUtil.join(temp, "") + PARTITION
+                    + temp.stream().map(one -> one.substring(0, 1)).collect(Collectors.joining());
+        }).collect(Collectors.toList());
     }
 }
