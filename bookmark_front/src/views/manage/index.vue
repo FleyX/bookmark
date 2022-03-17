@@ -35,7 +35,7 @@ export default {
     await this.$store.dispatch("treeData/init");
     console.log("treeData加载完毕");
     console.log("state数据:", this.$store.state);
-	//数据初始化时会检查版本情况，因此循环检查，五分钟后开始
+    //数据初始化时会检查版本情况，因此循环检查，五分钟后开始
     this.timer = setInterval(this.checkVersion, 5 * 60 * 1000);
   },
   destroyed() {
@@ -60,7 +60,7 @@ export default {
         this.$confirm({
           title: "书签数据有更新，是否立即刷新？",
           content: "点击确定将刷新整个页面，请注意！",
-          cancelText: "五分钟后再提醒",
+          cancelText: "稍后提醒",
           closable: false,
           keyboard: false,
           maskClosable: false,

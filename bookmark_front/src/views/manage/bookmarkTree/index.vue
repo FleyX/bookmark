@@ -12,10 +12,13 @@
         <a-tooltip title="多选">
           <a-button type="primary" shape="circle" icon="check" @click="switchMul" />
         </a-tooltip>
-        <a-tooltip v-if="
-          (checkedKeys.length === 0 && (currentSelect == null || currentSelect.type === 1)) ||
-          (checkedKeys.length === 1 && checkedNodes[0].type === 1)
-        " title="添加书签">
+        <a-tooltip
+          v-if="
+            (checkedKeys.length === 0 && (currentSelect == null || currentSelect.type === 1)) ||
+            (checkedKeys.length === 1 && checkedNodes[0].type === 1)
+          "
+          title="添加书签"
+        >
           <a-button type="primary" shape="circle" icon="plus" @click="addData" />
         </a-tooltip>
         <a-tooltip v-if="currentSelect || checkedKeys.length === 1" title="编辑书签">
@@ -24,7 +27,13 @@
         <a-tooltip v-if="moveShow" title="移动书签">
           <a-button type="primary" shape="circle" icon="scissor" />
         </a-tooltip>
-        <a-popconfirm v-if="checkedKeys.length > 0 || currentSelect" title="此操作同时也会删除子节点数据，确认？" ok-text="是" cancel-text="否" @confirm="deleteBookmarks">
+        <a-popconfirm
+          v-if="checkedKeys.length > 0 || currentSelect"
+          title="此操作同时也会删除子节点数据，确认？"
+          ok-text="是"
+          cancel-text="否"
+          @confirm="deleteBookmarks"
+        >
           <a-tooltip title="删除书签">
             <a-button type="danger" shape="circle" icon="delete" />
           </a-tooltip>
@@ -37,24 +46,40 @@
       </div>
     </div>
     <a-empty v-if="treeData.length == 0" description="无数据，点击上方 + 新增"></a-empty>
-    <a-tree v-else :tree-data="treeData" :loaded-keys="loadedKeys" :selected-keys="currentSelect ? [currentSelect.bookmarkId] : []" :load-data="loadData" :checked-keys="checkedKeys" :replace-fields="replaceFields" :expandedKeys="expandedKeys" @select="select" @expand="expand" @check="check" blockNode :checkable="mulSelect" checkStrictly :draggable="!isPhone" @drop="onDrop">
+    <a-tree
+      v-else
+      :tree-data="treeData"
+      :loaded-keys="loadedKeys"
+      :selected-keys="currentSelect ? [currentSelect.bookmarkId] : []"
+      :load-data="loadData"
+      :checked-keys="checkedKeys"
+      :replace-fields="replaceFields"
+      :expandedKeys="expandedKeys"
+      @select="select"
+      @expand="expand"
+      @check="check"
+      blockNode
+      :checkable="mulSelect"
+      checkStrictly
+      :draggable="!isPhone"
+      @drop="onDrop"
+    >
       <a-dropdown :trigger="['contextmenu']" slot="nodeTitle" slot-scope="rec">
         <div class="titleContext">
           <a-icon type="folder" v-if="!rec.dataRef.isLeaf" />
-          <img v-else-if="rec.dataRef.icon.length>0" :src="rec.dataRef.icon" style="width:16px" />
+          <img v-else-if="rec.dataRef.icon.length > 0" :src="rec.dataRef.icon" style="width: 16px" />
           <a-icon type="book" v-else />
-          <span @click.prevent style="display:inline-block;min-width:50%;padding-left:0.4em">
-            {{rec.dataRef.name}}
+          <span @click.prevent style="display: inline-block; min-width: 50%; padding-left: 0.4em">
+            {{ rec.dataRef.name }}
           </span>
         </div>
-        <a-menu slot="overlay" @click="rightClick($event,rec.dataRef)">
+        <a-menu slot="overlay" @click="rightClick($event, rec.dataRef)">
           <a-menu-item v-if="!rec.dataRef.isLeaf" key="add">新增</a-menu-item>
           <a-menu-item v-else key="copy" class="copy-to-board" :data="rec.dataRef.url">复制URL</a-menu-item>
           <a-menu-item key="edit">编辑</a-menu-item>
           <a-menu-item key="delete">删除</a-menu-item>
         </a-menu>
       </a-dropdown>
-
     </a-tree>
     <!-- 新增、修改 -->
     <a-modal v-model="addModal.show" :title="addModal.isAdd ? '新增' : '编辑'" :footer="null">
@@ -64,11 +89,11 @@
 </template>
 
 <script>
-import AddBookmark from "../../../../components/main/things/AddBookmark.vue";
-import Search from "../../../../components/main/Search.vue";
-import HttpUtil from "../../../../util/HttpUtil.js";
+import AddBookmark from "@/components/main/things/AddBookmark.vue";
+import Search from "@/components/main/Search.vue";
+import HttpUtil from "@/util/HttpUtil.js";
 import { mapState, mapActions } from "vuex";
-import { downloadFile } from "../../../../util/FileUtil";
+import { downloadFile } from "@/util/FileUtil";
 import ClipboardJS from "clipboard";
 import moment from "moment";
 export default {

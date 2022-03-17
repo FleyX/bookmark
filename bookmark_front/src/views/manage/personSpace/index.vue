@@ -11,45 +11,44 @@
     </div>
     <div class="baseInfo">
       <div class="item">
-
-        <a-tooltip title="点击修改" v-if="currentAction!='name'">
-          <span style="font-size:2em;cursor: pointer;" @click="()=>this.currentAction='name'">{{userInfo.username}}</span>
+        <a-tooltip title="点击修改" v-if="currentAction != 'name'">
+          <span style="font-size: 2em; cursor: pointer" @click="() => (this.currentAction = 'name')">{{ userInfo.username }}</span>
         </a-tooltip>
-        <div class="inputGroup" v-else-if="currentAction==='name'">
+        <div class="inputGroup" v-else-if="currentAction === 'name'">
           <a-input type="text" v-model="name" placeholder="修改昵称" />
-          <div style="padding-top:0.2em">
-            <a-button style="margin-right:2em" type="warn" @click="()=>this.currentAction=null">取消</a-button>
+          <div style="padding-top: 0.2em">
+            <a-button style="margin-right: 2em" type="warn" @click="() => (this.currentAction = null)">取消</a-button>
             <a-button type="primary" @click="submit">确定</a-button>
           </div>
         </div>
       </div>
 
       <div class="item">
-        <span style="width:5em">密码</span>
-        <a-tooltip title="点击修改" v-if="currentAction!='password'">
-          <span style="cursor: pointer;" @click="()=>this.currentAction='password'">{{userInfo.noPassword?'设置密码' : '**********'}}</span>
+        <span style="width: 5em">密码</span>
+        <a-tooltip title="点击修改" v-if="currentAction != 'password'">
+          <span style="cursor: pointer" @click="() => (this.currentAction = 'password')">{{ userInfo.noPassword ? "设置密码" : "**********" }}</span>
         </a-tooltip>
-        <div class="inputGroup" v-else-if="currentAction==='password'">
+        <div class="inputGroup" v-else-if="currentAction === 'password'">
           <a-input type="password" v-model="oldPassword" placeholder="旧密码(如无置空)" />
           <a-input type="password" v-model="password" placeholder="新密码" />
           <a-input type="password" v-model="rePassword" placeholder="重复新密码" />
-          <div style="padding-top:0.2em">
-            <a-button style="margin-right:2em" type="warn" @click="()=>this.currentAction=null">取消</a-button>
+          <div style="padding-top: 0.2em">
+            <a-button style="margin-right: 2em" type="warn" @click="() => (this.currentAction = null)">取消</a-button>
             <a-button type="primary" @click="submit">确定</a-button>
           </div>
         </div>
       </div>
 
       <div class="item">
-        <span style="width:5em">邮箱</span>
-        <a-tooltip title="点击修改" v-if="currentAction!='email'">
-          <span style="cursor: pointer;" @click="()=>this.currentAction='email'">{{userInfo.email}}</span>
+        <span style="width: 5em">邮箱</span>
+        <a-tooltip title="点击修改" v-if="currentAction != 'email'">
+          <span style="cursor: pointer" @click="() => (this.currentAction = 'email')">{{ userInfo.email }}</span>
         </a-tooltip>
-        <div class="inputGroup" v-else-if="currentAction==='email'">
+        <div class="inputGroup" v-else-if="currentAction === 'email'">
           <a-input type="password" v-model="oldPassword" placeholder="旧密码" />
           <a-input type="email" v-model="email" placeholder="email" />
-          <div style="padding-top:0.2em">
-            <a-button style="margin-right:2em" type="warn" @click="()=>this.currentAction=null">取消</a-button>
+          <div style="padding-top: 0.2em">
+            <a-button style="margin-right: 2em" type="warn" @click="() => (this.currentAction = null)">取消</a-button>
             <a-button type="primary" @click="submit">确定</a-button>
           </div>
         </div>
@@ -57,33 +56,26 @@
 
       <div class="item">
         <a-tooltip title="搜索框默认搜索引擎">
-          <span style="width:5em">搜索</span>
+          <span style="width: 5em">搜索</span>
         </a-tooltip>
-        <a-tooltip title="点击修改" v-if="currentAction!='defaultSearchEngine'">
-          <span style="cursor: pointer;" @click="()=>this.currentAction='defaultSearchEngine'">{{defaultSearchEngine}}</span>
+        <a-tooltip title="点击修改" v-if="currentAction != 'defaultSearchEngine'">
+          <span style="cursor: pointer" @click="() => (this.currentAction = 'defaultSearchEngine')">{{ defaultSearchEngine }}</span>
         </a-tooltip>
-        <div class="inputGroup" v-else-if="currentAction==='defaultSearchEngine'">
-          <a-select :default-value="userInfo.defaultSearchEngine" style="width:100%" @change="submit">
-            <a-select-option value="baidu">
-              百度
-            </a-select-option>
-            <a-select-option value="google">
-              谷歌
-            </a-select-option>
-            <a-select-option value="bing">
-              Bing
-            </a-select-option>
+        <div class="inputGroup" v-else-if="currentAction === 'defaultSearchEngine'">
+          <a-select :default-value="userInfo.defaultSearchEngine" style="width: 100%" @change="submit">
+            <a-select-option value="baidu">百度</a-select-option>
+            <a-select-option value="google">谷歌</a-select-option>
+            <a-select-option value="bing">Bing</a-select-option>
           </a-select>
         </div>
       </div>
-
     </div>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
-import HttpUtil from "../../../../util/HttpUtil";
+import HttpUtil from "@/util/HttpUtil";
 export default {
   name: "UserInfo",
   data() {

@@ -1,76 +1,30 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Main from "../views/main/Main.vue";
-import HOME from "../views/main/pages/home/index";
-import UserInfo from "../views/main/pages/personSpace/UserInfo.vue";
-import BookmarkManage from "../views/main/pages/manage/BookmarkManage.vue";
-
-import Public from "../views/public/Public.vue";
-import Login from "../views/public/pages/Login.vue";
-import Register from "../views/public/pages/Register.vue";
-import ResetPassword from "../views/public/pages/ResetPassword.vue";
-import GithubOauth from "../views/public/pages/oauth/Github.vue";
 
 Vue.use(VueRouter);
 
 const routes = [
+	{ path: "/", component: () => import("@/views/home/index") },
 	{
-		path: "/",
-		component: Main,
+		path: "/manage",
+		component: () => import("@/views/manage/index"),
 		children: [
-			{
-				path: "",
-				name: "HOME",
-				component: HOME
-			},
-			{
-				path: "/manage",
-				name: "BookmarkManage",
-				component: BookmarkManage
-			},
-			{
-				path: "personSpace/userInfo",
-				name: "UserInfo",
-				component: UserInfo
-			}
+			{ path: "/bookmarkTree", component: () => import("@/views/manage/bookmarkTree/index") },
+			{ path: "personSpace/userInfo", component: () => import("@/views/manage/personSpace/index") },
 		]
 	},
 	{
 		path: "/public",
-		name: "Public",
-		component: Public,
+		component: () => import("@/views/public/index"),
 		children: [
-			{
-				path: "login",
-				name: "Login",
-				component: Login
-			},
-			{
-				path: "register",
-				name: "Register",
-				component: Register
-			},
-			{
-				path: "resetPassword",
-				name: "ResetPassword",
-				component: ResetPassword
-			},
-			{
-				path: "oauth/github",
-				name: "GithubRedirect",
-				component: GithubOauth
-			},
-			{
-				path: "notFound",
-				name: "NOTFOUND",
-				component: () => import("@/views/public/pages/NotFound")
-			}
+			{ path: "/login", component: () => import("@/views/public/login/index") },
+			{ path: "/register", component: () => import("@/views/public/register/index") },
+			{ path: "/resetPassword", component: () => import("@/views/public/passwordReset/index") },
+			{ path: "/oauth/github", component: () => import("@/views/public/oauth/github/index") },
+			{ path: "/404", component: () => import("@/views/public/notFound/index") }
 		]
 	},
-	{
-		path: "*",
-		redirect: "/public/notFound"
-	}
+	{ path: "*", redirect: "/public/404" }
 ];
 
 const router = new VueRouter({
