@@ -9,9 +9,9 @@
 </template>
 
 <script>
-import Content from "@/layout/main/Content.vue";
-import Bottom from "@/layout/main/Bottom.vue";
-import Top from "@//layout/main/Top.vue";
+import Content from "@/layout/manage/Content.vue";
+import Bottom from "@/layout/manage/Bottom.vue";
+import Top from "@/layout/manage/Top.vue";
 
 import httpUtil from "../../util/HttpUtil";
 export default {
