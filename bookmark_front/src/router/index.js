@@ -1,7 +1,8 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import vuex from "../store/index.js";
+import * as vuex from "../store/index.js";
 import { GLOBAL_CONFIG, SUPPORT_NO_LOGIN, TOKEN } from "@/store/modules/globalConfig";
+import { checkJwtValid } from "@/util/UserUtil";
 
 Vue.use(VueRouter);
 
@@ -11,7 +12,7 @@ const routes = [
 		path: "/manage",
 		component: () => import("@/views/manage/index"),
 		children: [
-			{ path: "/bookmarkTree", component: () => import("@/views/manage/bookmarkTree/index") },
+			{ path: "bookmarkTree", component: () => import("@/views/manage/bookmarkTree/index") },
 			{ path: "personSpace/userInfo", component: () => import("@/views/manage/personSpace/index") },
 		]
 	},
@@ -37,10 +38,14 @@ const router = new VueRouter({
 /**
  * 在此进行登录信息判断，以及重定向到登录页面
  */
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
+	//进入主页面/管理页面时，确认已经进行初始化操作
+	if (to.path === '/' || to.path.startsWith("/manage")) {
+		await vuex.loginInit();
+	}
 	let supportNoLogin = to.path === '/' || to.path.startsWith("/public");
-	vuex.commit(GLOBAL_CONFIG + "/" + SUPPORT_NO_LOGIN, supportNoLogin);
-	if (!supportNoLogin && !checkJwtValid()) {
+	vuex.default.commit(GLOBAL_CONFIG + "/" + SUPPORT_NO_LOGIN, supportNoLogin);
+	if (!supportNoLogin && !checkJwtValid(vuex.default.state[GLOBAL_CONFIG][TOKEN])) {
 		//如不支持未登录进入，切jwt已过期，直接跳转到登录页面
 		next({
 			path: "/public/login?to=" + btoa(location.href),
@@ -51,23 +56,6 @@ router.beforeEach((to, from, next) => {
 	}
 })
 
-/**
- * 检查jwt是否有效
- */
-function checkJwtValid () {
-	let token = vuex.state[GLOBAL_CONFIG][TOKEN];
-	try {
-		if (token && token.trim().length > 0) {
-			//检查token是否还有效
-			let content = window.atob(token.split(".")[1]);
-			if (content.exp > Date.now() / 1000) {
-				return true;
-			}
-		}
-	} catch (err) {
-		console.error(err);
-	}
-	return false;
-}
+
 
 export default router;

@@ -9,7 +9,9 @@ export default {
   components: {
     header,
   },
-  data() {},
+  data() {
+    return {};
+  },
   methods: {},
 };
 </script>

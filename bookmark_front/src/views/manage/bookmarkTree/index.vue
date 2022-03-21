@@ -92,10 +92,11 @@
 import AddBookmark from "@/components/main/things/AddBookmark.vue";
 import Search from "@/components/main/Search.vue";
 import HttpUtil from "@/util/HttpUtil.js";
-import { mapState, mapActions } from "vuex";
+import { mapState } from "vuex";
 import { downloadFile } from "@/util/FileUtil";
 import ClipboardJS from "clipboard";
 import moment from "moment";
+import { TREE_DATA, SHOW_REFRESH_TOAST } from "@/store/modules/treeData";
 export default {
   name: "BookmarkManage",
   components: { AddBookmark, Search },
@@ -130,6 +131,7 @@ export default {
     ...mapState("globalConfig", ["isPhone"]),
   },
   async mounted() {
+    this.$store.commit(TREE_DATA + "/" + SHOW_REFRESH_TOAST, true);
     await this.$store.dispatch("treeData/ensureDataOk");
     this.treeData = this.totalTreeData[""];
     this.loading = false;
@@ -144,7 +146,8 @@ export default {
       e.clearSelection();
     });
   },
-  destroyed() {
+  beforeDestroy() {
+    this.$store.commit(TREE_DATA + "/" + SHOW_REFRESH_TOAST, false);
     if (this.copyBoard != null) {
       this.copyBoard.destroy();
     }
@@ -165,11 +168,21 @@ export default {
         resolve();
       });
     },
+    /**
+     * 刷新书签数据
+     */
     async refresh(deleteCache) {
       if (deleteCache) {
         this.loading = true;
         await this.$store.dispatch("treeData/refresh");
       }
+      this.resetData();
+      this.loading = false;
+    },
+    /**
+     * 重置当前data中书签相关数据
+     */
+    resetData() {
       this.treeData = this.totalTreeData[""];
       this.expandedKeys = [];
       this.checkedKeys = [];
@@ -178,6 +191,9 @@ export default {
       this.currentSelect = null;
       this.loading = false;
     },
+    /**
+     * 树节点展开
+     */
     expand(expandedKeys, { expanded, node }) {
       if (expanded) {
         const item = node.dataRef;

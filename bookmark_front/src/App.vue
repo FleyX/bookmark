@@ -7,10 +7,6 @@
 <script>
 export default {
   name: "App",
-  async created(){
-    //全局初始化
-    await this.$store.dispatch("globalConfig/refreshServerConfig");
-  }
 };
 </script>
 
