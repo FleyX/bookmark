@@ -1,6 +1,6 @@
 <template>
   <div class="main" v-if="userInfo">
-    <a class="ico" href="/"><img src="/static/img/bookmarkLogo.png" style="height:100%" /></a>
+    <a class="ico" href="/"><img src="/static/img/bookmarkLogo.png" style="height: 100%" /></a>
     <a-dropdown>
       <div class="user">
         <img :src="userInfo.icon" class="userIcon" />
@@ -28,10 +28,12 @@ export default {
   methods: {
     async menuClick({ key }) {
       if (key === "logout") {
+        //推出登录清理缓存
+        await this.$store.dispatch("treeData/clear");
         await this.$store.dispatch("globalConfig/clear");
         this.$router.replace("/public/login");
       } else if (key === "personSpace") {
-        this.$router.push("/personSpace/userInfo");
+        this.$router.push("/manage/personSpace/userInfo");
       }
     },
   },

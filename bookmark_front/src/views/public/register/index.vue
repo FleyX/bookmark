@@ -5,22 +5,22 @@
       <a-form-model ref="registerForm" :model="form" :rules="rules">
         <a-form-model-item prop="username">
           <a-input v-model="form.username" placeholder="用户名">
-            <a-icon slot="prefix" type="user" style="color:rgba(0,0,0,.25)" />
+            <a-icon slot="prefix" type="user" style="color: rgba(0, 0, 0, 0.25)" />
           </a-input>
         </a-form-model-item>
         <a-form-model-item prop="email">
           <a-input v-model="form.email" placeholder="邮箱">
-            <a-icon slot="prefix" type="password" style="color:rgba(0,0,0,.25)" />
+            <a-icon slot="prefix" type="password" style="color: rgba(0, 0, 0, 0.25)" />
           </a-input>
         </a-form-model-item>
         <a-form-model-item prop="password">
           <a-input v-model="form.password" placeholder="密码" type="password">
-            <a-icon slot="prefix" type="password" style="color:rgba(0,0,0,.25)" />
+            <a-icon slot="prefix" type="password" style="color: rgba(0, 0, 0, 0.25)" />
           </a-input>
         </a-form-model-item>
         <a-form-model-item prop="repeatPass">
           <a-input v-model="form.repeatPass" placeholder="重复密码" type="password">
-            <a-icon slot="prefix" type="password" style="color:rgba(0,0,0,.25)" />
+            <a-icon slot="prefix" type="password" style="color: rgba(0, 0, 0, 0.25)" />
           </a-input>
         </a-form-model-item>
 
@@ -66,7 +66,8 @@ export default {
         ],
         email: [
           {
-            pattern: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+            pattern:
+              /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
             message: "请输入正确的邮箱",
             trigger: "change",
           },
@@ -78,11 +79,6 @@ export default {
         repeatPass: [{ validator: repeatPass, trigger: "change" }],
       },
     };
-  },
-  async created() {
-    //进入注册、登录页需要清理掉所有的缓存数据
-    await this.$store.dispatch("treeData/clear");
-    await this.$store.dispatch("globalConfig/clear");
   },
   methods: {
     submit() {

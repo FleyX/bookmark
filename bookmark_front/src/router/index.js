@@ -12,6 +12,7 @@ const routes = [
 		path: "/manage",
 		component: () => import("@/views/manage/index"),
 		children: [
+			{ path: "", redirect: "/manage/bookmarkTree" },
 			{ path: "bookmarkTree", component: () => import("@/views/manage/bookmarkTree/index") },
 			{ path: "personSpace/userInfo", component: () => import("@/views/manage/personSpace/index") },
 		]
@@ -46,7 +47,9 @@ router.beforeEach(async (to, from, next) => {
 	let supportNoLogin = to.path === '/' || to.path.startsWith("/public");
 	vuex.default.commit(GLOBAL_CONFIG + "/" + SUPPORT_NO_LOGIN, supportNoLogin);
 	if (!supportNoLogin && !checkJwtValid(vuex.default.state[GLOBAL_CONFIG][TOKEN])) {
-		//如不支持未登录进入，切jwt已过期，直接跳转到登录页面
+		//如不支持未登录进入，切jwt已过期，直接跳转到登录页面,并清理缓存
+		await vuex.default.dispatch("treeData/clear");
+		await vuex.default.dispatch("globalConfig/clear");
 		next({
 			path: "/public/login?to=" + btoa(location.href),
 			replace: true

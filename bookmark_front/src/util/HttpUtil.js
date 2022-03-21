@@ -43,6 +43,9 @@ async function request (url, method, params, body, isForm, redirect) {
 	} else if (code === -1 && redirect) {
 		//未登陆，根据redirect参数判断是否需要跳转到登陆页
 		window.vueInstance.$message.error("您尚未登陆，请先登陆");
+		//跳转到登录页面需要清理缓存
+		await this.$store.dispatch("treeData/clear");
+		await this.$store.dispatch("globalConfig/clear");
 		router.replace(`/public/login?redirect=${encodeURIComponent(router.currentRoute.fullPath)}`);
 		throw new Error(message);
 	} else if (code === 0) {

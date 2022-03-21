@@ -5,12 +5,12 @@
       <a-form-model ref="loginForm" :model="form" :rules="rules">
         <a-form-model-item prop="str" ref="str">
           <a-input v-model="form.str" placeholder="邮箱/用户名">
-            <a-icon slot="prefix" type="user" style="color:rgba(0,0,0,.25)" />
+            <a-icon slot="prefix" type="user" style="color: rgba(0, 0, 0, 0.25)" />
           </a-input>
         </a-form-model-item>
         <a-form-model-item prop="password">
           <a-input v-model="form.password" placeholder="密码" type="password">
-            <a-icon slot="prefix" type="password" style="color:rgba(0,0,0,.25)" />
+            <a-icon slot="prefix" type="password" style="color: rgba(0, 0, 0, 0.25)" />
           </a-input>
         </a-form-model-item>
         <div class="reset">
@@ -25,7 +25,7 @@
           <div class="thirdPart">
             <span>第三方登陆</span>
             <a-tooltip v-if="serverConfig.proxyExist" title="github登陆" class="oneIcon" placement="bottom">
-              <a-icon type="github" @click="toGithub" style="font-size:1.4em" />
+              <a-icon type="github" @click="toGithub" style="font-size: 1.4em" />
             </a-tooltip>
           </div>
         </a-form-model-item>
@@ -37,15 +37,15 @@
 <script>
 import Header from "@/components/public/Switch.vue";
 import httpUtil from "../../../util/HttpUtil.js";
-import { mapMutations ,mapState} from "vuex";
+import { mapMutations, mapState } from "vuex";
 import HttpUtil from "../../../util/HttpUtil.js";
 export default {
   name: "Login",
   components: {
     Header,
   },
-  computed:{
-    ...mapState("globalConfig", ["serverConfig"])
+  computed: {
+    ...mapState("globalConfig", ["serverConfig"]),
   },
   data() {
     return {
@@ -72,10 +72,6 @@ export default {
   async created() {
     let _this = this;
     window.addEventListener("storage", this.storageDeal.bind(this));
-
-    //进入注册、登录页需要清理掉所有的缓存数据
-    await this.$store.dispatch("treeData/clear");
-    await this.$store.dispatch("globalConfig/clear");
   },
   destroyed() {
     window.removeEventListener("storage", this.storageDeal);
