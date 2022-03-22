@@ -130,6 +130,12 @@ export default {
     ...mapState("treeData", ["totalTreeData"]),
     ...mapState("globalConfig", ["isPhone"]),
   },
+  watch: {
+    //底层数据变更后，需要刷新当前data数据
+    totalTreeData(newVal, oldVal) {
+      this.resetData();
+    },
+  },
   async mounted() {
     this.$store.commit(TREE_DATA + "/" + SHOW_REFRESH_TOAST, true);
     await this.$store.dispatch("treeData/ensureDataOk");

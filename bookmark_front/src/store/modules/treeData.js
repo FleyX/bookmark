@@ -12,6 +12,7 @@ export const IS_INITING = "isIniting";
 
 export const noLoginInit = "noLoginInit";
 export const loginInit = "loginInit";
+export const refresh = "refresh";
 
 /**
  * 版本检查定时调度
@@ -69,7 +70,8 @@ const actions = {
 		await treeDataCheck(context, true);
 		context.commit(IS_INIT, true);
 		context.commit(IS_INITING, false);
-		timer = setInterval(treeDataCheck, 5 * 60 * 1000);
+		// timer = setInterval(treeDataCheck, 5 * 60 * 1000);
+		timer = setInterval(() => treeDataCheck(context, false), 10 * 1000);
 	},
 	/**
 	 * 确保数据加载完毕
@@ -89,7 +91,7 @@ const actions = {
 		});
 	},
 	//刷新缓存数据
-	async refresh (context) {
+	async [refresh] (context) {
 		let treeData = await HttpUtil.get("/bookmark/currentUser");
 		if (!treeData[""]) {
 			treeData[""] = [];
@@ -296,7 +298,7 @@ async function treeDataCheck (context, isFirst) {
 				onOk () {
 					toastShow = false;
 					return new Promise(async (resolve) => {
-						await context.dispatch("treeData/clear");
+						await context.dispatch("refresh");
 						resolve();
 					});
 				},
@@ -306,7 +308,7 @@ async function treeDataCheck (context, isFirst) {
 			});
 			toastShow = true;
 		} else {
-			await context.dispatch("refresh");
+			await context.dispatch(refresh);
 		}
 	}
 }
