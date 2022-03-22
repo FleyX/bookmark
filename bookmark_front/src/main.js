@@ -25,7 +25,7 @@ import router from "./router";
 import store from "./store";
 
 const IconFont = Icon.createFromIconfontCN({
-	scriptUrl: "//at.alicdn.com/t/font_1261825_3wf60i93sdm.js"
+	scriptUrl: "//at.alicdn.com/t/font_1261825_1cgngjf5r4f.js"
 });
 Vue.use(Button);
 Vue.use(FormModel);

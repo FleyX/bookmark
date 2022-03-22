@@ -1,19 +1,42 @@
 <template>
   <div class="search">
-    <a-input-search id="searchInput" ref="searchInput" size="large" style="width: 100%" v-model="value" @change="search" @search="searchClick" allowClear @blur.prevent="inputBlur" @focus="inputFocus" @keydown="keyPress">
-      <a-tooltip title="全网搜索" slot="enterButton">
-        <a-button icon="search" type="primary" />
-      </a-tooltip>
-    </a-input-search>
-    <div v-if="focused && searchBookmark" class="searchContent">
-      <a-empty v-if="list.length == 0" />
-      <div class="listItem" :class="{ itemActive: index == hoverIndex || index == selectIndex }" v-for="(item, index) in list" :key="item.bookmarkId" @mouseenter="mouseEnterOut(index, 'enter')" @mouseleave="mouseEnterOut(index, 'leave')" @mouseup="onMouse">
-        <a class="listItemUrl" style="padding-right: 1em;min-width:3em; max-width: calc(100% - 2em)" :id="'bookmark:' + item.bookmarkId" :href="item.url" @click="itemClick($event,index)" target="_blank">
-          {{ item.name }}
-        </a>
-        <a-tooltip v-if="showActions && hoverIndex === index" title="定位到书签树中">
-          <my-icon style="color: #40a9ff; font-size: 1.3em; cursor: pointer" type="icon-et-location" @click="location(item)" />
+    <div :class="{ listShow: focused && list.length > 0 }" class="newSearch">
+      <input ref="searchInput" class="input" type="text" v-model="value" @keydown="keyPress" @focus="inputFocus" @blur="inputBlur" />
+      <div class="action">
+        <a-tooltip title="点击切换网页搜索">
+          <my-icon style="color: white; font-size: 1.3em; margin-right: 0.5em" type="icon-google" @mousedown="location($event, item)" />
         </a-tooltip>
+        <a-icon style="font-size: 1.2em; cursor: pointer" type="search" />
+      </div>
+    </div>
+    <div v-if="focused && list.length > 0" class="searchContent">
+      <div
+        class="listItem"
+        :class="{ itemActive: index == hoverIndex || index == selectIndex }"
+        v-for="(item, index) in list"
+        :key="item.bookmarkId"
+        @mousedown="itemClick(index)"
+        @mouseenter="mouseEnterOut(index, 'enter')"
+        @mouseleave="mouseEnterOut(index, 'leave')"
+        :id="'bookmark:' + item.bookmarkId"
+      >
+        <div class="name" style="" target="_blank">
+          {{ item.name }}
+        </div>
+        <div class="icons" v-if="hoverIndex === index">
+          <a-tooltip title="定位到书签树中" v-if="showActions">
+            <my-icon style="color: white; font-size: 1.3em" type="icon-et-location" @mousedown="location($event, item)" />
+          </a-tooltip>
+          <a-tooltip :title="'复制链接:' + item.url">
+            <a-icon
+              type="copy"
+              style="color: white; font-size: 1.3em; padding-left: 0.5em"
+              class="search-copy-to-board"
+              @mousedown.prevent="copy($event, item)"
+              :data="item.url"
+            />
+          </a-tooltip>
+        </div>
       </div>
     </div>
     <a ref="targetA" style="left: 1000000px" target="_blank" />
@@ -23,6 +46,7 @@
 <script>
 import HttpUtil from "@/util/HttpUtil";
 import { mapState } from "vuex";
+import ClipboardJS from "clipboard";
 export default {
   name: "Search",
   props: {
@@ -34,89 +58,92 @@ export default {
       value: "",
       focused: false,
       list: [],
-      //计时器结束列表的显示
-      timer: null,
       //鼠标悬浮选中
       hoverIndex: null,
       //上下选中
       selectIndex: null,
-      //是否搜索书签
-      searchBookmark: true,
+      copyBoard: null, //剪贴板对象
     };
+  },
+  mounted() {
+    //初始化clipboard
+    this.copyBoard = new ClipboardJS(".search-copy-to-board", {
+      text: function (trigger) {
+        return trigger.attributes.data.nodeValue;
+      },
+    });
+    this.copyBoard.on("success", (e) => {
+      this.$message.success("复制成功");
+      e.clearSelection();
+    });
+  },
+  destroyed() {
+    if (this.copyBoard != null) {
+      this.copyBoard.destroy();
+    }
   },
   computed: {
     ...mapState("treeData", ["totalTreeData"]),
     ...mapState("globalConfig", ["userInfo"]),
+    searchIcon() {
+      let search = this.userInfo && this.userInfo.defaultSearchEngine ? this.userInfo.defaultSearchEngine : "baidu";
+      return search === "baidu" ? "icon-baidu" : search === "bing" ? "icon-bing" : "icon-google";
+    },
+    searchUrl() {
+      let search = this.userInfo && this.userInfo.defaultSearchEngine ? this.userInfo.defaultSearchEngine : "baidu";
+      return search === "baidu"
+        ? "https://www.baidu.com/s?ie=UTF-8&wd="
+        : search === "bing"
+        ? "https://www.bing.com/search?q="
+        : "https://www.google.com/search?q=";
+    },
+  },
+  watch: {
+    value(newVal, oldVal) {
+      this.search(newVal);
+    },
   },
   methods: {
     search(content) {
-      this.value = content.target.value;
-      let val = content.target.value.toLocaleLowerCase().trim();
-      if (val === "") {
+      console.log(content);
+      let val = content.toLocaleLowerCase().trim();
+      if (val === "" || this.userInfo == null) {
         this.list = [];
-        return;
-      }
-      let time1 = Date.now();
-      this.list = this.dealSearch(val);
-      this.selectIndex = 0;
-      console.info("搜索耗时：" + (Date.now() - time1));
-    },
-    /**
-     * 初始化数据
-     */
-    init() {
-      this.focused = false;
-      this.value = "";
-      this.list = [];
-      this.selectIndex = null;
-    },
-    searchClick(value, e) {
-      //如果是enter按键触发的不作处理
-      if (e && e.key) {
-        return;
-      }
-      if (this.timer != null) {
-        clearTimeout(this.timer);
-      }
-      switch (this.userInfo.defaultSearchEngine) {
-        case "bing":
-          window.open("https://www.bing.com/search?q=" + encodeURIComponent(this.value));
-          break;
-        case "google":
-          window.open("https://www.google.com/search?q=" + encodeURIComponent(this.value));
-          break;
-        default:
-          window.open("https://www.baidu.com/s?ie=UTF-8&wd=" + encodeURIComponent(this.value));
+      } else {
+        this.list = this.dealSearch(val);
       }
     },
-    itemClick(e, index) {
-      if (e) {
-        this.stopDefault(e);
+    //下方列表点击
+    itemClick(index) {
+      this.selectIndex = index;
+      this.submit();
+    },
+    //搜索或者跳转到书签
+    submit() {
+      let url;
+      if (this.selectIndex == null) {
+        //说明使用百度搜索
+        url = this.searchUrl + encodeURIComponent(this.value);
+      } else {
+        //说明跳转到书签
+        let bookmark = this.list[this.selectIndex];
+        HttpUtil.post("/bookmark/visitNum", { id: bookmark.bookmarkId });
+        url = bookmark.url;
       }
-      if (index === undefined || index === null) {
-        return;
-      }
-      let bookmark = this.list[index];
-      HttpUtil.post("/bookmark/visitNum", { id: bookmark.bookmarkId });
       let a = this.$refs["targetA"];
-      a.href = bookmark.url;
+      a.href = url;
       a.click();
-      return false;
     },
     inputBlur() {
       console.log("blur");
-      this.timer = setTimeout(() => (this.focused = false), 250);
+      this.focused = false;
     },
     inputFocus() {
+      console.log("focus");
       this.focused = true;
     },
-    onMouse(e) {
-      if (this.timer != null) {
-        clearTimeout(this.timer);
-      }
-      this.$refs["searchInput"].focus();
-    },
     mouseEnterOut(item, type) {
+      console.log(item, type);
       if (type === "enter") {
         this.hoverIndex = item;
       } else {
@@ -124,41 +151,28 @@ export default {
       }
     },
     //定位到书签树中
-    location(item) {
+    location(event, item) {
       this.$emit("location", item);
+      event.stopPropagation();
     },
     /**
      * 键盘事件处理
      */
     keyPress(e) {
-      switch (e.key) {
-        case "ArrowUp":
+      let stop = false;
+      if (e.key === "Enter") {
+        this.submit();
+        return this.stopDefault();
+      } else if (this.list.length > 0) {
+        if (e.key === "ArrowUp") {
           this.selectIndex = this.selectIndex == null ? this.list.length - 1 : this.selectIndex == 0 ? null : this.selectIndex - 1;
-          this.stopDefault();
-          break;
-        case "ArrowDown":
+          return this.stopDefault();
+        } else if (e.key === "ArrowDown" || e.key === "Tab") {
           this.selectIndex = this.selectIndex == null ? 0 : this.selectIndex == this.list.length - 1 ? null : this.selectIndex + 1;
-          this.stopDefault();
-          break;
-        case "Enter":
-          if (this.searchBookmark) {
-            this.itemClick(e, this.selectIndex);
-          } else {
-            this.searchClick();
-          }
-          break;
-        case "Tab":
-          this.searchBookmark = !this.searchBookmark;
-          if (this.searchBookmark) {
-            this.$message.info("书签搜索");
-          } else {
-            this.$message.info("全网搜索");
-          }
-          this.stopDefault();
-          break;
-        case "Escape":
-          this.init();
-          this.$refs["searchInput"].blur();
+          return this.stopDefault();
+        }
+      }
+      if (stop) {
       }
     },
     dealSearch(content) {
@@ -180,6 +194,10 @@ export default {
       }
       return res;
     },
+    //复制
+    copy(event, item) {
+      return this.stopDefault(event);
+    },
     /**
      * 阻止默认事件
      */
@@ -187,9 +205,11 @@ export default {
       //阻止默认浏览器动作(W3C)
       if (e && e.preventDefault) {
         e.preventDefault();
+        e.stopPropagation();
       } else {
         window.event.returnValue = false;
       }
+      console.log("阻止成功");
       return false;
     },
   },
@@ -199,29 +219,67 @@ export default {
 <style lang="less" scoped>
 .search {
   position: relative;
+  .listShow {
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+  .newSearch {
+    display: flex;
+    align-items: center;
+    background-color: rgb(74, 74, 74);
+    border-radius: 0.18rem;
+    overflow: hidden;
+    font-size: 1.2em;
+    color: white;
+    .input {
+      flex: 1;
+      border: 0;
+      background-color: rgb(74, 74, 74);
+      padding: 0.1rem;
+      padding-left: 0.19rem;
+      outline: none;
+    }
+    .action {
+      padding: 0.1rem;
+      padding-right: 0.19rem;
+      display: flex;
+      align-items: center;
+    }
+  }
+
   .searchContent {
     position: absolute;
     width: 100%;
-    background: white;
+    background: #2b2b2b;
     z-index: 1;
-    border: 1px solid black;
-    border-top: 0;
-    padding: 5px;
-    border-radius: 5px;
+    border-top: 1px solid white;
+    border-bottom-left-radius: 0.18rem;
+    border-bottom-right-radius: 0.18rem;
+    overflow: hidden;
     .listItem {
       font-size: 0.16rem;
       display: flex;
+      align-items: center;
       height: 0.3rem;
       line-height: 0.3rem;
-      align-items: center;
-      .listItemUrl {
+      color: white;
+      margin: 0.05rem 0 0.05rem 0;
+      padding: 0 0.19rem 0 0.19rem;
+      cursor: pointer;
+      .name {
+        padding-right: 1em;
+        max-width: calc(100% - 2em);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
+      .icons {
+        display: flex;
+        align-items: center;
+      }
     }
     .itemActive {
-      background-color: #aca6a6;
+      background-color: #454545;
     }
   }
 }
