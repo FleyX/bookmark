@@ -210,4 +210,13 @@ public class BookmarkController {
 
     }
 
+    /**
+     * 获取首页固定的书签
+     *
+     * @author fanxb
+     */
+    public Result getHomePin() {
+
+    }
+
 }
