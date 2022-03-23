@@ -1,12 +1,32 @@
 <template>
   <div class="top">
-    <div>应用</div>
-    <div>头像</div>
+    <div></div>
+    <div v-if="userInfo == null">
+      <router-link to="/public/login">登陆</router-link>
+      /
+      <router-link to="/public/register">注册</router-link>
+    </div>
+    <div v-else>
+      <a-dropdown>
+        <div class="user">
+          <img :src="userInfo.icon" class="userIcon" />
+        </div>
+        <a-menu slot="overlay" :trigger="['hover', 'click']" @click="menuClick">
+          <a-menu-item key="personSpace">
+            <router-link to="manage">管理</router-link>
+          </a-menu-item>
+          <a-menu-item key="logout">
+            <a href="javascript:;">退出</a>
+          </a-menu-item>
+        </a-menu>
+      </a-dropdown>
+    </div>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
+import { logoutClear } from "@/store/index";
 export default {
   name: "homeTop",
   data() {
@@ -14,6 +34,14 @@ export default {
   },
   computed: {
     ...mapState("globalConfig", ["userInfo"]),
+  },
+  methods: {
+    async menuClick(item) {
+      if (item.key == "logout") {
+        await logoutClear();
+        this.$router.replace("/public/login");
+      }
+    },
   },
 };
 </script>
@@ -27,5 +55,9 @@ export default {
   align-items: center;
   padding-left: 0.4rem;
   padding-right: 0.4rem;
+
+  .userIcon {
+    border-radius: 50%;
+  }
 }
 </style>

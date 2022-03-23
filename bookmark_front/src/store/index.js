@@ -40,6 +40,17 @@ export async function loginInit () {
 	}
 }
 
+/**
+ * 推出登陆时需要清理的
+ */
+export async function logoutClear () {
+	await store.dispatch(globalConfig.GLOBAL_CONFIG + "/" + globalConfig.clear);
+	await store.dispatch(treeData.TREE_DATA + "/" + treeData.clear);
+}
+
+/**
+ * 确保未登录前要初始化的初始化完了 
+ */
 async function finishNoLogin () {
 	return new Promise((resolve) => {
 		let timer = setInterval(() => {

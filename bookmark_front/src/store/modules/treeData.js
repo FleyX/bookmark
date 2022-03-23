@@ -1,5 +1,5 @@
 import localforage from "localforage";
-import { } from "ant-design-vue";
+import { checkJwtValid } from "@/util/UserUtil";
 import HttpUtil from "../../util/HttpUtil";
 
 export const TREE_DATA = "treeData";
@@ -13,6 +13,7 @@ export const IS_INITING = "isIniting";
 export const noLoginInit = "noLoginInit";
 export const loginInit = "loginInit";
 export const refresh = "refresh";
+export const clear = "clear";
 
 /**
  * 版本检查定时调度
@@ -109,7 +110,7 @@ const actions = {
 		await localforage.setItem(TOTAL_TREE_DATA, treeData);
 	},
 	//清除缓存数据
-	async clear (context) {
+	async [clear] (context) {
 		context.commit(TOTAL_TREE_DATA, null);
 		context.commit(VERSION, null);
 		context.commit(SHOW_REFRESH_TOAST, false);
@@ -282,7 +283,7 @@ const mutations = {
 
 
 async function treeDataCheck (context, isFirst) {
-	if (toastShow) {
+	if (toastShow || !checkJwtValid(context.rootState.globalConfig.token)) {
 		return;
 	}
 	let realVersion = await HttpUtil.get("/user/version");

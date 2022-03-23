@@ -3,10 +3,17 @@
     <div :class="{ listShow: focused && list.length > 0 }" class="newSearch">
       <input ref="searchInput" class="input" type="text" v-model="value" @keydown="keyPress" @focus="inputFocus" @blur="inputBlur" />
       <div class="action">
-        <a-tooltip title="点击切换网页搜索">
-          <my-icon style="color: white; font-size: 1.3em; margin-right: 0.5em" type="icon-google" @mousedown="location($event, item)" />
-        </a-tooltip>
-        <a-icon style="font-size: 1.2em; cursor: pointer" type="search" />
+        <a-dropdown :trigger="['click']">
+          <a-tooltip title="点击切换网页搜索">
+            <my-icon class="icon" style="margin-right: 0.5em" :type="searchIcon" />
+          </a-tooltip>
+          <a-menu slot="overlay" @click="searchEngineChange">
+            <a-menu-item key="google">谷歌</a-menu-item>
+            <a-menu-item key="bing">bing</a-menu-item>
+            <a-menu-item key="baidu">baidu</a-menu-item>
+          </a-menu>
+        </a-dropdown>
+        <a-icon class="icon" type="search" @click="submit(true)" />
       </div>
     </div>
     <div v-if="focused && list.length > 0" class="searchContent">
@@ -24,7 +31,7 @@
           {{ item.name }}
         </div>
         <div class="icons" v-if="hoverIndex === index">
-          <a-tooltip title="定位到书签树中" v-if="showActions">
+          <a-tooltip title="定位到书签树中" v-if="showLocation">
             <my-icon style="color: white; font-size: 1.3em" type="icon-et-location" @mousedown="location($event, item)" />
           </a-tooltip>
           <a-tooltip :title="'复制链接:' + item.url">
@@ -47,11 +54,11 @@
 import HttpUtil from "@/util/HttpUtil";
 import { mapState } from "vuex";
 import ClipboardJS from "clipboard";
+import { GLOBAL_CONFIG, USER_INFO } from "@/store/modules/globalConfig";
 export default {
   name: "Search",
   props: {
-    //是否显示定位等按钮
-    showActions: Boolean,
+    showLocation: Boolean, //是否显示定位等按钮
   },
   data() {
     return {
@@ -86,7 +93,7 @@ export default {
     ...mapState("treeData", ["totalTreeData"]),
     ...mapState("globalConfig", ["userInfo"]),
     searchIcon() {
-      let search = this.userInfo && this.userInfo.defaultSearchEngine ? this.userInfo.defaultSearchEngine : "baidu";
+      let search = this.userInfo != null ? this.userInfo.defaultSearchEngine : "baidu";
       return search === "baidu" ? "icon-baidu" : search === "bing" ? "icon-bing" : "icon-google";
     },
     searchUrl() {
@@ -119,9 +126,9 @@ export default {
       this.submit();
     },
     //搜索或者跳转到书签
-    submit() {
+    submit(forceSearch) {
       let url;
-      if (this.selectIndex == null) {
+      if (forceSearch || this.selectIndex == null) {
         //说明使用百度搜索
         url = this.searchUrl + encodeURIComponent(this.value);
       } else {
@@ -159,7 +166,6 @@ export default {
      * 键盘事件处理
      */
     keyPress(e) {
-      let stop = false;
       if (e.key === "Enter") {
         this.submit();
         return this.stopDefault();
@@ -172,7 +178,17 @@ export default {
           return this.stopDefault();
         }
       }
-      if (stop) {
+    },
+    //修改默认搜索引擎
+    async searchEngineChange(item) {
+      if (this.userInfo == null) {
+        this.$message.warning("未登录，请登录后操作");
+        return;
+      }
+      if (item.key !== this.userInfo.defaultSearchEngine) {
+        await HttpUtil.post("/baseInfo/updateSearchEngine", null, { defaultSearchEngine: item.key });
+        this.userInfo.defaultSearchEngine = item.key;
+        this.$store.commit(GLOBAL_CONFIG + "/" + USER_INFO, this.userInfo);
       }
     },
     dealSearch(content) {
@@ -217,6 +233,10 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@inputBgColor: rgb(74, 74, 74);
+@listBgColor: #2b2b2b;
+@textColor: white;
+@listActiveBgColor: #454545;
 .search {
   position: relative;
   .listShow {
@@ -226,15 +246,15 @@ export default {
   .newSearch {
     display: flex;
     align-items: center;
-    background-color: rgb(74, 74, 74);
+    background-color: @inputBgColor;
     border-radius: 0.18rem;
     overflow: hidden;
     font-size: 1.2em;
-    color: white;
+    color: @textColor;
     .input {
       flex: 1;
       border: 0;
-      background-color: rgb(74, 74, 74);
+      background-color: @inputBgColor;
       padding: 0.1rem;
       padding-left: 0.19rem;
       outline: none;
@@ -244,13 +264,18 @@ export default {
       padding-right: 0.19rem;
       display: flex;
       align-items: center;
+      .icon {
+        color: @textColor;
+        cursor: pointer;
+        font-size: 1.3em;
+      }
     }
   }
 
   .searchContent {
     position: absolute;
     width: 100%;
-    background: #2b2b2b;
+    background: @listBgColor;
     z-index: 1;
     border-top: 1px solid white;
     border-bottom-left-radius: 0.18rem;
@@ -262,7 +287,7 @@ export default {
       align-items: center;
       height: 0.3rem;
       line-height: 0.3rem;
-      color: white;
+      color: @textColor;
       margin: 0.05rem 0 0.05rem 0;
       padding: 0 0.19rem 0 0.19rem;
       cursor: pointer;
@@ -279,7 +304,7 @@ export default {
       }
     }
     .itemActive {
-      background-color: #454545;
+      background-color: @listActiveBgColor;
     }
   }
 }

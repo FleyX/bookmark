@@ -10,6 +10,7 @@ export const IS_INIT = "isInit";
 
 export const noLoginInit = "noLoginInit";
 export const loginInit = "loginInit";
+export const clear = "clear";
 /**
  * 存储全局配置
  */
@@ -67,7 +68,7 @@ const actions = {
 		commit(TOKEN, token);
 	},
 	//登出清除数据
-	async clear (context) {
+	async [clear] (context) {
 		await localforage.removeItem(TOKEN);
 		context.commit(USER_INFO, null);
 		context.commit(TOKEN, null);

@@ -20,6 +20,7 @@
 
 <script>
 import { mapState } from "vuex";
+import { logoutClear } from "@/store/index";
 export default {
   name: "Top",
   computed: {
@@ -28,9 +29,7 @@ export default {
   methods: {
     async menuClick({ key }) {
       if (key === "logout") {
-        //推出登录清理缓存
-        await this.$store.dispatch("treeData/clear");
-        await this.$store.dispatch("globalConfig/clear");
+        await logoutClear();
         this.$router.replace("/public/login");
       } else if (key === "personSpace") {
         this.$router.push("/manage/personSpace/userInfo");

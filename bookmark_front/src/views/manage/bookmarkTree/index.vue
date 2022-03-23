@@ -1,7 +1,7 @@
 <template>
   <a-spin :spinning="loading" :delay="300">
     <div class="search">
-      <search :showActions="true" @location="location" />
+      <search :showLocation="true" @location="location" />
     </div>
     <div class="actions">
       <div class="left">
