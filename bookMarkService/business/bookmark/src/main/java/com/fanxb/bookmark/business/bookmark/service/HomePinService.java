@@ -1,5 +1,6 @@
 package com.fanxb.bookmark.business.bookmark.service;
 
+import com.fanxb.bookmark.business.bookmark.entity.po.PInBookmarkPo;
 import com.fanxb.bookmark.business.bookmark.entity.vo.HomePinItemVo;
 
 import java.util.List;
@@ -10,10 +11,11 @@ import java.util.List;
  * @author fanxb
  */
 public interface HomePinService {
+
     /**
      * 获取固定的标签
      *
-     * @return {@link List<  HomePinItemVo >}
+     * @return {@link List<HomePinItemVo>}
      * @author fanxb
      */
     List<HomePinItemVo> getHomePinList();
@@ -24,7 +26,7 @@ public interface HomePinService {
      * @return {@link HomePinItemVo}
      * @author fanxb
      */
-    HomePinItemVo addOne();
+    PInBookmarkPo addOne(PInBookmarkPo po);
 
     /**
      * 删除一个
@@ -34,5 +36,4 @@ public interface HomePinService {
      */
     void delete(int id);
 
-    void update(HomePinItemVo);
 }

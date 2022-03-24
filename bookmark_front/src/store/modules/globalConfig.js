@@ -7,6 +7,7 @@ export const TOKEN = "token";
 export const SERVER_CONFIG = "serverConfig";
 export const SUPPORT_NO_LOGIN = "supportNoLogin";
 export const IS_INIT = "isInit";
+export const IS_PHONE = "isPhone";
 
 export const noLoginInit = "noLoginInit";
 export const loginInit = "loginInit";
@@ -30,7 +31,7 @@ const state = {
 	/**
 	 * 是否移动端
 	 */
-	isPhone: /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent),
+	[IS_PHONE]: /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent),
 	/**
 	 * 是否支持未登录进入页面
 	 */

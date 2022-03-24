@@ -57,6 +57,7 @@ spring:
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: false
   # classpath后面加*，值里面的*才起作用
   mapper-locations: classpath*:mapper/*.xml
 debug: false

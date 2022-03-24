@@ -8,8 +8,14 @@ export const VERSION = "version";
 export const SHOW_REFRESH_TOAST = "showRefreshToast";
 export const IS_INIT = "isInit";
 export const IS_INITING = "isIniting";
-
-
+/**
+ * 首页固定的书签
+ */
+export const HOME_PIN_LIST = "homePinList";
+/**
+ * 刷新首页固定标签
+ */
+export const refreshHomePinList = "refreshHomePinList";
 export const noLoginInit = "noLoginInit";
 export const loginInit = "loginInit";
 export const refresh = "refresh";
@@ -37,7 +43,8 @@ const state = {
 	// 是否正在加载数据
 	[IS_INITING]: false,
 	//是否展示刷新书签数据弹窗
-	[SHOW_REFRESH_TOAST]: false
+	[SHOW_REFRESH_TOAST]: false,
+	[HOME_PIN_LIST]: false
 };
 
 const getters = {
@@ -65,14 +72,14 @@ const actions = {
 		if (context.state.isInit || context.state.isIniting) {
 			return;
 		}
+		await context.dispatch(refreshHomePinList);
 		context.commit(IS_INITING, true);
 		context.commit(TOTAL_TREE_DATA, await localforage.getItem(TOTAL_TREE_DATA));
 		context.commit(VERSION, await localforage.getItem(VERSION));
 		await treeDataCheck(context, true);
 		context.commit(IS_INIT, true);
 		context.commit(IS_INITING, false);
-		// timer = setInterval(treeDataCheck, 5 * 60 * 1000);
-		timer = setInterval(() => treeDataCheck(context, false), 10 * 1000);
+		timer = setInterval(() => treeDataCheck(context, false), 5 * 60 * 1000);
 	},
 	/**
 	 * 确保数据加载完毕
@@ -114,8 +121,9 @@ const actions = {
 		context.commit(TOTAL_TREE_DATA, null);
 		context.commit(VERSION, null);
 		context.commit(SHOW_REFRESH_TOAST, false);
-		context.commit("isInit", false);
-		context.commit("isIniting", false);
+		context.commit(IS_INIT, false);
+		context.commit(IS_INITING, false);
+		context.commit(HOME_PIN_LIST, []);
 		await localforage.removeItem(TOTAL_TREE_DATA);
 		await localforage.removeItem(VERSION);
 	},
@@ -189,6 +197,9 @@ const actions = {
 		await context.dispatch("updateVersion", null);
 		await localforage.setItem(TOTAL_TREE_DATA, state[TOTAL_TREE_DATA]);
 		return body;
+	},
+	async [refreshHomePinList] ({ commit }) {
+		commit(HOME_PIN_LIST, await HttpUtil.get("/home/pin"));
 	},
 	/**
 	 * 更新版本数据
@@ -278,10 +289,20 @@ const mutations = {
 	},
 	[SHOW_REFRESH_TOAST]: (state, val) => {
 		state[SHOW_REFRESH_TOAST] = val;
+	},
+	[HOME_PIN_LIST]: (state, val) => {
+		state[HOME_PIN_LIST] = val;
 	}
 };
 
 
+/**
+ * 检查书签缓存是否最新
+ * 
+ * @param {*} context 
+ * @param {*} isFirst 
+ * @returns 
+ */
 async function treeDataCheck (context, isFirst) {
 	if (toastShow || !checkJwtValid(context.rootState.globalConfig.token)) {
 		return;

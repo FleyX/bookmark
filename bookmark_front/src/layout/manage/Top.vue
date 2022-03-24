@@ -7,6 +7,9 @@
         <span class="name">{{ userInfo.username }}</span>
       </div>
       <a-menu slot="overlay" :trigger="['hover', 'click']" @click="menuClick">
+        <a-menu-item key="manage">
+          <a href="javascript:;">书签管理</a>
+        </a-menu-item>
         <a-menu-item key="personSpace">
           <a href="javascript:;">个人中心</a>
         </a-menu-item>
@@ -33,6 +36,8 @@ export default {
         this.$router.replace("/public/login");
       } else if (key === "personSpace") {
         this.$router.push("/manage/personSpace/userInfo");
+      } else if (key === "manage") {
+        this.$router.push("/manage");
       }
     },
   },

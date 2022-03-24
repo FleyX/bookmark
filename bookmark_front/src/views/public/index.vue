@@ -1,9 +1,8 @@
 <template>
   <div class="main">
-    <img class="ico" src="/static/img/bookmarkLogo.png" />
+    <router-link to="/"><img class="ico" src="/static/img/bookmarkLogo.png" /></router-link>
     <div class="main-body">
       <router-view />
-
     </div>
   </div>
 </template>
@@ -11,8 +10,7 @@
 <script>
 export default {
   name: "Public",
-  async created() {
-  },
+  async created() {},
 };
 </script>
 

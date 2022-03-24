@@ -84,7 +84,7 @@ export default {
           try {
             this.loading = true;
             let token = await httpUtil.post("/user/login", null, this.form);
-            this.$store.dispatch("globalConfig/setToken", token);
+            await this.$store.dispatch("globalConfig/setToken", token);
             this.$router.replace("/");
           } finally {
             this.loading = false;
@@ -121,7 +121,7 @@ export default {
         this.loading = true;
         form.rememberMe = this.form.rememberMe;
         let token = await HttpUtil.post("/user/oAuthLogin", null, form);
-        this.$store.dispatch("globalConfig/setToken", token);
+        await this.$store.dispatch("globalConfig/setToken", token);
         this.$router.replace("/");
       } finally {
         this.loading = false;

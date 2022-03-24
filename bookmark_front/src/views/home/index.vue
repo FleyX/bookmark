@@ -2,7 +2,7 @@
   <div class="main">
     <top />
     <div class="content">
-      <search style="width: 60%" />
+      <search :style="{ width: isPhone ? '100%' : '60%' }" />
       <div>书签收藏区</div>
     </div>
     <bottom />
@@ -13,6 +13,8 @@
 import Top from "@/layout/home/Top.vue";
 import Bottom from "@/layout/home/Bottom.vue";
 import Search from "@/components/main/Search.vue";
+import { mapState } from "vuex";
+import { GLOBAL_CONFIG, IS_PHONE } from "@/store/modules/globalConfig";
 export default {
   name: "HOME",
   components: {
@@ -22,6 +24,9 @@ export default {
   },
   data() {
     return {};
+  },
+  computed: {
+    ...mapState(GLOBAL_CONFIG, [IS_PHONE, IS_PHONE]),
   },
   methods: {},
 };
