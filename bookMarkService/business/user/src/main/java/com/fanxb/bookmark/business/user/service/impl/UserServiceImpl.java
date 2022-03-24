@@ -12,7 +12,7 @@ import com.fanxb.bookmark.common.constant.CommonConstant;
 import com.fanxb.bookmark.common.constant.NumberConstant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.MailInfo;
-import com.fanxb.bookmark.common.entity.User;
+import com.fanxb.bookmark.common.entity.po.User;
 import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.exception.FormDataException;
 import com.fanxb.bookmark.common.util.*;
@@ -159,7 +159,7 @@ public class UserServiceImpl implements UserService {
      * Description: 根据userId获取用户信息
      *
      * @param userId userId
-     * @return com.fanxb.bookmark.common.entity.User
+     * @return com.fanxb.bookmark.common.entity.po.User
      * @author fanxb
      * @date 2019/7/30 15:57
      */

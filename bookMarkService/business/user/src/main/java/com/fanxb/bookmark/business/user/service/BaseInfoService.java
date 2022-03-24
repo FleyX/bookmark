@@ -2,7 +2,7 @@ package com.fanxb.bookmark.business.user.service;
 
 import com.fanxb.bookmark.business.user.vo.EmailUpdateBody;
 import com.fanxb.bookmark.business.user.vo.UpdatePasswordBody;
-import com.fanxb.bookmark.common.entity.User;
+import com.fanxb.bookmark.common.entity.po.User;
 
 /**
  * 个人信息修改

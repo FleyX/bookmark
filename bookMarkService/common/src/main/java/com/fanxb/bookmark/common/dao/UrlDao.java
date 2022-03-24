@@ -1,6 +1,6 @@
 package com.fanxb.bookmark.common.dao;
 
-import com.fanxb.bookmark.common.entity.Url;
+import com.fanxb.bookmark.common.entity.po.Url;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public interface UrlDao {
      *
      * @author fanxb
      * @date 2019/7/9 14:52
-     * @return java.util.List<com.fanxb.bookmark.common.entity.Url>
+     * @return java.util.List<com.fanxb.bookmark.common.entity.po.Url>
      */
     List<Url> getPublicUrl();
 }

@@ -3,7 +3,7 @@
 <mapper namespace="com.fanxb.bookmark.common.dao.UrlDao">
 
 
-    <select id="getPublicUrl" resultType="com.fanxb.bookmark.common.entity.Url">
+    <select id="getPublicUrl" resultType="com.fanxb.bookmark.common.entity.po.Url">
         select *
         from url
         where type = 0

@@ -5,7 +5,7 @@ import com.auth0.jwt.interfaces.Claim;
 import com.fanxb.bookmark.common.constant.CommonConstant;
 import com.fanxb.bookmark.common.dao.UrlDao;
 import com.fanxb.bookmark.common.entity.Result;
-import com.fanxb.bookmark.common.entity.Url;
+import com.fanxb.bookmark.common.entity.po.Url;
 import com.fanxb.bookmark.common.entity.UserContext;
 import com.fanxb.bookmark.common.exception.NoLoginException;
 import com.fanxb.bookmark.common.util.JwtUtil;

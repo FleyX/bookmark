@@ -4,7 +4,7 @@ import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkBackupService;
 import com.fanxb.bookmark.common.constant.EsConstant;
-import com.fanxb.bookmark.common.entity.Bookmark;
+import com.fanxb.bookmark.common.entity.po.Bookmark;
 import com.fanxb.bookmark.common.entity.EsEntity;
 import com.fanxb.bookmark.common.util.EsUtil;
 import org.elasticsearch.index.query.TermQueryBuilder;

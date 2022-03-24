@@ -8,7 +8,7 @@ import com.fanxb.bookmark.business.user.vo.EmailUpdateBody;
 import com.fanxb.bookmark.business.user.vo.UpdatePasswordBody;
 import com.fanxb.bookmark.common.constant.CommonConstant;
 import com.fanxb.bookmark.common.entity.MailInfo;
-import com.fanxb.bookmark.common.entity.User;
+import com.fanxb.bookmark.common.entity.po.User;
 import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.*;
 import lombok.extern.slf4j.Slf4j;

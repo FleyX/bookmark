@@ -1,6 +1,6 @@
 package com.fanxb.bookmark.business.user.vo;
 
-import com.fanxb.bookmark.common.entity.User;
+import com.fanxb.bookmark.common.entity.po.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

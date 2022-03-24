@@ -5,7 +5,7 @@ import com.fanxb.bookmark.business.user.vo.EmailUpdateBody;
 import com.fanxb.bookmark.business.user.vo.UpdatePasswordBody;
 import com.fanxb.bookmark.business.user.vo.UsernameBody;
 import com.fanxb.bookmark.common.entity.Result;
-import com.fanxb.bookmark.common.entity.User;
+import com.fanxb.bookmark.common.entity.po.User;
 import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;

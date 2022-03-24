@@ -2,7 +2,7 @@ package com.fanxb.bookmark.business.bookmark.service;
 
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
-import com.fanxb.bookmark.common.entity.Bookmark;
+import com.fanxb.bookmark.common.entity.po.Bookmark;
 
 import java.io.InputStream;
 import java.util.List;
@@ -28,7 +28,7 @@ public interface BookmarkService {
      *
      * @param userId userId
      * @param path   path
-     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @return java.util.List<com.fanxb.bookmark.common.entity.po.Bookmark>
      * @author fanxb
      * @date 2019/7/15 13:40
      */
@@ -38,7 +38,7 @@ public interface BookmarkService {
      * 功能描述: 获取某个用户的书签map
      *
      * @param userId userId
-     * @return java.util.Map<java.lang.String, java.util.List < com.fanxb.bookmark.common.entity.Bookmark>>
+     * @return java.util.Map<java.lang.String, java.util.List < com.fanxb.bookmark.common.entity.po.Bookmark>>
      * @author fanxb
      * @date 2019/12/14 0:02
      */
@@ -60,7 +60,7 @@ public interface BookmarkService {
      * Description: 详情
      *
      * @param bookmark 插入一条记录
-     * @return com.fanxb.bookmark.common.entity.Bookmark
+     * @return com.fanxb.bookmark.common.entity.po.Bookmark
      * @author fanxb
      * @date 2019/7/12 17:18
      */
@@ -122,7 +122,7 @@ public interface BookmarkService {
      * 功能描述: 获取用户访问次数前num的书签数据
      *
      * @param num 获取条数
-     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @return java.util.List<com.fanxb.bookmark.common.entity.po.Bookmark>
      * @author fanxb
      * @date 2020/8/26 15:54
      */

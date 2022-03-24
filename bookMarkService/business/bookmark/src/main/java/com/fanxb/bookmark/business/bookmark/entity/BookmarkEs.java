@@ -1,6 +1,6 @@
 package com.fanxb.bookmark.business.bookmark.entity;
 
-import com.fanxb.bookmark.common.entity.Bookmark;
+import com.fanxb.bookmark.common.entity.po.Bookmark;
 import lombok.Data;
 
 /**

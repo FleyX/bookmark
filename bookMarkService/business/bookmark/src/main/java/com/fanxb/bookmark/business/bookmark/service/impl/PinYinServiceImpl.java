@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.fanxb.bookmark.business.api.UserApi;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.business.bookmark.service.PinYinService;
-import com.fanxb.bookmark.common.entity.Bookmark;
+import com.fanxb.bookmark.common.entity.po.Bookmark;
 import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.UserContextHolder;
 import com.github.houbb.pinyin.constant.enums.PinyinStyleEnum;

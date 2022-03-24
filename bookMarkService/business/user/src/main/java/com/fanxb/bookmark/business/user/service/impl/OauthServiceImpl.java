@@ -7,7 +7,7 @@ import com.fanxb.bookmark.business.user.service.OauthService;
 import com.fanxb.bookmark.business.user.service.UserService;
 import com.fanxb.bookmark.business.user.vo.OauthBody;
 import com.fanxb.bookmark.common.constant.CommonConstant;
-import com.fanxb.bookmark.common.entity.User;
+import com.fanxb.bookmark.common.entity.po.User;
 import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.HttpUtil;
 import com.fanxb.bookmark.common.util.JwtUtil;

@@ -1,4 +1,4 @@
-package com.fanxb.bookmark.common.entity;
+package com.fanxb.bookmark.common.entity.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

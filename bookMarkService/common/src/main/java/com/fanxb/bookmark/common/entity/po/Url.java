@@ -1,4 +1,4 @@
-package com.fanxb.bookmark.common.entity;
+package com.fanxb.bookmark.common.entity.po;
 
 import lombok.Data;
 
