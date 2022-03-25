@@ -80,6 +80,7 @@ const actions = {
 		context.commit(IS_INIT, true);
 		context.commit(IS_INITING, false);
 		timer = setInterval(() => treeDataCheck(context, false), 5 * 60 * 1000);
+		// timer = setInterval(() => treeDataCheck(context, false), 5 * 1000);
 	},
 	/**
 	 * 确保数据加载完毕
@@ -124,6 +125,9 @@ const actions = {
 		context.commit(IS_INIT, false);
 		context.commit(IS_INITING, false);
 		context.commit(HOME_PIN_LIST, []);
+		if (timer != null) {
+			clearInterval(timer);
+		}
 		await localforage.removeItem(TOTAL_TREE_DATA);
 		await localforage.removeItem(VERSION);
 	},
@@ -324,9 +328,9 @@ async function treeDataCheck (context, isFirst) {
 						resolve();
 					});
 				},
-				afterClose () {
+				onCancel () {
 					toastShow = false;
-				},
+				}
 			});
 			toastShow = true;
 		} else {

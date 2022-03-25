@@ -76,6 +76,9 @@
         <a-menu slot="overlay" @click="rightClick($event, rec.dataRef)">
           <a-menu-item v-if="!rec.dataRef.isLeaf" key="add">新增</a-menu-item>
           <a-menu-item v-else key="copy" class="copy-to-board" :data="rec.dataRef.url">复制URL</a-menu-item>
+          <a-menu-item v-if="rec.dataRef.isLeaf" key="pin">
+            {{ homePinList.filter((item) => item.id && item.bookmarkId == rec.dataRef.bookmarkId).length > 0 ? "从首页移除" : "固定到首页" }}
+          </a-menu-item>
           <a-menu-item key="edit">编辑</a-menu-item>
           <a-menu-item key="delete">删除</a-menu-item>
         </a-menu>
@@ -96,7 +99,9 @@ import { mapState } from "vuex";
 import { downloadFile } from "@/util/FileUtil";
 import ClipboardJS from "clipboard";
 import moment from "moment";
-import { TREE_DATA, SHOW_REFRESH_TOAST } from "@/store/modules/treeData";
+import { TREE_DATA, SHOW_REFRESH_TOAST, refreshHomePinList, HOME_PIN_LIST } from "@/store/modules/treeData";
+import { dealList, exportFileHead } from "@/views/manage/bookmarkTree/helper";
+import { GLOBAL_CONFIG } from "@/store/modules/globalConfig";
 export default {
   name: "BookmarkManage",
   components: { AddBookmark, Search },
@@ -127,7 +132,7 @@ export default {
     };
   },
   computed: {
-    ...mapState("treeData", ["totalTreeData"]),
+    ...mapState("treeData", ["totalTreeData", HOME_PIN_LIST]),
     ...mapState("globalConfig", ["isPhone"]),
   },
   watch: {
@@ -389,6 +394,14 @@ export default {
         });
       } else if (key === "edit") {
         this.editData();
+      } else if (key === "pin") {
+        let pin = this.homePinList.filter((one) => one.id && one.bookmarkId == item.bookmarkId);
+        if (pin.length > 0) {
+          await HttpUtil.delete("/home/pin", { id: pin[0].id });
+        } else {
+          await HttpUtil.put("/home/pin", null, { bookmarkId: item.bookmarkId });
+        }
+        await this.$store.dispatch(TREE_DATA + "/" + refreshHomePinList);
       }
     },
     /**
@@ -397,45 +410,9 @@ export default {
     exportBookmark() {
       let map = this.totalTreeData;
       let root = document.createElement("DL");
-      this.dealList(root, map[""], map);
-      let content =
-        `<!DOCTYPE NETSCAPE-Bookmark-file-1>
-<!-- This is an automatically generated file.
-     It will be read and overwritten.
-     DO NOT EDIT! -->
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
-<TITLE>Bookmarks</TITLE>
-<H1>签签世界导出</H1>` + root.outerHTML;
+      dealList(root, map[""], map);
+      let content = exportFileHead + root.outerHTML;
       downloadFile(moment().format("YYYY-MM-DD") + "导出书签.html", content);
-    },
-    dealList(root, list, totalMap) {
-      if (!list || list.length == undefined) {
-        return;
-      }
-      list.forEach((item) => {
-        let node = document.createElement("DT");
-        root.appendChild(node);
-        if (item.type === 0) {
-          //说明为书签
-          let url = document.createElement("A");
-          url.setAttribute("HREF", item.url);
-          url.setAttribute("ADD_DATE", parseInt(Date.now() / 1000));
-          url.innerText = item.name;
-          if (item.icon.length > 0) {
-            url.setAttribute("ICON", item.icon);
-          }
-          node.appendChild(url);
-        } else {
-          //说明为文件夹
-          let header = document.createElement("H3");
-          header.setAttribute("ADD_DATE", parseInt(Date.now() / 1000));
-          header.innerText = item.name;
-          node.appendChild(header);
-          let children = document.createElement("DL");
-          node.appendChild(children);
-          this.dealList(children, totalMap[item.path + "." + item.bookmarkId], totalMap);
-        }
-      });
     },
   },
 };

@@ -92,6 +92,8 @@ public class LoginFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
+        boolean login = this.checkJwt(request.getHeader(CommonConstant.JWT_KEY));
+        //检查是否公共方法
         List<Url> publicUrl = this.getPublicUrl();
         for (Url url : publicUrl) {
             if (url.getMethod().equalsIgnoreCase(requestMethod) && matcher.match(url.getUrl(), requestUrl)) {
@@ -100,7 +102,7 @@ public class LoginFilter implements Filter {
             }
         }
         //登陆用户
-        if (this.checkJwt(request.getHeader(CommonConstant.JWT_KEY))) {
+        if (login) {
             try {
                 filterChain.doFilter(servletRequest, servletResponse);
             } finally {
@@ -128,7 +130,6 @@ public class LoginFilter implements Filter {
 
     private boolean checkJwt(String jwt) {
         if (StringUtil.isEmpty(jwt)) {
-            log.error("jwt为空");
             return false;
         }
         try {

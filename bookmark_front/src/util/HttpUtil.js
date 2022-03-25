@@ -33,9 +33,9 @@ async function request (url, method, params, body, isForm, redirect) {
 	try {
 		res = await http.default.request(options);
 	} catch (err) {
-		window.vueInstance.$message.error("发生了某些异常问题");
+		window.vueInstance.$message.error("网络连接异常");
 		console.error(err);
-		return;
+		throw err;
 	}
 	const { code, data, message } = res.data;
 	if (code === 1) {

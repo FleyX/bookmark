@@ -3,7 +3,7 @@
     <top />
     <div class="content">
       <search :style="{ width: isPhone ? '100%' : '60%' }" />
-      <div>书签收藏区</div>
+      <div :style="{ width: isPhone ? '100%' : '70%' }"><pin-bookmark /></div>
     </div>
     <bottom />
   </div>
@@ -13,6 +13,7 @@
 import Top from "@/layout/home/Top.vue";
 import Bottom from "@/layout/home/Bottom.vue";
 import Search from "@/components/main/Search.vue";
+import PinBookmark from "./PinBookmark.vue";
 import { mapState } from "vuex";
 import { GLOBAL_CONFIG, IS_PHONE } from "@/store/modules/globalConfig";
 export default {
@@ -21,6 +22,7 @@ export default {
     Top,
     Bottom,
     Search,
+    PinBookmark,
   },
   data() {
     return {};

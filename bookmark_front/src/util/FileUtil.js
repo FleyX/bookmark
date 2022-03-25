@@ -1,5 +1,4 @@
-export function downloadFile(fileName, content) {
-  debugger;
+export function downloadFile (fileName, content) {
   // 定义触发事件的DOM
   var aLink = document.createElement("a");
   // 定义BLOB对象，生成文件内容
