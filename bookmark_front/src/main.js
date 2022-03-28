@@ -18,7 +18,8 @@ import {
 	Upload,
 	Popconfirm,
 	AutoComplete,
-	Select
+	Select,
+	Popover
 } from "ant-design-vue";
 import App from "./App.vue";
 import router from "./router";
@@ -44,6 +45,7 @@ Vue.use(Upload);
 Vue.use(Popconfirm);
 Vue.use(AutoComplete);
 Vue.use(Select);
+Vue.use(Popover);
 Vue.component("my-icon", IconFont);
 
 Vue.prototype.$message = message;

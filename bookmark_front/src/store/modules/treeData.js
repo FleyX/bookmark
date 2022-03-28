@@ -20,6 +20,10 @@ export const noLoginInit = "noLoginInit";
 export const loginInit = "loginInit";
 export const refresh = "refresh";
 export const clear = "clear";
+/**
+ * 删除书签数据
+ */
+export const deleteData = "deleteData";
 
 /**
  * 版本检查定时调度
@@ -240,7 +244,7 @@ const actions = {
 	/**
 	 * 删除节点数据
 	 */
-	async deleteData (context, { pathList, bookmarkIdList }) {
+	async [deleteData] (context, { pathList, bookmarkIdList }) {
 		//待删除的书签
 		let bookmarkIdSet = new Set();
 		bookmarkIdList.forEach(item => bookmarkIdSet.add(item));

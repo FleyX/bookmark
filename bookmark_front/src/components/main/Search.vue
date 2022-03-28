@@ -19,22 +19,20 @@
     <div v-if="focused && list.length > 0" class="searchContent">
       <div
         class="listItem"
-        :class="{ itemActive: index == hoverIndex || index == selectIndex }"
+        :class="{ itemActive: index == selectIndex }"
         v-for="(item, index) in list"
         :key="item.bookmarkId"
         @mousedown="itemClick(index)"
-        @mouseenter="mouseEnterOut(index, 'enter')"
-        @mouseleave="mouseEnterOut(index, 'leave')"
         :id="'bookmark:' + item.bookmarkId"
       >
-        <div class="name" style="" target="_blank">
+        <div class="name" target="_blank" :title="item.url.substr(0, 50)">
           {{ item.name }}
         </div>
-        <div class="icons" v-if="hoverIndex === index">
+        <div class="icons">
           <a-tooltip title="定位到书签树中" v-if="showLocation">
             <my-icon style="color: white; font-size: 1.3em" type="icon-et-location" @mousedown="location($event, item)" />
           </a-tooltip>
-          <a-tooltip :title="'复制链接:' + item.url">
+          <a-tooltip title="复制链接">
             <a-icon
               type="copy"
               style="color: white; font-size: 1.3em; padding-left: 0.5em"
@@ -65,8 +63,6 @@ export default {
       value: "",
       focused: false,
       list: [],
-      //鼠标悬浮选中
-      hoverIndex: null,
       //上下选中
       selectIndex: null,
       copyBoard: null, //剪贴板对象
@@ -129,7 +125,7 @@ export default {
     submit(forceSearch) {
       let url;
       if (forceSearch || this.selectIndex == null) {
-        //说明使用百度搜索
+        //说明使用网页搜索
         url = this.searchUrl + encodeURIComponent(this.value);
       } else {
         //说明跳转到书签
@@ -142,20 +138,10 @@ export default {
       a.click();
     },
     inputBlur() {
-      console.log("blur");
       this.focused = false;
     },
     inputFocus() {
-      console.log("focus");
       this.focused = true;
-    },
-    mouseEnterOut(item, type) {
-      console.log(item, type);
-      if (type === "enter") {
-        this.hoverIndex = item;
-      } else {
-        this.hoverIndex = null;
-      }
     },
     //定位到书签树中
     location(event, item) {
@@ -299,12 +285,18 @@ export default {
         white-space: nowrap;
       }
       .icons {
-        display: flex;
+        display: none;
         align-items: center;
       }
     }
+    .listItem:hover {
+      background-color: @listActiveBgColor;
+    }
     .itemActive {
       background-color: @listActiveBgColor;
+    }
+    .listItem:hover .icons {
+      display: flex;
     }
   }
 }

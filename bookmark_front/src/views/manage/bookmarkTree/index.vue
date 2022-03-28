@@ -99,7 +99,7 @@ import { mapState } from "vuex";
 import { downloadFile } from "@/util/FileUtil";
 import ClipboardJS from "clipboard";
 import moment from "moment";
-import { TREE_DATA, SHOW_REFRESH_TOAST, refreshHomePinList, HOME_PIN_LIST } from "@/store/modules/treeData";
+import { TREE_DATA, SHOW_REFRESH_TOAST, refreshHomePinList, deleteData, HOME_PIN_LIST } from "@/store/modules/treeData";
 import { dealList, exportFileHead } from "@/views/manage/bookmarkTree/helper";
 import { GLOBAL_CONFIG } from "@/store/modules/globalConfig";
 export default {
@@ -167,6 +167,7 @@ export default {
      * 加载数据，兼容treeNode为id
      */
     loadData(treeNode) {
+      console.log("加载数据", treeNode);
       return new Promise((resolve) => {
         const data = typeof treeNode === "number" ? this.$store.getters["treeData/getById"](treeNode) : treeNode.dataRef;
         let newPath = data.path + "." + data.bookmarkId;
@@ -193,6 +194,7 @@ export default {
      * 重置当前data中书签相关数据
      */
     resetData() {
+      console.log("重置数据");
       this.treeData = this.totalTreeData[""];
       this.expandedKeys = [];
       this.checkedKeys = [];
@@ -284,13 +286,9 @@ export default {
         this.$message.warn("请选择后再进行操作");
         return;
       }
-
       this.loading = true;
-      await HttpUtil.post("/bookmark/batchDelete", null, {
-        pathList,
-        bookmarkIdList,
-      });
-      this.$store.dispatch("treeData/deleteData", { pathList, bookmarkIdList });
+      await HttpUtil.post("/bookmark/batchDelete", null, { pathList, bookmarkIdList });
+      this.$store.dispatch(TREE_DATA + "/" + deleteData, { pathList, bookmarkIdList });
       //删除已经被删除的数据
       pathList.forEach((item) => {
         const id = parseInt(item.split(".").reverse()[0]);
@@ -337,8 +335,8 @@ export default {
      * 关闭弹窗
      * @param isUpload 说明为上传书签文件，需要刷新缓存数据
      */
-    async close(isUpload) {
-      if (isUpload) {
+    async close(type) {
+      if (type === "file") {
         this.refresh(true);
       } else {
         this.treeData.__ob__.dep.notify();

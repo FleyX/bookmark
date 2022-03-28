@@ -2,13 +2,11 @@
   <div>
     <a href="pinObj.url" v-if="pinObj" class="pinBookmarkItem">
       <img :src="pinObj.icon.length > 0 ? pinObj.icon : '/favicon.ico'" class="icon" />
-      <span class="text">{{ pinObj.name }}</span>
+      <span class="text" :title="pinObj.name">{{ pinObj.name }}</span>
       <span class="action actionShow">...</span>
     </a>
-    <div v-else class="pinBookmarkItem" @click="add">
-      <a-tooltip title="新增">
-        <a-icon style="font-size: 1.5em" type="plus" />
-      </a-tooltip>
+    <div v-else class="pinBookmarkItem" @click="showAddBlock = !showAddBlock" title="新增书签并固定到首页">
+      <a-icon style="font-size: 1.5em" type="plus" />
     </div>
   </div>
 </template>
@@ -20,7 +18,12 @@ export default {
     pinObj: Object,
   },
   data() {
-    return {};
+    return {
+      showAddBlock: false,
+    };
+  },
+  methods: {
+    add() {},
   },
 };
 </script>

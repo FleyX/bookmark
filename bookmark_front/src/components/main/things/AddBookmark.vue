@@ -1,14 +1,14 @@
 <template>
   <div>
     <a-form-model ref="addForm" :model="form" :rules="rules" :label-col="labelCol" :wrapper-col="wrapperCol">
-      <a-form-model-item v-if="isAdd" prop="type" label="类别">
+      <a-form-model-item v-if="isAdd && !addType" prop="type" label="类别">
         <a-radio-group v-model="form.type" :options="options" />
       </a-form-model-item>
       <template v-if="form.type !== 'file'">
         <a-form-model-item prop="name" label="名称" :required="false">
           <a-input v-model="form.name" placeholder="名称" />
         </a-form-model-item>
-        <a-form-model-item v-if="form.type === '0'" prop="url" label="URL">
+        <a-form-model-item v-if="form.type === 'bookmark'" prop="url" label="URL">
           <a-input v-model="form.url" placeholder="url" />
         </a-form-model-item>
         <div class="btns">
@@ -16,7 +16,13 @@
         </div>
       </template>
       <div v-else prop="file">
-        <a-upload-dragger name="file" :data="{ path: form.path }" :headers="{ 'jwt-token': token }" action="/bookmark/api/bookmark/uploadBookmarkFile" @change="fileChange">
+        <a-upload-dragger
+          name="file"
+          :data="{ path: form.path }"
+          :headers="{ 'jwt-token': token }"
+          action="/bookmark/api/bookmark/uploadBookmarkFile"
+          @change="fileChange"
+        >
           <p class="ant-upload-drag-icon">
             <a-icon type="inbox" />
           </p>
@@ -30,14 +36,15 @@
 <script>
 import HttpUtil from "@/util/HttpUtil";
 const options = [
-  { label: "书签", value: "0" },
-  { label: "文件夹", value: "1" },
+  { label: "书签", value: "bookmark" },
+  { label: "文件夹", value: "folder" },
   { label: "导入", value: "file" },
 ];
 export default {
   name: "addBookmark",
   props: {
-    isAdd: Boolean,
+    isAdd: Boolean, //是否新增
+    addType: String, //新增的类别
     targetNode: Object,
   },
   data() {
@@ -48,7 +55,7 @@ export default {
       token: "",
       loading: false,
       form: {
-        type: "0", //0:书签,1:文件夹,file:文件
+        type: "bookmark",
         name: "",
         url: "",
         path: "",
@@ -63,9 +70,9 @@ export default {
   created() {
     console.log(this.isAdd, this.targetNode);
     if (!this.isAdd) {
-      this.form.type = this.targetNode.type.toString();
+      this.form.type = this.targetNode.type == 0 ? "bookmark" : "folder";
       this.form.name = this.targetNode.name;
-      this.form.url = this.form.type === "0" ? this.targetNode.url : "";
+      this.form.url = this.form.type === "bookmark" ? this.targetNode.url : "";
     }
     this.token = this.$store.state.globalConfig.token;
     this.form.path = this.targetNode == null ? "" : this.targetNode.path + (this.isAdd ? "." + this.targetNode.bookmarkId : "");
@@ -74,25 +81,27 @@ export default {
     /**
      * 文件提交不走这儿
      */
-    submit() {
+    async submit() {
       //名称校验
       this.loading = true;
-      this.$refs["addForm"].validateField(this.form.type === 0 ? ["name", "url"] : "name", async (message) => {
-        if (message.length > 0) {
+      this.$refs["addForm"].validate(async (pass) => {
+        if (!pass) {
           this.loading = false;
           return;
         }
         let res = null;
+        let body = JSON.parse(JSON.stringify(this.form));
+        body.type = body.type === "bookmark" ? 0 : 1;
         if (this.isAdd) {
-          res = await HttpUtil.put("/bookmark", null, this.form);
+          res = await HttpUtil.put("/bookmark", null, body);
           await this.$store.dispatch("treeData/addNode", { sourceNode: this.targetNode, targetNode: res });
         } else {
-          this.form.bookmarkId = this.targetNode.bookmarkId;
-          let newIcon = await HttpUtil.post("/bookmark/updateOne", null, this.form);
+          body.bookmarkId = this.targetNode.bookmarkId;
+          let newIcon = await HttpUtil.post("/bookmark/updateOne", null, body);
           await this.$store.dispatch("treeData/editNode", { node: this.targetNode, newName: this.form.name, newUrl: this.form.url, newIcon });
         }
         this.$message.success("操作成功");
-        this.$emit("close", false);
+        this.$emit("close", this.form.type);
         this.loading = false;
       });
     },
@@ -106,7 +115,7 @@ export default {
           });
         } else {
           this.$message.success("解析成功");
-          this.$emit("close", true);
+          this.$emit("close", this.form.type);
         }
       }
     },
