@@ -41,6 +41,13 @@
               :data="item.url"
             />
           </a-tooltip>
+          <a-icon
+            v-if="!homePinBookmarkIdMap[item.bookmarkId]"
+            style="color: white; font-size: 1.3em; padding-left: 0.5em"
+            type="pushpin"
+            title="固定到首页"
+            @mousedown.prevent="pinBookmark($event, item)"
+          />
         </div>
       </div>
     </div>
@@ -53,6 +60,7 @@ import HttpUtil from "@/util/HttpUtil";
 import { mapState } from "vuex";
 import ClipboardJS from "clipboard";
 import { GLOBAL_CONFIG, USER_INFO } from "@/store/modules/globalConfig";
+import { TREE_DATA, refreshHomePinList, HOME_PIN_BOOKMARK_ID_MAP } from "@/store/modules/treeData";
 export default {
   name: "Search",
   props: {
@@ -86,7 +94,7 @@ export default {
     }
   },
   computed: {
-    ...mapState("treeData", ["totalTreeData"]),
+    ...mapState("treeData", ["totalTreeData", HOME_PIN_BOOKMARK_ID_MAP]),
     ...mapState("globalConfig", ["userInfo"]),
     searchIcon() {
       let search = this.userInfo != null ? this.userInfo.defaultSearchEngine : "baidu";
@@ -177,6 +185,12 @@ export default {
         this.$store.commit(GLOBAL_CONFIG + "/" + USER_INFO, this.userInfo);
       }
     },
+    //固定书签到首页
+    async pinBookmark(event, { bookmarkId }) {
+      this.stopDefault(event);
+      await HttpUtil.put("/home/pin", null, { bookmarkId });
+      await this.$store.dispatch(TREE_DATA + "/" + refreshHomePinList);
+    },
     dealSearch(content) {
       let res = [];
       let arrs = Object.values(this.totalTreeData);
@@ -197,7 +211,7 @@ export default {
       return res;
     },
     //复制
-    copy(event, item) {
+    async copy(event) {
       return this.stopDefault(event);
     },
     /**

@@ -1,9 +1,10 @@
-本项目是一个云书签的项目，取名为：签签世界。
+本项目是一个云书签的项目，取名为：签签世界.
 
-此地址长期提供服务:[fleyx.com](https://fleyx.com)，也可自己搭建，教程如下：
+部署地址:[fleyx.com](https://fleyx.com)，
 
-部署教程：[docker-compose部署](https://github.com/FleyX/bookmark/blob/master/DEPLOY.md)
+也可自己搭建，教程如下：
 
+部署教程：[docker-compose 部署](https://github.com/FleyX/bookmark/blob/master/DEPLOY.md)
 
 # 缘由
 
@@ -17,22 +18,27 @@
 
 # 主要功能
 
-1. 基础的书签增删改查功能。支持chrome、firefox等浏览器书签文件导入，导出。
+使用帮助见：[使用帮助](https://github.com/FleyX/bookmark/blob/master/HELP.md)
 
-   按需加载书签节点，即使上万条书签也不会卡
+1. 基础的书签增删改查功能。支持 chrome、firefox 等浏览器书签文件导入，导出。
 
-   支持鼠标拖拽排序、移动位置、层级（移动端不支持）
-
-   支持书签文件双向导入导出（从浏览器导入到系统、从系统导出到浏览器）
+![](https://qiniupic.fleyx.com/blog/20220329214126.png?imageView2/2/w/1920)
 
 2. 强大的书签检索功能，毫秒级的关键字检索。
 
-   支持使用 书签名搜索、url搜索、书签名拼音搜索、书签名拼音首字母搜索。（注意不支持组合使用）
-4. 移动端支持，web页面可在浏览器中正常使用
+![](https://qiniupic.fleyx.com/blog/20220329214210.png?imageView2/2/w/1920)
 
-## TODO
+3. 首页功能，参考 bing 首页实现
 
-- 主页功能 
+![](https://qiniupic.fleyx.com/blog/20220329214236.png?imageView2/2/w/1920)
+
+4. 移动端支持，手机端也可使用（部分功能比如拖拽等无法使用）
+
+![](https://qiniupic.fleyx.com/blog/20220329214312.png?imageView2/2/w/1920)
+
+# TODO
+
+- 主页功能 Ok!
 - 拼音检索 Ok!
 - 书签导出 OK！
 - 侧边栏显示

@@ -51,7 +51,7 @@ public class HttpUtil {
     /**
      * 无代理环境
      */
-    private static final OkHttpClient CLIENT = new OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS)
+    private static final OkHttpClient CLIENT = new OkHttpClient.Builder().connectTimeout(2, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .build();
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");

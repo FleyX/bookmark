@@ -5,16 +5,15 @@ import HttpUtil from "../../util/HttpUtil";
 export const TREE_DATA = "treeData";
 export const TOTAL_TREE_DATA = "totalTreeData";
 export const VERSION = "version";
+/** 是否展示刷新书签数据弹窗 */
 export const SHOW_REFRESH_TOAST = "showRefreshToast";
 export const IS_INIT = "isInit";
 export const IS_INITING = "isIniting";
-/**
- * 首页固定的书签
- */
+/** 首页固定的书签 */
 export const HOME_PIN_LIST = "homePinList";
-/**
- * 刷新首页固定标签
- */
+/** 首页固定书签id Map */
+export const HOME_PIN_BOOKMARK_ID_MAP = "homePinBookmarkIdMap";
+/** 刷新首页固定标签*/
 export const refreshHomePinList = "refreshHomePinList";
 /**
  * 通过id获取书签数据
@@ -50,9 +49,9 @@ const state = {
 	[IS_INIT]: false,
 	// 是否正在加载数据
 	[IS_INITING]: false,
-	//是否展示刷新书签数据弹窗
 	[SHOW_REFRESH_TOAST]: false,
-	[HOME_PIN_LIST]: false
+	[HOME_PIN_LIST]: [],
+	[HOME_PIN_BOOKMARK_ID_MAP]: {}
 };
 
 const getters = {
@@ -208,7 +207,12 @@ const actions = {
 		return body;
 	},
 	async [refreshHomePinList] ({ commit }) {
-		commit(HOME_PIN_LIST, await HttpUtil.get("/home/pin"));
+		let list = await HttpUtil.get("/home/pin");
+		commit(HOME_PIN_LIST, list);
+		let map = {};
+		list.filter(item => item.id).forEach(item => map[item.bookmarkId] = true);
+		commit(HOME_PIN_BOOKMARK_ID_MAP, map);
+
 	},
 	/**
 	 * 更新版本数据
@@ -301,6 +305,9 @@ const mutations = {
 	},
 	[HOME_PIN_LIST]: (state, val) => {
 		state[HOME_PIN_LIST] = val;
+	},
+	[HOME_PIN_BOOKMARK_ID_MAP]: (state, val) => {
+		state[HOME_PIN_BOOKMARK_ID_MAP] = val;
 	}
 };
 

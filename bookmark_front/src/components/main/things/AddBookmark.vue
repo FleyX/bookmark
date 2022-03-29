@@ -44,10 +44,7 @@ export default {
   name: "addBookmark",
   props: {
     isAdd: Boolean, //是否新增
-    addType: {
-      type: String,
-      default: "bookmark",
-    }, //新增的类别
+    addType: String, //新增的类别
     targetNode: Object,
   },
   data() {
@@ -73,7 +70,7 @@ export default {
   created() {
     console.log(this.isAdd, this.targetNode);
     if (this.isAdd) {
-      this.form.type = this.addType;
+      this.form.type = this.addType ? this.addType : "bookmark";
     } else {
       this.form.type = this.targetNode.type == 0 ? "bookmark" : "folder";
       this.form.name = this.targetNode.name;
