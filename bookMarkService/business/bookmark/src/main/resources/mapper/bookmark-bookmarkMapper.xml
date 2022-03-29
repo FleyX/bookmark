@@ -13,7 +13,7 @@
     <select id="selectIdByUserIdAndNameAndPath" resultType="java.lang.Integer">
         select bookmarkId
         from bookmark
-        where userId = #{userId} and path = #{path} and name = #{name};
+        where userId = #{userId} and path = #{path} and name = #{name} limit 1;
     </select>
 
     <select id="selectMaxSort" resultType="java.lang.Integer">
