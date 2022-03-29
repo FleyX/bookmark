@@ -5,10 +5,10 @@
       源码地址：
       <a href="https://github.com/FleyX/bookmark" target="_blank">github.com/FleyX/bookmark</a>
     </div>
-    <!-- <div>
+    <div>
       使用教程：
-      <a href="https://github.com/FleyX/bookmark" target="_blank">点击跳转</a>
-    </div> -->
+      <a href="https://blog.fleyx.com/blog/detail/20220329" target="_blank">点击跳转</a>
+    </div>
     <div>交流反馈qq群：150056494,邮箱：fleyx20@outlook.com</div>
     <div>
       统计：
