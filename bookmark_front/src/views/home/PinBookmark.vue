@@ -3,9 +3,6 @@
     <div class="oneLine">
       <pin-bookmark-item v-for="(item, index) in lineOne" :key="index" :pinObj="item" />
     </div>
-    <div class="oneLine">
-      <pin-bookmark-item v-for="(item, index) in lineTwo" :key="index" :pinObj="item" />
-    </div>
   </div>
 </template>
 
@@ -16,7 +13,7 @@ import { TREE_DATA, HOME_PIN_LIST } from "@/store/modules/treeData";
 /**
  * 首页网页固定
  */
-const LINE_NUM = 10;
+const LINE_NUM = 20;
 export default {
   name: "PinBookmark",
   components: { PinBookmarkItem },
@@ -30,16 +27,6 @@ export default {
         return this.homePinList.slice(0, LINE_NUM);
       }
     },
-    lineTwo() {
-      if (this.homePinList.length < LINE_NUM) {
-        return [];
-      }
-      if (this.homePinList.length - LINE_NUM < LINE_NUM) {
-        return [...this.homePinList.slice(LINE_NUM), null];
-      } else {
-        return this.homePinList.slice(LINE_NUM, LINE_NUM * 2);
-      }
-    },
   },
 };
 </script>
@@ -48,8 +35,11 @@ export default {
 .pinBookmark {
   .oneLine {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
+    margin: 0 auto;
+    max-width: 62em;
   }
 }
 </style>

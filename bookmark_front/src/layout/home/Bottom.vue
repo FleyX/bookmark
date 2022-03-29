@@ -1,5 +1,7 @@
 <template>
-  <div class="bottom">这是首页的底部</div>
+  <div class="bottom">
+    <router-link to="/public/about">关于</router-link>
+  </div>
 </template>
 
 <script>
@@ -14,6 +16,8 @@ export default {
 
 <style lang="less" scoped>
 .bottom {
-  height: 0.2rem;
+  height: 0.4rem;
+  padding: 0.1rem;
+  text-align: right;
 }
 </style>

@@ -16,6 +16,10 @@ export const HOME_PIN_LIST = "homePinList";
  * 刷新首页固定标签
  */
 export const refreshHomePinList = "refreshHomePinList";
+/**
+ * 通过id获取书签数据
+ */
+export const getById = "getById";
 export const noLoginInit = "noLoginInit";
 export const loginInit = "loginInit";
 export const refresh = "refresh";
@@ -52,10 +56,7 @@ const state = {
 };
 
 const getters = {
-	/**
-	 * 通过id获取节点数据
-	 */
-	getById: state => id => {
+	[getById]: state => id => {
 		let arr = Object.values(state[TOTAL_TREE_DATA]);
 		for (let i in arr) {
 			for (let j in arr[i]) {

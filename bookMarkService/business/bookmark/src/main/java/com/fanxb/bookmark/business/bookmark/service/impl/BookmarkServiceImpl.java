@@ -7,6 +7,7 @@ import com.fanxb.bookmark.business.api.UserApi;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
+import com.fanxb.bookmark.business.bookmark.entity.redis.BookmarkDeleteMessage;
 import com.fanxb.bookmark.business.bookmark.entity.redis.VisitNumPlus;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
 import com.fanxb.bookmark.business.bookmark.service.PinYinService;
@@ -187,7 +188,7 @@ public class BookmarkServiceImpl implements BookmarkService {
             bookmarkDao.deleteUserBookmark(userId, bookmarkIdList);
             set.addAll(bookmarkIdList.stream().map(String::valueOf).collect(Collectors.toSet()));
         }
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_DELETE_ES, set);
+        RedisUtil.addToMq(RedisConstant.BOOKMARK_DELETE_ES, new BookmarkDeleteMessage(userId, set));
         userApi.versionPlus(userId);
     }
 

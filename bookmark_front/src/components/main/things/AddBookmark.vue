@@ -44,7 +44,10 @@ export default {
   name: "addBookmark",
   props: {
     isAdd: Boolean, //是否新增
-    addType: String, //新增的类别
+    addType: {
+      type: String,
+      default: "bookmark",
+    }, //新增的类别
     targetNode: Object,
   },
   data() {
@@ -69,13 +72,15 @@ export default {
   },
   created() {
     console.log(this.isAdd, this.targetNode);
-    if (!this.isAdd) {
+    if (this.isAdd) {
+      this.form.type = this.addType;
+    } else {
       this.form.type = this.targetNode.type == 0 ? "bookmark" : "folder";
       this.form.name = this.targetNode.name;
       this.form.url = this.form.type === "bookmark" ? this.targetNode.url : "";
     }
     this.token = this.$store.state.globalConfig.token;
-    this.form.path = this.targetNode == null ? "" : this.targetNode.path + (this.isAdd ? "." + this.targetNode.bookmarkId : "");
+    this.form.path = !this.targetNode ? "" : this.targetNode.path + (this.isAdd ? "." + this.targetNode.bookmarkId : "");
   },
   methods: {
     /**
@@ -101,7 +106,7 @@ export default {
           await this.$store.dispatch("treeData/editNode", { node: this.targetNode, newName: this.form.name, newUrl: this.form.url, newIcon });
         }
         this.$message.success("操作成功");
-        this.$emit("close", this.form.type);
+        this.$emit("close", this.form.type, res);
         this.loading = false;
       });
     },

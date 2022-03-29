@@ -16,7 +16,7 @@
             <router-link to="manage">书签管理</router-link>
           </a-menu-item>
           <a-menu-item key="personSpace">
-            <router-link to="/manage/personSpace">个人中心</router-link>
+            <router-link to="/manage/personSpace/userInfo">个人中心</router-link>
           </a-menu-item>
           <a-menu-item key="logout">
             <a href="javascript:;">退出</a>
@@ -42,7 +42,6 @@ export default {
     async menuClick(item) {
       if (item.key == "logout") {
         await logoutClear();
-        // this.$router.replace("/public/login");
       }
     },
   },

@@ -288,7 +288,7 @@ export default {
       }
       this.loading = true;
       await HttpUtil.post("/bookmark/batchDelete", null, { pathList, bookmarkIdList });
-      this.$store.dispatch(TREE_DATA + "/" + deleteData, { pathList, bookmarkIdList });
+      await this.$store.dispatch(TREE_DATA + "/" + deleteData, { pathList, bookmarkIdList });
       //删除已经被删除的数据
       pathList.forEach((item) => {
         const id = parseInt(item.split(".").reverse()[0]);

@@ -43,7 +43,7 @@ export default {
   background-attachment: fixed;
 
   .content {
-    height: calc(~"100vh" - 1.01rem);
+    height: calc(~"100vh" - 1.21rem);
     display: flex;
     flex-direction: column;
     justify-content: space-around;

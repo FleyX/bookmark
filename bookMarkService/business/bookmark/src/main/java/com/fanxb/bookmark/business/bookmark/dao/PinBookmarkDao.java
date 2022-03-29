@@ -33,4 +33,12 @@ public interface PinBookmarkDao extends BaseMapper<PInBookmarkPo> {
      */
     @Select("select ifnull(max(sort),0) from pin_bookmark where userId=#{userId}")
     int getUserMaxSort(int userId);
+
+    /**
+     * 删除书签后，需要清理此表,将不存在的书签删除
+     *
+     * @param userId userId
+     * @author fanxb
+     */
+    void deleteUnExistBookmark(int userId);
 }

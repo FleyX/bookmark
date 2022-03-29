@@ -25,6 +25,7 @@ const routes = [
 			{ path: "register", component: () => import("@/views/public/register/index") },
 			{ path: "resetPassword", component: () => import("@/views/public/passwordReset/index") },
 			{ path: "oauth/github", component: () => import("@/views/public/oauth/github/index") },
+			{ path: "about", component: () => import("@/views/public/about/index") },
 			{ path: "404", component: () => import("@/views/public/notFound/index") },
 		]
 	},
