@@ -1,75 +1,65 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Main from "../views/main/Main.vue";
-import UserInfo from "../views/main/pages/personSpace/UserInfo.vue";
-import BookmarkManage from "../views/main/pages/things/BookmarkManage.vue";
-
-import Public from "../views/public/Public.vue";
-import Login from "../views/public/pages/Login.vue";
-import Register from "../views/public/pages/Register.vue";
-import ResetPassword from "../views/public/pages/ResetPassword.vue";
-import GithubOauth from "../views/public/pages/oauth/Github.vue";
+import * as vuex from "../store/index.js";
+import { GLOBAL_CONFIG, SUPPORT_NO_LOGIN, TOKEN } from "@/store/modules/globalConfig";
+import { checkJwtValid } from "@/util/UserUtil";
 
 Vue.use(VueRouter);
 
 const routes = [
-  {
-    path: "/",
-    component: Main,
-    children: [
-      {
-        path: "",
-        name: "BookmarkManage",
-        component: BookmarkManage
-      },
-      {
-        path: "personSpace/userInfo",
-        name: "UserInfo",
-        component: UserInfo
-      }
-    ]
-  },
-  {
-    path: "/public",
-    name: "Public",
-    component: Public,
-    children: [
-      {
-        path: "login",
-        name: "Login",
-        component: Login
-      },
-      {
-        path: "register",
-        name: "Register",
-        component: Register
-      },
-      {
-        path: "resetPassword",
-        name: "ResetPassword",
-        component: ResetPassword
-      },
-      {
-        path: "oauth/github",
-        name: "GithubRedirect",
-        component: GithubOauth
-      },
-      {
-        path: "notFound",
-        name: "NOTFOUND",
-        component: () => import("@/views/public/pages/NotFound")
-      }
-    ]
-  },
-  {
-    path: "*",
-    redirect: "/public/notFound"
-  }
+	{ path: "/", component: () => import("@/views/home/index") },
+	{
+		path: "/manage",
+		component: () => import("@/views/manage/index"),
+		children: [
+			{ path: "", redirect: "/manage/bookmarkTree" },
+			{ path: "bookmarkTree", component: () => import("@/views/manage/bookmarkTree/index") },
+			{ path: "personSpace/userInfo", component: () => import("@/views/manage/personSpace/index") },
+		]
+	},
+	{
+		path: "/public",
+		component: () => import("@/views/public/index"),
+		children: [
+			{ path: "login", component: () => import("@/views/public/login/index") },
+			{ path: "register", component: () => import("@/views/public/register/index") },
+			{ path: "resetPassword", component: () => import("@/views/public/passwordReset/index") },
+			{ path: "oauth/github", component: () => import("@/views/public/oauth/github/index") },
+			{ path: "about", component: () => import("@/views/public/about/index") },
+			{ path: "404", component: () => import("@/views/public/notFound/index") },
+		]
+	},
+	{ path: "*", redirect: "/public/404" }
 ];
 
 const router = new VueRouter({
-  mode: "history",
-  routes
+	mode: "history",
+	routes
 });
+
+/**
+ * 在此进行登录信息判断，以及重定向到登录页面
+ */
+router.beforeEach(async (to, from, next) => {
+	//进入主页面/管理页面时，确认已经进行初始化操作
+	if (to.path === '/' || to.path.startsWith("/manage")) {
+		await vuex.loginInit();
+	}
+	let supportNoLogin = to.path === '/' || to.path.startsWith("/public");
+	vuex.default.commit(GLOBAL_CONFIG + "/" + SUPPORT_NO_LOGIN, supportNoLogin);
+	if (!supportNoLogin && !checkJwtValid(vuex.default.state[GLOBAL_CONFIG][TOKEN])) {
+		//如不支持未登录进入，切jwt已过期，直接跳转到登录页面,并清理缓存
+		await vuex.default.dispatch("treeData/clear");
+		await vuex.default.dispatch("globalConfig/clear");
+		next({
+			path: "/public/login?to=" + btoa(location.href),
+			replace: true
+		});
+	} else {
+		next();
+	}
+})
+
+
 
 export default router;

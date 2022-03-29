@@ -9,7 +9,7 @@
         (#{username}, #{email}, #{icon}, #{password}, #{createTime}, #{lastLoginTime}, #{version})
     </insert>
 
-    <select id="selectByUsernameOrEmail" resultType="com.fanxb.bookmark.common.entity.User">
+    <select id="selectByUsernameOrEmail" resultType="com.fanxb.bookmark.common.entity.po.User">
         select *
         from user
         where username = #{name}
@@ -29,7 +29,7 @@
         where email = #{email}
     </update>
 
-    <select id="selectByUserIdOrGithubId" resultType="com.fanxb.bookmark.common.entity.User">
+    <select id="selectByUserIdOrGithubId" resultType="com.fanxb.bookmark.common.entity.po.User">
         select *
         from user
         where userId = #{userId}

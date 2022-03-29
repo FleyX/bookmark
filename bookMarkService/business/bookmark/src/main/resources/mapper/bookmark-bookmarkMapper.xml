@@ -13,7 +13,7 @@
     <select id="selectIdByUserIdAndNameAndPath" resultType="java.lang.Integer">
         select bookmarkId
         from bookmark
-        where userId = #{userId} and path = #{path} and name = #{name};
+        where userId = #{userId} and path = #{path} and name = #{name} limit 1;
     </select>
 
     <select id="selectMaxSort" resultType="java.lang.Integer">
@@ -22,7 +22,7 @@
         where userId = #{userId} and path = #{path}
     </select>
 
-    <select id="getListByUserId" resultType="com.fanxb.bookmark.common.entity.Bookmark">
+    <select id="getListByUserId" resultType="com.fanxb.bookmark.common.entity.po.Bookmark">
         select
         bookmarkId,
         path,
@@ -37,7 +37,7 @@
         order by path, sort
     </select>
 
-    <select id="getListByUserIdAndPath" resultType="com.fanxb.bookmark.common.entity.Bookmark">
+    <select id="getListByUserIdAndPath" resultType="com.fanxb.bookmark.common.entity.po.Bookmark">
         select
         bookmarkId,
         path,
@@ -75,7 +75,7 @@
         </foreach>
     </delete>
 
-    <update id="editBookmark" parameterType="com.fanxb.bookmark.common.entity.Bookmark">
+    <update id="editBookmark" parameterType="com.fanxb.bookmark.common.entity.po.Bookmark">
         update bookmark
         set name = #{name}, url = #{url},searchKey = #{searchKey},icon=#{icon}
         where bookmarkId = #{bookmarkId} and userId = #{userId}

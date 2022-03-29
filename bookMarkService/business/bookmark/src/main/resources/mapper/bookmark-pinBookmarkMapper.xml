@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fanxb.bookmark.business.bookmark.dao.PinBookmarkDao">
+
+    <delete id="deleteUnExistBookmark">
+        delete
+            a
+        from pin_bookmark a
+                 left join bookmark b on
+            a.bookmarkId = b.bookmarkId
+        where a.userId = #{userId}
+          and b.bookmarkId is null
+    </delete>
+
+</mapper>

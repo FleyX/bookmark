@@ -6,8 +6,8 @@ import com.fanxb.bookmark.business.user.dao.UserDao;
 import com.fanxb.bookmark.business.user.service.OauthService;
 import com.fanxb.bookmark.business.user.service.UserService;
 import com.fanxb.bookmark.business.user.vo.OauthBody;
-import com.fanxb.bookmark.common.constant.Constant;
-import com.fanxb.bookmark.common.entity.User;
+import com.fanxb.bookmark.common.constant.CommonConstant;
+import com.fanxb.bookmark.common.entity.po.User;
 import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.HttpUtil;
 import com.fanxb.bookmark.common.util.JwtUtil;
@@ -78,7 +78,7 @@ public class OauthServiceImpl implements OauthService {
             throw new CustomException("不支持的登陆方式" + body.getType());
         }
         User newest = dealOauth(current, other);
-        return JwtUtil.encode(Collections.singletonMap("userId", String.valueOf(newest.getUserId())), Constant.jwtSecret
+        return JwtUtil.encode(Collections.singletonMap("userId", String.valueOf(newest.getUserId())), CommonConstant.jwtSecret
                 , body.isRememberMe() ? LONG_EXPIRE_TIME : SHORT_EXPIRE_TIME);
     }
 

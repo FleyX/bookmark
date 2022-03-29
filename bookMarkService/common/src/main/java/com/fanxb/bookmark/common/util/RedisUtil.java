@@ -1,9 +1,6 @@
 package com.fanxb.bookmark.common.util;
 
 import com.alibaba.fastjson.JSON;
-import com.fanxb.bookmark.common.constant.RedisConstant;
-import com.fanxb.bookmark.common.entity.User;
-import com.fanxb.bookmark.common.entity.redis.UserBookmarkUpdate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;

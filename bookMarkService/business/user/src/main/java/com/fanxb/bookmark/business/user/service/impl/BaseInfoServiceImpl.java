@@ -6,9 +6,9 @@ import com.fanxb.bookmark.business.user.dao.UserDao;
 import com.fanxb.bookmark.business.user.service.BaseInfoService;
 import com.fanxb.bookmark.business.user.vo.EmailUpdateBody;
 import com.fanxb.bookmark.business.user.vo.UpdatePasswordBody;
-import com.fanxb.bookmark.common.constant.Constant;
+import com.fanxb.bookmark.common.constant.CommonConstant;
 import com.fanxb.bookmark.common.entity.MailInfo;
-import com.fanxb.bookmark.common.entity.User;
+import com.fanxb.bookmark.common.entity.po.User;
 import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +66,7 @@ public class BaseInfoServiceImpl implements BaseInfoService {
             throw new CustomException("密码校验失败，无法更新email");
         }
         String secret = UUID.randomUUID().toString().replaceAll("-", "");
-        String url = VERIFY_EMAIL.replaceAll("XXXX", Constant.serviceAddress + VERIFY_EMAIL_PATH + secret);
+        String url = VERIFY_EMAIL.replaceAll("XXXX", CommonConstant.serviceAddress + VERIFY_EMAIL_PATH + secret);
         log.debug(url);
         MailInfo info = new MailInfo(body.getEmail(), "验证邮箱", url);
         MailUtil.sendMail(info, true);

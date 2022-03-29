@@ -12,51 +12,54 @@ import router from "../router/index";
  * @param {*} redirect 接口返回未认证是否跳转到登陆
  * @returns 数据
  */
-async function request(url, method, params, body, isForm, redirect) {
-  let options = {
-    url,
-    baseURL: "/bookmark/api",
-    method,
-    params,
-    headers: {
-      "jwt-token": vuex.state.globalConfig.token
-    }
-  };
-  //如果是表单类型的请求，添加请求头
-  if (isForm) {
-    options.headers["Content-Type"] = "multipart/form-data";
-  }
-  if (body) {
-    options.data = body;
-  }
-  let res;
-  try {
-    res = await http.default.request(options);
-  } catch (err) {
-    window.vueInstance.$message.error("发生了某些异常问题");
-    console.error(err);
-    return;
-  }
-  const { code, data, message } = res.data;
-  if (code === 1) {
-    return data;
-  } else if (code === -1 && redirect) {
-    //未登陆，根据redirect参数判断是否需要跳转到登陆页
-    window.vueInstance.$message.error("您尚未登陆，请先登陆");
-    router.replace(`/public/login?redirect=${encodeURIComponent(router.currentRoute.fullPath)}`);
-    throw new Error(message);
-  } else if (code === 0) {
-    //通用异常，使用error提示
-    window.vueInstance.$notification.error({
-      message: "异常",
-      description: message
-    });
-    throw new Error(message);
-  } else if (code === -2) {
-    //表单异常，使用message提示
-    window.vueInstance.$message.error(message);
-    throw new Error(message);
-  }
+async function request (url, method, params, body, isForm, redirect) {
+	let options = {
+		url,
+		baseURL: "/bookmark/api",
+		method,
+		params,
+		headers: {
+			"jwt-token": window.jwtToken
+		}
+	};
+	//如果是表单类型的请求，添加请求头
+	if (isForm) {
+		options.headers["Content-Type"] = "multipart/form-data";
+	}
+	if (body) {
+		options.data = body;
+	}
+	let res;
+	try {
+		res = await http.default.request(options);
+	} catch (err) {
+		window.vueInstance.$message.error("网络连接异常");
+		console.error(err);
+		throw err;
+	}
+	const { code, data, message } = res.data;
+	if (code === 1) {
+		return data;
+	} else if (code === -1 && redirect) {
+		//未登陆，根据redirect参数判断是否需要跳转到登陆页
+		window.vueInstance.$message.error("您尚未登陆，请先登陆");
+		//跳转到登录页面需要清理缓存
+		await this.$store.dispatch("treeData/clear");
+		await this.$store.dispatch("globalConfig/clear");
+		router.replace(`/public/login?redirect=${encodeURIComponent(router.currentRoute.fullPath)}`);
+		throw new Error(message);
+	} else if (code === 0) {
+		//通用异常，使用error提示
+		window.vueInstance.$notification.error({
+			message: "异常",
+			description: message
+		});
+		throw new Error(message);
+	} else if (code === -2) {
+		//表单异常，使用message提示
+		window.vueInstance.$message.error(message);
+		throw new Error(message);
+	}
 }
 
 /**
@@ -65,8 +68,8 @@ async function request(url, method, params, body, isForm, redirect) {
  * @param {*} params url参数
  * @param {*} redirect 未登陆是否跳转到登陆页
  */
-async function get(url, params = null, redirect = true) {
-  return request(url, "get", params, null, false, redirect);
+async function get (url, params = null, redirect = true) {
+	return request(url, "get", params, null, false, redirect);
 }
 
 /**
@@ -77,8 +80,8 @@ async function get(url, params = null, redirect = true) {
  * @param {*} isForm 是否表单数据
  * @param {*} redirect 是否重定向
  */
-async function post(url, params, body, isForm = false, redirect = true) {
-  return request(url, "post", params, body, isForm, redirect);
+async function post (url, params, body, isForm = false, redirect = true) {
+	return request(url, "post", params, body, isForm, redirect);
 }
 
 /**
@@ -89,8 +92,8 @@ async function post(url, params, body, isForm = false, redirect = true) {
  * @param {*} isForm 是否表单数据
  * @param {*} redirect 是否重定向
  */
-async function put(url, params, body, isForm = false, redirect = true) {
-  return request(url, "put", params, body, isForm, redirect);
+async function put (url, params, body, isForm = false, redirect = true) {
+	return request(url, "put", params, body, isForm, redirect);
 }
 
 /**
@@ -99,13 +102,13 @@ async function put(url, params, body, isForm = false, redirect = true) {
  * @param {*} params url参数
  * @param {*} redirect 是否重定向
  */
-async function deletes(url, params = null, redirect = true) {
-  return request(url, "delete", params, null, redirect);
+async function deletes (url, params = null, redirect = true) {
+	return request(url, "delete", params, null, redirect);
 }
 
 export default {
-  get,
-  post,
-  put,
-  delete: deletes
+	get,
+	post,
+	put,
+	delete: deletes
 };

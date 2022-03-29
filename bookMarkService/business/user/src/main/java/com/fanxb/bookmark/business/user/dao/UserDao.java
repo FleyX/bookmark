@@ -1,7 +1,6 @@
 package com.fanxb.bookmark.business.user.dao;
 
-import com.fanxb.bookmark.common.entity.User;
-import com.fanxb.bookmark.common.entity.redis.UserBookmarkUpdate;
+import com.fanxb.bookmark.common.entity.po.User;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -33,7 +32,7 @@ public interface UserDao {
      *
      * @param name  username
      * @param email email
-     * @return com.fanxb.bookmark.common.entity.User
+     * @return com.fanxb.bookmark.common.entity.po.User
      * @author fanxb
      * @date 2019/7/6 16:45
      */
@@ -64,7 +63,7 @@ public interface UserDao {
      *
      * @param userId   userId
      * @param githubId githubId
-     * @return com.fanxb.bookmark.common.entity.User
+     * @return com.fanxb.bookmark.common.entity.po.User
      * @author fanxb
      * @date 2019/7/30 16:08
      */

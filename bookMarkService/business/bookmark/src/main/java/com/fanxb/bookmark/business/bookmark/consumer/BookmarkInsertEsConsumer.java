@@ -6,7 +6,7 @@ import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.common.annotation.MqConsumer;
 import com.fanxb.bookmark.common.constant.EsConstant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
-import com.fanxb.bookmark.common.entity.Bookmark;
+import com.fanxb.bookmark.common.entity.po.Bookmark;
 import com.fanxb.bookmark.common.entity.EsEntity;
 import com.fanxb.bookmark.common.entity.redis.RedisConsumer;
 import com.fanxb.bookmark.common.util.EsUtil;

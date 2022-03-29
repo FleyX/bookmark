@@ -1,19 +1,54 @@
 <template>
   <div class="search">
-    <a-input-search id="searchInput" ref="searchInput" size="large" style="width: 100%" v-model="value" @change="search" @search="searchClick" allowClear @blur.prevent="inputBlur" @focus="inputFocus" @keydown="keyPress">
-      <a-tooltip title="全网搜索" slot="enterButton">
-        <a-button icon="search" type="primary" />
-      </a-tooltip>
-    </a-input-search>
-    <div v-if="focused && searchBookmark" class="searchContent">
-      <a-empty v-if="list.length == 0" />
-      <div class="listItem" :class="{ itemActive: index == hoverIndex || index == selectIndex }" v-for="(item, index) in list" :key="item.bookmarkId" @mouseenter="mouseEnterOut(index, 'enter')" @mouseleave="mouseEnterOut(index, 'leave')" @mouseup="onMouse">
-        <a class="listItemUrl" style="padding-right: 1em;min-width:3em; max-width: calc(100% - 2em)" :id="'bookmark:' + item.bookmarkId" :href="item.url" @click="itemClick($event,index)" target="_blank">
+    <div :class="{ listShow: focused && list.length > 0 }" class="newSearch">
+      <input ref="searchInput" class="input" type="text" v-model="value" @keydown="keyPress" @focus="inputFocus" @blur="inputBlur" />
+      <div class="action">
+        <a-dropdown :trigger="['click']">
+          <a-tooltip title="点击切换网页搜索">
+            <my-icon class="icon" style="margin-right: 0.5em" :type="searchIcon" />
+          </a-tooltip>
+          <a-menu slot="overlay" @click="searchEngineChange">
+            <a-menu-item key="google">谷歌</a-menu-item>
+            <a-menu-item key="bing">bing</a-menu-item>
+            <a-menu-item key="baidu">baidu</a-menu-item>
+          </a-menu>
+        </a-dropdown>
+        <a-icon class="icon" type="search" @click="submit(true)" />
+      </div>
+    </div>
+    <div v-if="focused && list.length > 0" class="searchContent">
+      <div
+        class="listItem"
+        :class="{ itemActive: index == selectIndex }"
+        v-for="(item, index) in list"
+        :key="item.bookmarkId"
+        @mousedown="itemClick(index)"
+        :id="'bookmark:' + item.bookmarkId"
+      >
+        <div class="name" target="_blank" :title="item.url.substr(0, 50)">
           {{ item.name }}
-        </a>
-        <a-tooltip v-if="showActions && hoverIndex === index" title="定位到书签树中">
-          <my-icon style="color: #40a9ff; font-size: 1.3em; cursor: pointer" type="icon-et-location" @click="location(item)" />
-        </a-tooltip>
+        </div>
+        <div class="icons">
+          <a-tooltip title="定位到书签树中" v-if="showLocation">
+            <my-icon style="color: white; font-size: 1.3em" type="icon-et-location" @mousedown="location($event, item)" />
+          </a-tooltip>
+          <a-tooltip title="复制链接">
+            <a-icon
+              type="copy"
+              style="color: white; font-size: 1.3em; padding-left: 0.5em"
+              class="search-copy-to-board"
+              @mousedown.prevent="copy($event, item)"
+              :data="item.url"
+            />
+          </a-tooltip>
+          <a-icon
+            v-if="!homePinBookmarkIdMap[item.bookmarkId]"
+            style="color: white; font-size: 1.3em; padding-left: 0.5em"
+            type="pushpin"
+            title="固定到首页"
+            @mousedown.prevent="pinBookmark($event, item)"
+          />
+        </div>
       </div>
     </div>
     <a ref="targetA" style="left: 1000000px" target="_blank" />
@@ -23,143 +58,138 @@
 <script>
 import HttpUtil from "@/util/HttpUtil";
 import { mapState } from "vuex";
+import ClipboardJS from "clipboard";
+import { GLOBAL_CONFIG, USER_INFO } from "@/store/modules/globalConfig";
+import { TREE_DATA, refreshHomePinList, HOME_PIN_BOOKMARK_ID_MAP } from "@/store/modules/treeData";
 export default {
   name: "Search",
   props: {
-    //是否显示定位等按钮
-    showActions: Boolean,
+    showLocation: Boolean, //是否显示定位等按钮
   },
   data() {
     return {
       value: "",
       focused: false,
       list: [],
-      //计时器结束列表的显示
-      timer: null,
-      //鼠标悬浮选中
-      hoverIndex: null,
       //上下选中
       selectIndex: null,
-      //是否搜索书签
-      searchBookmark: true,
+      copyBoard: null, //剪贴板对象
     };
   },
+  mounted() {
+    //初始化clipboard
+    this.copyBoard = new ClipboardJS(".search-copy-to-board", {
+      text: function (trigger) {
+        return trigger.attributes.data.nodeValue;
+      },
+    });
+    this.copyBoard.on("success", (e) => {
+      this.$message.success("复制成功");
+      e.clearSelection();
+    });
+  },
+  destroyed() {
+    if (this.copyBoard != null) {
+      this.copyBoard.destroy();
+    }
+  },
   computed: {
-    ...mapState("treeData", ["totalTreeData"]),
+    ...mapState("treeData", ["totalTreeData", HOME_PIN_BOOKMARK_ID_MAP]),
     ...mapState("globalConfig", ["userInfo"]),
+    searchIcon() {
+      let search = this.userInfo != null ? this.userInfo.defaultSearchEngine : "baidu";
+      return search === "baidu" ? "icon-baidu" : search === "bing" ? "icon-bing" : "icon-google";
+    },
+    searchUrl() {
+      let search = this.userInfo && this.userInfo.defaultSearchEngine ? this.userInfo.defaultSearchEngine : "baidu";
+      return search === "baidu"
+        ? "https://www.baidu.com/s?ie=UTF-8&wd="
+        : search === "bing"
+        ? "https://www.bing.com/search?q="
+        : "https://www.google.com/search?q=";
+    },
+  },
+  watch: {
+    value(newVal, oldVal) {
+      this.search(newVal);
+    },
   },
   methods: {
     search(content) {
-      this.value = content.target.value;
-      let val = content.target.value.toLocaleLowerCase().trim();
-      if (val === "") {
+      console.log(content);
+      let val = content.toLocaleLowerCase().trim();
+      if (val === "" || this.userInfo == null) {
         this.list = [];
-        return;
-      }
-      let time1 = Date.now();
-      this.list = this.dealSearch(val);
-      this.selectIndex = 0;
-      console.info("搜索耗时：" + (Date.now() - time1));
-    },
-    /**
-     * 初始化数据
-     */
-    init() {
-      this.focused = false;
-      this.value = "";
-      this.list = [];
-      this.selectIndex = null;
-    },
-    searchClick(value, e) {
-      //如果是enter按键触发的不作处理
-      if (e && e.key) {
-        return;
-      }
-      if (this.timer != null) {
-        clearTimeout(this.timer);
-      }
-      switch (this.userInfo.defaultSearchEngine) {
-        case "bing":
-          window.open("https://www.bing.com/search?q=" + encodeURIComponent(this.value));
-          break;
-        case "google":
-          window.open("https://www.google.com/search?q=" + encodeURIComponent(this.value));
-          break;
-        default:
-          window.open("https://www.baidu.com/s?ie=UTF-8&wd=" + encodeURIComponent(this.value));
+      } else {
+        this.list = this.dealSearch(val);
       }
     },
-    itemClick(e, index) {
-      if (e) {
-        this.stopDefault(e);
+    //下方列表点击
+    itemClick(index) {
+      this.selectIndex = index;
+      this.submit();
+    },
+    //搜索或者跳转到书签
+    submit(forceSearch) {
+      let url;
+      if (forceSearch || this.selectIndex == null) {
+        //说明使用网页搜索
+        url = this.searchUrl + encodeURIComponent(this.value);
+      } else {
+        //说明跳转到书签
+        let bookmark = this.list[this.selectIndex];
+        HttpUtil.post("/bookmark/visitNum", { id: bookmark.bookmarkId });
+        url = bookmark.url;
       }
-      if (index === undefined || index === null) {
-        return;
-      }
-      let bookmark = this.list[index];
-      HttpUtil.post("/bookmark/visitNum", { id: bookmark.bookmarkId });
       let a = this.$refs["targetA"];
-      a.href = bookmark.url;
+      a.href = url;
       a.click();
-      return false;
     },
     inputBlur() {
-      console.log("blur");
-      this.timer = setTimeout(() => (this.focused = false), 250);
+      this.focused = false;
     },
     inputFocus() {
       this.focused = true;
     },
-    onMouse(e) {
-      if (this.timer != null) {
-        clearTimeout(this.timer);
-      }
-      this.$refs["searchInput"].focus();
-    },
-    mouseEnterOut(item, type) {
-      if (type === "enter") {
-        this.hoverIndex = item;
-      } else {
-        this.hoverIndex = null;
-      }
-    },
     //定位到书签树中
-    location(item) {
+    location(event, item) {
       this.$emit("location", item);
+      event.stopPropagation();
     },
     /**
      * 键盘事件处理
      */
     keyPress(e) {
-      switch (e.key) {
-        case "ArrowUp":
+      if (e.key === "Enter") {
+        this.submit();
+        return this.stopDefault();
+      } else if (this.list.length > 0) {
+        if (e.key === "ArrowUp") {
           this.selectIndex = this.selectIndex == null ? this.list.length - 1 : this.selectIndex == 0 ? null : this.selectIndex - 1;
-          this.stopDefault();
-          break;
-        case "ArrowDown":
+          return this.stopDefault();
+        } else if (e.key === "ArrowDown" || e.key === "Tab") {
           this.selectIndex = this.selectIndex == null ? 0 : this.selectIndex == this.list.length - 1 ? null : this.selectIndex + 1;
-          this.stopDefault();
-          break;
-        case "Enter":
-          if (this.searchBookmark) {
-            this.itemClick(e, this.selectIndex);
-          } else {
-            this.searchClick();
-          }
-          break;
-        case "Tab":
-          this.searchBookmark = !this.searchBookmark;
-          if (this.searchBookmark) {
-            this.$message.info("书签搜索");
-          } else {
-            this.$message.info("全网搜索");
-          }
-          this.stopDefault();
-          break;
-        case "Escape":
-          this.init();
-          this.$refs["searchInput"].blur();
+          return this.stopDefault();
+        }
       }
+    },
+    //修改默认搜索引擎
+    async searchEngineChange(item) {
+      if (this.userInfo == null) {
+        this.$message.warning("未登录，请登录后操作");
+        return;
+      }
+      if (item.key !== this.userInfo.defaultSearchEngine) {
+        await HttpUtil.post("/baseInfo/updateSearchEngine", null, { defaultSearchEngine: item.key });
+        this.userInfo.defaultSearchEngine = item.key;
+        this.$store.commit(GLOBAL_CONFIG + "/" + USER_INFO, this.userInfo);
+      }
+    },
+    //固定书签到首页
+    async pinBookmark(event, { bookmarkId }) {
+      this.stopDefault(event);
+      await HttpUtil.put("/home/pin", null, { bookmarkId });
+      await this.$store.dispatch(TREE_DATA + "/" + refreshHomePinList);
     },
     dealSearch(content) {
       let res = [];
@@ -180,6 +210,10 @@ export default {
       }
       return res;
     },
+    //复制
+    async copy(event) {
+      return this.stopDefault(event);
+    },
     /**
      * 阻止默认事件
      */
@@ -187,9 +221,11 @@ export default {
       //阻止默认浏览器动作(W3C)
       if (e && e.preventDefault) {
         e.preventDefault();
+        e.stopPropagation();
       } else {
         window.event.returnValue = false;
       }
+      console.log("阻止成功");
       return false;
     },
   },
@@ -197,31 +233,84 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@inputBgColor: rgb(74, 74, 74);
+@listBgColor: #2b2b2b;
+@textColor: white;
+@listActiveBgColor: #454545;
 .search {
   position: relative;
+  .listShow {
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+  .newSearch {
+    display: flex;
+    align-items: center;
+    background-color: @inputBgColor;
+    border-radius: 0.18rem;
+    overflow: hidden;
+    font-size: 1.2em;
+    color: @textColor;
+    .input {
+      flex: 1;
+      border: 0;
+      background-color: @inputBgColor;
+      padding: 0.1rem;
+      padding-left: 0.19rem;
+      outline: none;
+    }
+    .action {
+      padding: 0.1rem;
+      padding-right: 0.19rem;
+      display: flex;
+      align-items: center;
+      .icon {
+        color: @textColor;
+        cursor: pointer;
+        font-size: 1.3em;
+      }
+    }
+  }
+
   .searchContent {
     position: absolute;
     width: 100%;
-    background: white;
+    background: @listBgColor;
     z-index: 1;
-    border: 1px solid black;
-    border-top: 0;
-    padding: 5px;
-    border-radius: 5px;
+    border-top: 1px solid white;
+    border-bottom-left-radius: 0.18rem;
+    border-bottom-right-radius: 0.18rem;
+    overflow: hidden;
     .listItem {
       font-size: 0.16rem;
       display: flex;
+      align-items: center;
       height: 0.3rem;
       line-height: 0.3rem;
-      align-items: center;
-      .listItemUrl {
+      color: @textColor;
+      margin: 0.05rem 0 0.05rem 0;
+      padding: 0 0.19rem 0 0.19rem;
+      cursor: pointer;
+      .name {
+        padding-right: 1em;
+        max-width: calc(100% - 2em);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
+      .icons {
+        display: none;
+        align-items: center;
+      }
+    }
+    .listItem:hover {
+      background-color: @listActiveBgColor;
     }
     .itemActive {
-      background-color: #aca6a6;
+      background-color: @listActiveBgColor;
+    }
+    .listItem:hover .icons {
+      display: flex;
     }
   }
 }

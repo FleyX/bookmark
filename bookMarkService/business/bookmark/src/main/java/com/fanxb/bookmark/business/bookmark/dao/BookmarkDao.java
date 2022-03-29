@@ -3,7 +3,7 @@ package com.fanxb.bookmark.business.bookmark.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.redis.VisitNumPlus;
-import com.fanxb.bookmark.common.entity.Bookmark;
+import com.fanxb.bookmark.common.entity.po.Bookmark;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -57,7 +57,7 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      * Description: 根据用户id获取其所有数据
      *
      * @param userId userid
-     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @return java.util.List<com.fanxb.bookmark.common.entity.po.Bookmark>
      * @author fanxb
      * @date 2019/7/9 18:55
      */
@@ -68,7 +68,7 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      *
      * @param userId userId
      * @param path   path
-     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @return java.util.List<com.fanxb.bookmark.common.entity.po.Bookmark>
      * @author fanxb
      * @date 2019/7/17 14:48
      */
@@ -219,7 +219,7 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      *
      * @param userId 用户id
      * @param num    num
-     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @return java.util.List<com.fanxb.bookmark.common.entity.po.Bookmark>
      * @author fanxb
      * @date 2021/8/20 上午11:52
      */
@@ -232,7 +232,7 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      * @param userId userId
      * @param start  开始
      * @param size   数量
-     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @return java.util.List<com.fanxb.bookmark.common.entity.po.Bookmark>
      * @author fanxb
      * @date 2021/8/20 下午12:02
      */
@@ -254,7 +254,7 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
      * 查询一个用户全部的书签路径
      *
      * @param userId userId
-     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @return java.util.List<com.fanxb.bookmark.common.entity.po.Bookmark>
      * @author fanxb
      * @date 2021/8/20 上午11:58
      */

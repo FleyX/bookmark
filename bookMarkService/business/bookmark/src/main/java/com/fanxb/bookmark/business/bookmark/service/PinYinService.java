@@ -1,6 +1,6 @@
 package com.fanxb.bookmark.business.bookmark.service;
 
-import com.fanxb.bookmark.common.entity.Bookmark;
+import com.fanxb.bookmark.common.entity.po.Bookmark;
 
 import java.util.List;
 
@@ -38,7 +38,7 @@ public interface PinYinService {
      * 处理bookmark searchKey
      *
      * @param bookmark 处理单个
-     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @return java.util.List<com.fanxb.bookmark.common.entity.po.Bookmark>
      * @author fanxb
      * @date 2021/3/13
      **/
@@ -48,7 +48,7 @@ public interface PinYinService {
      * 处理bookmarks searchKey
      *
      * @param bookmarks 待处理舒淇啊你列表
-     * @return java.util.List<com.fanxb.bookmark.common.entity.Bookmark>
+     * @return java.util.List<com.fanxb.bookmark.common.entity.po.Bookmark>
      * @author fanxb
      * @date 2021/3/13
      **/

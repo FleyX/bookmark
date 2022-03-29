@@ -7,13 +7,12 @@ import com.fanxb.bookmark.business.user.constant.FileConstant;
 import com.fanxb.bookmark.business.user.dao.UserDao;
 import com.fanxb.bookmark.business.user.service.UserService;
 import com.fanxb.bookmark.business.user.vo.LoginBody;
-import com.fanxb.bookmark.business.user.vo.LoginRes;
 import com.fanxb.bookmark.business.user.vo.RegisterBody;
-import com.fanxb.bookmark.common.constant.Constant;
+import com.fanxb.bookmark.common.constant.CommonConstant;
 import com.fanxb.bookmark.common.constant.NumberConstant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.MailInfo;
-import com.fanxb.bookmark.common.entity.User;
+import com.fanxb.bookmark.common.entity.po.User;
 import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.exception.FormDataException;
 import com.fanxb.bookmark.common.util.*;
@@ -69,12 +68,12 @@ public class UserServiceImpl implements UserService {
         info.setContent("欢迎注册 签签世界 ，本次验证码");
         info.setContent(code + " 是您的验证码，注意验证码有效期为15分钟哦！");
         info.setReceiver(email);
-        if (Constant.isDev) {
+        if (CommonConstant.isDev) {
             code = "123456";
         } else {
             MailUtil.sendTextMail(info);
         }
-        RedisUtil.set(Constant.authCodeKey(email), code, Constant.AUTH_CODE_EXPIRE);
+        RedisUtil.set(CommonConstant.authCodeKey(email), code, CommonConstant.AUTH_CODE_EXPIRE);
     }
 
     /**
@@ -105,7 +104,7 @@ public class UserServiceImpl implements UserService {
         userDao.addOne(user);
         Map<String, String> data = new HashMap<>(1);
         data.put("userId", String.valueOf(user.getUserId()));
-        return JwtUtil.encode(data, Constant.jwtSecret, LONG_EXPIRE_TIME);
+        return JwtUtil.encode(data, CommonConstant.jwtSecret, LONG_EXPIRE_TIME);
     }
 
     /**
@@ -130,7 +129,7 @@ public class UserServiceImpl implements UserService {
         }
         redisTemplate.delete(key);
         userDao.updateLastLoginTime(System.currentTimeMillis(), userInfo.getUserId());
-        return JwtUtil.encode(Collections.singletonMap("userId", String.valueOf(userInfo.getUserId())), Constant.jwtSecret
+        return JwtUtil.encode(Collections.singletonMap("userId", String.valueOf(userInfo.getUserId())), CommonConstant.jwtSecret
                 , body.isRememberMe() ? LONG_EXPIRE_TIME : SHORT_EXPIRE_TIME);
     }
 
@@ -146,7 +145,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new FormDataException("用户不存在");
         }
-        String codeKey = Constant.authCodeKey(body.getEmail());
+        String codeKey = CommonConstant.authCodeKey(body.getEmail());
         String realCode = RedisUtil.get(codeKey, String.class);
         if (StringUtil.isEmpty(realCode) || (!realCode.equals(body.getAuthCode()))) {
             throw new FormDataException("验证码错误");
@@ -160,7 +159,7 @@ public class UserServiceImpl implements UserService {
      * Description: 根据userId获取用户信息
      *
      * @param userId userId
-     * @return com.fanxb.bookmark.common.entity.User
+     * @return com.fanxb.bookmark.common.entity.po.User
      * @author fanxb
      * @date 2019/7/30 15:57
      */
@@ -184,7 +183,7 @@ public class UserServiceImpl implements UserService {
         String fileName = file.getOriginalFilename();
         assert fileName != null;
         String path = Paths.get(FileConstant.iconPath, userId + "." + System.currentTimeMillis() + fileName.substring(fileName.lastIndexOf("."))).toString();
-        Path realPath = Paths.get(Constant.fileSavePath, path);
+        Path realPath = Paths.get(CommonConstant.fileSavePath, path);
         FileUtil.ensurePathExist(realPath.getParent().toString());
         file.transferTo(realPath);
         path = File.separator + path;

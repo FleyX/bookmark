@@ -3,17 +3,17 @@ package com.fanxb.bookmark.business.bookmark.service.impl;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fanxb.bookmark.business.api.UserApi;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
+import com.fanxb.bookmark.business.bookmark.entity.redis.BookmarkDeleteMessage;
 import com.fanxb.bookmark.business.bookmark.entity.redis.VisitNumPlus;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
 import com.fanxb.bookmark.business.bookmark.service.PinYinService;
 import com.fanxb.bookmark.common.constant.EsConstant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
-import com.fanxb.bookmark.common.entity.Bookmark;
+import com.fanxb.bookmark.common.entity.po.Bookmark;
 import com.fanxb.bookmark.common.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -188,7 +188,7 @@ public class BookmarkServiceImpl implements BookmarkService {
             bookmarkDao.deleteUserBookmark(userId, bookmarkIdList);
             set.addAll(bookmarkIdList.stream().map(String::valueOf).collect(Collectors.toSet()));
         }
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_DELETE_ES, set);
+        RedisUtil.addToMq(RedisConstant.BOOKMARK_DELETE_ES, new BookmarkDeleteMessage(userId, set));
         userApi.versionPlus(userId);
     }
 
@@ -201,11 +201,11 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setUserId(userId);
         bookmark.setCreateTime(System.currentTimeMillis());
         bookmark.setAddTime(bookmark.getCreateTime());
+        bookmark.setIcon(getIconBase64(bookmark.getUrl()));
         //文件夹和书签都建立搜索key
         pinYinService.changeBookmark(bookmark);
         bookmarkDao.insertOne(bookmark);
         userApi.versionPlus(userId);
-        ThreadPoolUtil.execute(() -> bookmarkDao.updateIcon(bookmark.getBookmarkId(), getIconBase64(bookmark.getUrl())));
         return bookmark;
     }
 
