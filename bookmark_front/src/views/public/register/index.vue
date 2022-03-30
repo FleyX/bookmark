@@ -81,12 +81,12 @@ export default {
     };
   },
   methods: {
-    submit() {
+    async submit() {
       let _this = this;
       this.$refs.registerForm.validate(async (status) => {
         if (status) {
           let res = await httpUtil.put("/user", null, _this.form);
-          this.$store.dispatch("globalConfig/setToken", res);
+          await this.$store.dispatch("globalConfig/setToken", res);
           this.$router.replace("/");
         }
       });
