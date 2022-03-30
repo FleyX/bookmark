@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a href="pinObj.url" v-if="pinObj" class="pinBookmarkItem">
+    <a :href="pinObj.url" v-if="pinObj" class="pinBookmarkItem" target="_blank">
       <img :src="pinObj.icon.length > 0 ? pinObj.icon : '/favicon.ico'" class="icon" />
       <span class="text" :title="pinObj.name">{{ pinObj.name }}</span>
       <a-dropdown :trigger="['click']">
