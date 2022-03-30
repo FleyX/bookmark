@@ -2,6 +2,9 @@ import localforage from "localforage";
 import { checkJwtValid } from "@/util/UserUtil";
 import HttpUtil from "../../util/HttpUtil";
 
+/**书签版本检查间隔 */
+const CHECK_INTERVAL = 5 * 60 * 1000;
+// const CHECK_INTERVAL = 5 * 1000;
 export const TREE_DATA = "treeData";
 export const TOTAL_TREE_DATA = "totalTreeData";
 export const VERSION = "version";
@@ -83,8 +86,7 @@ const actions = {
 		await treeDataCheck(context, true);
 		context.commit(IS_INIT, true);
 		context.commit(IS_INITING, false);
-		timer = setInterval(() => treeDataCheck(context, false), 5 * 60 * 1000);
-		// timer = setInterval(() => treeDataCheck(context, false), 5 * 1000);
+		timer = setInterval(() => treeDataCheck(context, false), CHECK_INTERVAL);
 	},
 	/**
 	 * 确保数据加载完毕
@@ -118,6 +120,7 @@ const actions = {
 		);
 		let version = await HttpUtil.get("/user/version");
 		await context.dispatch("updateVersion", version);
+		await context.dispatch(refreshHomePinList);
 		context.commit(TOTAL_TREE_DATA, treeData);
 		await localforage.setItem(TOTAL_TREE_DATA, treeData);
 	},
@@ -325,7 +328,7 @@ async function treeDataCheck (context, isFirst) {
 	}
 	let realVersion = await HttpUtil.get("/user/version");
 	if (realVersion !== context.state[VERSION]) {
-		if (SHOW_REFRESH_TOAST && !isFirst) {
+		if (context.state[SHOW_REFRESH_TOAST] && !isFirst) {
 			//如果在书签管理页面需要弹窗提示
 			window.vueInstance.$confirm({
 				title: "书签数据有更新，是否立即刷新？",
@@ -336,7 +339,7 @@ async function treeDataCheck (context, isFirst) {
 				onOk () {
 					toastShow = false;
 					return new Promise(async (resolve) => {
-						await context.dispatch("refresh");
+						await context.dispatch(refresh);
 						resolve();
 					});
 				},
