@@ -1,5 +1,5 @@
 <template>
-  <div class="main">
+  <div class="main" :style="{ background: backgroundImg }">
     <top />
     <div class="content">
       <search :style="{ width: isPhone ? '100%' : '60%' }" />
@@ -15,7 +15,7 @@ import Bottom from "@/layout/home/Bottom.vue";
 import Search from "@/components/main/Search.vue";
 import PinBookmark from "./PinBookmark.vue";
 import { mapState } from "vuex";
-import { GLOBAL_CONFIG, IS_PHONE } from "@/store/modules/globalConfig";
+import { GLOBAL_CONFIG, IS_PHONE, SERVER_CONFIG } from "@/store/modules/globalConfig";
 export default {
   name: "HOME",
   components: {
@@ -28,7 +28,11 @@ export default {
     return {};
   },
   computed: {
-    ...mapState(GLOBAL_CONFIG, [IS_PHONE, IS_PHONE]),
+    ...mapState(GLOBAL_CONFIG, [IS_PHONE, SERVER_CONFIG]),
+    backgroundImg() {
+      let url = this.serverConfig.bingImgSrc ? this.serverConfig.bingImgSrc : "/static/img/homeBg.jpg";
+      return `url("${url}") no-repeat center center`;
+    },
   },
   methods: {},
 };
@@ -38,7 +42,6 @@ export default {
 .main {
   width: 100%;
   height: 100vh;
-  background: url("/static/img/homeBg.jpg") no-repeat center center;
   background-size: cover;
   background-attachment: fixed;
 

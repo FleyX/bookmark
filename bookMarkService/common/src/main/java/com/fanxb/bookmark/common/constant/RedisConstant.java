@@ -35,4 +35,6 @@ public class RedisConstant {
     public static String getUserFailCountKey(String username) {
         return "bookmark_user_fail_count_" + username;
     }
+
+    public static final String BING_IMG = "bing_img";
 }

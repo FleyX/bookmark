@@ -91,6 +91,10 @@ proxy:
 # url icon服务提供地址
 urlIconAddress: http://localhost:11001
 
+bing:
+  host: https://cn.bing.com
+  onePic: /HPImageArchive.aspx?format=js&idx=0&n=1
+
 # 管理员用户id(因为目前尚未设计分角色权限系统，须指定管理员用户id)
 manageUserId: -1
 
