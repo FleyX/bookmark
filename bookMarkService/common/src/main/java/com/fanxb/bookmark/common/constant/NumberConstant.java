@@ -13,4 +13,8 @@ public class NumberConstant {
      * 2^10
      */
     public static final int K_SIZE = 1024;
+    /**
+     * 一天的秒数
+     */
+    public static final int S_DAY = 24 * 60 * 60;
 }

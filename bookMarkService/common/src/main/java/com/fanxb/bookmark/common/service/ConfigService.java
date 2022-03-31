@@ -1,6 +1,6 @@
 package com.fanxb.bookmark.common.service;
 
-import java.util.Map;
+import com.fanxb.bookmark.common.entity.vo.GlobalConfigVo;
 
 /**
  * 全局配置相关
@@ -17,5 +17,12 @@ public interface ConfigService {
      * @author fanxb
      * @date 2021/9/15 下午9:58
      */
-    Map<String, Object> getGlobalConfig();
+    GlobalConfigVo getGlobalConfig();
+
+    /**
+     * 缓存bing每日一图到redis
+     *
+     * @author fanxb
+     */
+    String getCacheBingImg();
 }
