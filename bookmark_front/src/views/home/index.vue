@@ -1,5 +1,5 @@
 <template>
-  <div class="main" :style="{ background: backgroundImg }">
+  <div class="main" :style="{ backgroundImage: backgroundImg }">
     <top />
     <div class="content">
       <search :style="{ width: isPhone ? '100%' : '60%' }" />
@@ -31,7 +31,7 @@ export default {
     ...mapState(GLOBAL_CONFIG, [IS_PHONE, SERVER_CONFIG]),
     backgroundImg() {
       let url = this.serverConfig.bingImgSrc ? this.serverConfig.bingImgSrc : "/static/img/homeBg.jpg";
-      return `url("${url}") no-repeat center center`;
+      return `url("${url}")`;
     },
   },
   methods: {},
@@ -42,8 +42,8 @@ export default {
 .main {
   width: 100%;
   height: 100vh;
+  background-repeat: no-repeat;
   background-size: cover;
-  background-attachment: fixed;
 
   .content {
     height: calc(~"100vh" - 1.21rem);
