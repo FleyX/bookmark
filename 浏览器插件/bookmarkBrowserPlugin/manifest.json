@@ -1,0 +1,28 @@
+{
+  "name": "bookmark-chrome",
+  "description": "A Vue.js web extension",
+  "version": "1.0",
+  "manifest_version": 2,
+  "permissions": ["contextMenus"],
+  "icons": {
+    "48": "static/icons/icon_48.png",
+    "128": "static/icons/icon_128.png"
+  },
+  "browser_action": {
+    "default_title": "bookmark-chrome",
+    "default_popup": "popup/index.html"
+  },
+  "background": {
+    "scripts": ["static/js/jquery.js", "background.js"]
+  },
+  "options_ui": {
+    "page": "options/index.html",
+    "chrome_style": true
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["static/js/jquery.js", "static/js/sso.js"]
+    }
+  ]
+}
