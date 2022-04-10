@@ -17,7 +17,7 @@ port.onMessage.addListener(msg => {
 /**
  * 接收当前注入页面传来的消息
  */
-window.addEventListener('message', function(event) {
+window.addEventListener('message', function (event) {
   if (event.data.type === undefined) {
     return;
   }
@@ -31,3 +31,10 @@ window.addEventListener('message', function(event) {
       console.error('未知的事件', event);
   }
 });
+
+
+// 接收background发送的消息
+chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
+  console.log(req);
+  sendResponse("收到");
+})

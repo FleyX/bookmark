@@ -201,7 +201,9 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setUserId(userId);
         bookmark.setCreateTime(System.currentTimeMillis());
         bookmark.setAddTime(bookmark.getCreateTime());
-        bookmark.setIcon(getIconBase64(bookmark.getUrl()));
+        if (bookmark.getIcon() == null) {
+            bookmark.setIcon(getIconBase64(bookmark.getUrl()));
+        }
         //文件夹和书签都建立搜索key
         pinYinService.changeBookmark(bookmark);
         bookmarkDao.insertOne(bookmark);
