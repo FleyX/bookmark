@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: "App",
+  name: "App"
 };
 </script>
 
@@ -17,7 +17,7 @@ body {
   margin: 0;
   padding: 0;
   font-size: 100px;
-  background-color: @bgColor;
+  // background-color: @bgColor;
   height: initial;
 }
 #app {

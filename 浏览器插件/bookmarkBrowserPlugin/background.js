@@ -1,44 +1,42 @@
-chrome.contextMenus.create(
-  {
-    title: '添加到书签',
-    id: "addBookmark",
-  },
-  () => console.log("创建右键菜单成功")
-);
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create(
+    {
+      title: '添加到书签',
+      id: "addBookmark",
+    },
+    () => console.log("创建右键菜单成功")
+  );
+});
+
 
 
 chrome.contextMenus.onClicked.addListener(async function (info, tab) {
   console.log(info, tab);
   let body = {
-    path: "",
     name: tab.title,
     url: tab.url,
-    type: 0,
     iconUrl: tab.favIconUrl
   };
   sendToContent(tab.id, { code: "addBookmark", data: body, token: await getVal("token") });
-})
+});
 
 
-
-/**
- * 构建一个标准命令
- * @param {*} code code
- * @param {*} data data
- */
-function createMsg (code, data) {
-  return JSON.stringify({ code, data });
-}
-
-// 接收content发送的消息
+// 接收content/popup发送的消息
 chrome.runtime.onMessage.addListener(async (data, sender, sendResponse) => {
-  if (!data.code) {
+  if (!data.code || !data.receiver == 'background') {
     return;
   }
-  console.log("收到content发送消息：", data);
+  sendResponse("ok");
+  console.log("收到消息：", data, sender);
   if (data.code == 'setToken') {
-    setVal("token", data.data);
-    sendResponse({ code: "setTokenOk" });
+    await setVal("token", data.data);
+    // sendToContent
+    await sendToContent(sender.tab.id, { code: "setTokenOk" });
+  } else if (data.code == 'getToken') {
+    let token = await getVal("token");
+    sendToPopup({ code: "setToken", data: await getVal("token") });
+  } else if (data.code == "clearToken") {
+    await clearVal("token");
   }
 })
 
@@ -49,11 +47,27 @@ chrome.runtime.onMessage.addListener(async (data, sender, sendResponse) => {
  */
 function sendToContent (tabId, data) {
   console.log(tabId, data);
+  data.receiver = "content";
   chrome.tabs.sendMessage(tabId, data, res => {
     console.log("接受响应", res);
   })
 }
 
+/**
+ * 向popup发送消息
+ * @param {*} data 
+ */
+function sendToPopup (data) {
+  data.receiver = "popup";
+  chrome.runtime.sendMessage(data, res => console.log(res));
+}
+
+/**
+ * 设置值
+ * @param {*} key 
+ * @param {*} val 
+ * @returns 
+ */
 function setVal (key, val) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({ [key]: val }, function () {
@@ -63,11 +77,25 @@ function setVal (key, val) {
   })
 }
 
+/**
+ * 获取值
+ * @param {*} key 
+ * @returns 
+ */
 function getVal (key) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get([key], function (res) {
       console.log("取值成功", res);
       resolve(res[key]);
+    })
+  })
+}
+
+function clearVal (key) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.remove(key, function () {
+      console.log("remove成功", key);
+      resolve();
     })
   })
 }

@@ -7,8 +7,8 @@
     <style>
       html,
       body {
-        width: 40em;
-        width: 80em;
+        padding: 0.2em;
+        width: 8em;
       }
       #content {
         color: red;
@@ -16,7 +16,12 @@
     </style>
   </head>
   <body>
-    <a href="https://fleyx.com/userSpace/ssoAuth" target="_blank">点击登录</a>
+    <a id="login" href="https://fleyx.com/userSpace/ssoAuth" target="_blank">点击登录</a>
+    <div id="action" style="display: none">
+      <button id="logout">退出登陆</button>
+      <button title="同步云端书签到浏览器（覆盖本地）">同步云端书签</button>
+      <button title="同步浏览器书签到云端(覆盖云端)">同步浏览器</button>
+    </div>
     <p id="content"></p>
     <script type="text/javascript" src="/static/js/axios.min.js"></script>
     <script type="text/javascript" src="/static/js/config.js"></script>
