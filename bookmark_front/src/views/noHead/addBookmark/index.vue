@@ -1,5 +1,8 @@
 <template>
-  <div class="ssoAddBookmark">正在添加，请稍后！！！</div>
+  <div class="ssoAddBookmark">
+    正在添加，请稍后！！！
+    <button @click="closeIframe">关闭</button>
+  </div>
 </template>
 
 <script>

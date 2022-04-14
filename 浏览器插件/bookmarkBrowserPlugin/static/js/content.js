@@ -46,23 +46,14 @@ async function addBookmark (data) {
     return;
   }
   //新增书签
-  try {
-    if (data.data.iconUrl) {
-      let icon = await axios.get(data.data.iconUrl, { responseType: 'arraybuffer' });
-      data.data.icon = `data:` + icon.headers['content-type'] + ';base64,' + window.btoa(String.fromCharCode(...new Uint8Array(icon.data)));
-    }
-  } catch (error) {
-    console.error(error);
-  }
   console.log("新增书签", data.data);
   bookmarkInfo = data.data;
-
   addBlockDiv = document.createElement("div");
   addBlockDiv.setAttribute("style", "position:fixed;width:100%;height:100vh;z-index:100000;left:0;top:0;background:rgba(211, 211, 205, 0.8)");
   document.getElementsByTagName("body")[0].appendChild(addBlockDiv);
   iframe = document.createElement("iframe");
   iframe.src = bookmarkHost + "/noHead/addBookmark?token=" + data.token;
-  iframe.setAttribute("style", "width:70%;min-height:60vh;margin-left:15%;margin-top:10vh;padding:0.3em;");
+  iframe.setAttribute("style", "width:70%;min-height:60vh;margin-left:15%;margin-top:10vh;padding:0;border:0;border-radius:10px");
   addBlockDiv.appendChild(iframe);
 }
 

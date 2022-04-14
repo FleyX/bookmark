@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Map;
@@ -51,42 +49,33 @@ public class HttpUtil {
     /**
      * 无代理环境
      */
-    private static final OkHttpClient CLIENT = new OkHttpClient.Builder().connectTimeout(2, TimeUnit.SECONDS)
+    private static final OkHttpClient CLIENT = new OkHttpClient.Builder().connectTimeout(1, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .build();
+
+    /**
+     * 获取客户端
+     *
+     * @param proxy 是否代理
+     * @return {@link OkHttpClient}
+     * @author fanxb
+     */
+    public static OkHttpClient getClient(boolean proxy) {
+        return proxy ? PROXY_CLIENT : CLIENT;
+    }
+
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     @PostConstruct
     public void init() {
-        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        OkHttpClient.Builder builder = new OkHttpClient.Builder().connectTimeout(1, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS);
         log.info("代理配置，ip:{},port:{}", proxyIp, proxyPort);
         if (StrUtil.isNotBlank(proxyIp) && StrUtil.isNotBlank(proxyPort)) {
             builder.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyIp, Integer.parseInt(proxyPort))));
             proxyExist = true;
-        }
-        PROXY_CLIENT = builder.connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .build();
-    }
-
-    /***
-     * 下载文件
-     * @author fanxb
-     * @param url 下载链接
-     * @param proxy 是否使用代理
-     * @return java.io.InputStream
-     * @date 2021/3/12
-     **/
-    public static byte[] download(String url, boolean proxy) {
-        try (Response res = (proxy ? PROXY_CLIENT : CLIENT).newCall(new Request.Builder().url(url).build()).execute()) {
-            assert res.body() != null;
-            if (checkIsOk(res.code())) {
-                return res.body().byteStream().readAllBytes();
-            } else {
-                throw new CustomException("下载出现问题:" + res.body().string());
-            }
-        } catch (Exception e) {
-            throw new CustomException(e);
+            PROXY_CLIENT = builder.build();
+        } else {
+            PROXY_CLIENT = CLIENT;
         }
     }
 
@@ -270,6 +259,8 @@ public class HttpUtil {
         }
         return ipAddress;
     }
+
+
 }
 
 
