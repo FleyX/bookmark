@@ -8,6 +8,7 @@ var action = document.getElementById("action");
 (async () => {
 	//初始化
 	login.href = bookmarkHost + "/manage/sso/auth";
+	document.getElementById("version").innerText = version;
 	sendToBg("getToken", null);
 })();
 

@@ -36,12 +36,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -324,7 +326,6 @@ public class BookmarkServiceImpl implements BookmarkService {
      *
      * @param url url
      * @return {@link String}
-     * @throws
      * @author fanxb
      */
     private String getIconPath(String url) {
@@ -343,10 +344,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         if (iconPath != null) {
             return iconPath;
         }
-        iconPath = saveFile(host, "http://" + host + "/favicon.ico");
-        if (StrUtil.isEmpty(iconPath)) {
-            iconPath = saveFile(host, urlIconAddress + "/icon?url=" + host + "&size=16..64..256");
-        }
+        iconPath = saveFile(host, urlIconAddress + "/icon?url=" + host + "&size=16..64..256");
         if (StrUtil.isNotEmpty(iconPath)) {
             hostIconDao.insert(host, iconPath);
         }
@@ -366,9 +364,9 @@ public class BookmarkServiceImpl implements BookmarkService {
                 if (data.length > 0) {
                     String iconUrl = res.request().url().toString();
                     String fileName = URLEncoder.encode(host, StandardCharsets.UTF_8) + iconUrl.substring(iconUrl.lastIndexOf("."));
-                    String filePath = Paths.get(CommonConstant.fileSavePath, FileConstant.FAVICON_PATH, host.substring(0, 2), fileName).toString();
-                    FileUtil.writeBytes(data, filePath);
-                    return filePath;
+                    String filePath = Paths.get(FileConstant.FAVICON_PATH, host.substring(0, 2), fileName).toString();
+                    FileUtil.writeBytes(data, Paths.get(CommonConstant.fileSavePath, filePath).toString());
+                    return File.separator + filePath;
                 } else {
                     log.info("未获取到icon:{}", url);
                 }

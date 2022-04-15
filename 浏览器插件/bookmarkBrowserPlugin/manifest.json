@@ -1,6 +1,6 @@
 {
-  "name": "bookmark-chrome",
-  "description": "A Vue.js web extension",
+  "name": "签签世界",
+  "description": "云书签管理平台",
   "version": "1.0",
   "manifest_version": 3,
   "permissions": ["contextMenus", "storage"],
@@ -8,8 +8,8 @@
     "default_popup": "popup/index.html"
   },
   "icons": {
-    "48": "static/icons/icon_48.png",
-    "128": "static/icons/icon_128.png"
+    "48": "static/icons/favicon.png",
+    "128": "static/icons/favicon.png"
   },
   "background": {
     "service_worker": "background.js"

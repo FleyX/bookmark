@@ -15,7 +15,6 @@ chrome.contextMenus.onClicked.addListener(async function (info, tab) {
   let body = {
     name: tab.title,
     url: tab.url,
-    iconUrl: tab.favIconUrl
   };
   sendToContent(tab.id, { code: "addBookmark", data: body, token: await getVal("token") });
 });
