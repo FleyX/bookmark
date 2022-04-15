@@ -9,6 +9,11 @@
       使用教程：
       <a href="https://blog.fleyx.com/blog/detail/20220329" target="_blank">点击跳转</a>
     </div>
+    <div>
+      浏览器插件：
+      <a href="/static/bookmarkBrowserPlugin.7z" download="浏览器插件.7z" target="_blank">点击下载</a>
+      ,使用详情请参考使用教程
+    </div>
     <div>交流反馈qq群：150056494,邮箱：fleyx20@outlook.com</div>
     <div>
       统计：
@@ -38,7 +43,7 @@ export default {
     script.defer = true;
     script.src = "https://qiezi.fleyx.com/qiezijs/1.0/qiezi_statistic.min.js";
     document.getElementsByTagName("head")[0].appendChild(script);
-  },
+  }
 };
 </script>
 

@@ -1,21 +1,29 @@
 package com.fanxb.bookmark.business.bookmark.service.impl;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.fanxb.bookmark.business.api.UserApi;
+import com.fanxb.bookmark.business.bookmark.constant.FileConstant;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
+import com.fanxb.bookmark.business.bookmark.dao.HostIconDao;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
 import com.fanxb.bookmark.business.bookmark.entity.redis.BookmarkDeleteMessage;
 import com.fanxb.bookmark.business.bookmark.entity.redis.VisitNumPlus;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
 import com.fanxb.bookmark.business.bookmark.service.PinYinService;
+import com.fanxb.bookmark.common.constant.CommonConstant;
 import com.fanxb.bookmark.common.constant.EsConstant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.po.Bookmark;
+import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.*;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -28,9 +36,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,13 +65,15 @@ public class BookmarkServiceImpl implements BookmarkService {
     private final PinYinService pinYinService;
     private final UserApi userApi;
     private final EsUtil esUtil;
+    private final HostIconDao hostIconDao;
 
     @Autowired
-    public BookmarkServiceImpl(BookmarkDao bookmarkDao, PinYinService pinYinService, UserApi userApi, EsUtil esUtil) {
+    public BookmarkServiceImpl(BookmarkDao bookmarkDao, PinYinService pinYinService, UserApi userApi, EsUtil esUtil, HostIconDao hostIconDao) {
         this.bookmarkDao = bookmarkDao;
         this.pinYinService = pinYinService;
         this.userApi = userApi;
         this.esUtil = esUtil;
+        this.hostIconDao = hostIconDao;
     }
 
     @Override
@@ -201,7 +217,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setUserId(userId);
         bookmark.setCreateTime(System.currentTimeMillis());
         bookmark.setAddTime(bookmark.getCreateTime());
-        bookmark.setIcon(getIconBase64(bookmark.getUrl()));
+        bookmark.setIcon(getIconPath(bookmark.getUrl()));
         //文件夹和书签都建立搜索key
         pinYinService.changeBookmark(bookmark);
         bookmarkDao.insertOne(bookmark);
@@ -215,7 +231,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setUserId(userId);
         if (bookmark.getType() == 0) {
             pinYinService.changeBookmark(bookmark);
-            bookmark.setIcon(getIconBase64(bookmark.getUrl()));
+            bookmark.setIcon(getIconPath(bookmark.getUrl()));
         }
         bookmarkDao.editBookmark(bookmark);
         userApi.versionPlus(userId);
@@ -274,7 +290,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         while ((deal = bookmarkDao.selectUserNoIcon(userId, start, size)).size() > 0) {
             start += size;
             deal.forEach(item -> {
-                String icon = getIconBase64(item.getUrl());
+                String icon = getIconPath(item.getUrl());
                 if (StrUtil.isNotEmpty(icon)) {
                     bookmarkDao.updateIcon(item.getBookmarkId(), icon);
                 }
@@ -305,21 +321,56 @@ public class BookmarkServiceImpl implements BookmarkService {
         return resPath;
     }
 
-    private String getIconBase64(String url) {
+    /**
+     * 获取icon
+     *
+     * @param url url
+     * @return {@link String}
+     * @author fanxb
+     */
+    private String getIconPath(String url) {
         if (StrUtil.isEmpty(url)) {
             return "";
         }
+        String host;
         try {
             URL urlObj = new URL(url);
-            byte[] data = HttpUtil.download(urlIconAddress + "/icon?url=" + urlObj.getHost() + "&size=8..16..64", false);
-            String base64 = new String(Base64.getEncoder().encode(data));
-            if (StrUtil.isNotEmpty(base64)) {
-                return "data:image/png;base64," + base64;
-            } else {
-                log.warn("url无法获取icon:{}", url);
-            }
-        } catch (MalformedURLException e) {
+            host = urlObj.getHost();
+        } catch (Exception e) {
             log.warn("url无法解析出domain:{}", url);
+            return "";
+        }
+        String iconPath = hostIconDao.selectByHost(host);
+        if (iconPath != null) {
+            return iconPath;
+        }
+        iconPath = saveFile(host, urlIconAddress + "/icon?url=" + host + "&size=16..64..256");
+        if (StrUtil.isNotEmpty(iconPath)) {
+            hostIconDao.insert(host, iconPath);
+        }
+        return iconPath;
+    }
+
+    private String saveFile(String host, String url) {
+        try {
+            try (Response res = HttpUtil.getClient(false).newCall(new Request.Builder().url(url)
+                    .header("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36 Edg/100.0.1185.36")
+                    .get().build()).execute()) {
+                assert res.body() != null;
+                if (!HttpUtil.checkIsOk(res.code())) {
+                    throw new CustomException("请求错误:" + res.code());
+                }
+                byte[] data = res.body().byteStream().readAllBytes();
+                if (data.length > 0) {
+                    String iconUrl = res.request().url().toString();
+                    String fileName = URLEncoder.encode(host, StandardCharsets.UTF_8) + iconUrl.substring(iconUrl.lastIndexOf("."));
+                    String filePath = Paths.get(FileConstant.FAVICON_PATH, host.substring(0, 2), fileName).toString();
+                    FileUtil.writeBytes(data, Paths.get(CommonConstant.fileSavePath, filePath).toString());
+                    return File.separator + filePath;
+                } else {
+                    log.info("未获取到icon:{}", url);
+                }
+            }
         } catch (Exception e) {
             log.error("url获取icon故障:{}", url, e);
         }

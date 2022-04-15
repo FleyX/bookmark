@@ -1,0 +1,26 @@
+{
+  "name": "签签世界",
+  "description": "云书签管理平台",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": ["contextMenus", "storage"],
+  "action": {
+    "default_popup": "popup/index.html"
+  },
+  "icons": {
+    "48": "static/icons/favicon.png",
+    "128": "static/icons/favicon.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_ui": {
+    "page": "options/index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["static/js/axios.min.js", "static/js/config.js", "static/js/content.js"]
+    }
+  ]
+}

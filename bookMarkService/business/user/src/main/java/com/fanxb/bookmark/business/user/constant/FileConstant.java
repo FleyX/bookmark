@@ -1,5 +1,6 @@
 package com.fanxb.bookmark.business.user.constant;
 
+import com.fanxb.bookmark.common.constant.CommonConstant;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Paths;
@@ -17,6 +18,6 @@ public class FileConstant {
     /**
      * 用户头像目录
      */
-    public static String iconPath = Paths.get("files", "public", "icon").toString();
+    public static String iconPath = Paths.get(CommonConstant.fileSavePath, "files", "public", "icon").toString();
 
 }
