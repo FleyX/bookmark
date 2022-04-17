@@ -123,6 +123,7 @@ export default {
       } else {
         this.list = this.dealSearch(val);
       }
+      this.selectIndex = null;
     },
     //下方列表点击
     itemClick(index) {
