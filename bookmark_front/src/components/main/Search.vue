@@ -51,7 +51,7 @@
         </div>
       </div>
     </div>
-    <a ref="targetA" style="left: 1000000px" target="_blank" />
+    <a ref="targetA" style="left: 1000000px" />
   </div>
 </template>
 

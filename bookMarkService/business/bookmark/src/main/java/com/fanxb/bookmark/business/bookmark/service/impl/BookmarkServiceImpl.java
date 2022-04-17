@@ -1,8 +1,10 @@
 package com.fanxb.bookmark.business.bookmark.service.impl;
 
+import cn.hutool.core.codec.Base64Decoder;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.fanxb.bookmark.business.api.UserApi;
@@ -21,6 +23,7 @@ import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.po.Bookmark;
 import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.*;
+import com.mysql.cj.conf.url.SingleConnectionUrl;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -37,6 +40,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -53,7 +57,6 @@ import java.util.stream.Collectors;
  * 类功能详述：
  *
  * @author fanxb
- * @date 2019/7/8 15:00
  */
 @Service
 @Slf4j
@@ -116,7 +119,6 @@ public class BookmarkServiceImpl implements BookmarkService {
      * @param path 节点路径，不包含自身
      * @param sort 当前层级中的排序序号
      * @author fanxb
-     * @date 2019/7/8 14:49
      */
     private void dealBookmark(int userId, Element ele, String path, int sort, List<Bookmark> bookmarks) {
         if (!DT.equalsIgnoreCase(ele.tagName())) {
@@ -125,7 +127,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         Element first = ele.child(0);
         if (A.equalsIgnoreCase(first.tagName())) {
             //说明为链接
-            Bookmark node = new Bookmark(userId, path, first.ownText(), first.attr("href"), first.attr("icon")
+            Bookmark node = new Bookmark(userId, path, first.ownText(), first.attr("href"), ""
                     , Long.parseLong(first.attr("add_date")) * 1000, sort);
             //存入数据库
             insertOne(node);
@@ -155,7 +157,6 @@ public class BookmarkServiceImpl implements BookmarkService {
      * @param node node
      * @return boolean 如果已经存在返回true，否则false
      * @author fanxb
-     * @date 2019/7/8 17:25
      */
     private boolean insertOne(Bookmark node) {
         //先根据name,userId,parentId获取此节点id
@@ -217,7 +218,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setUserId(userId);
         bookmark.setCreateTime(System.currentTimeMillis());
         bookmark.setAddTime(bookmark.getCreateTime());
-        bookmark.setIcon(getIconPath(bookmark.getUrl()));
+        bookmark.setIcon(getIconPath(bookmark.getUrl(), bookmark.getIcon(), bookmark.getIconUrl()));
         //文件夹和书签都建立搜索key
         pinYinService.changeBookmark(bookmark);
         bookmarkDao.insertOne(bookmark);
@@ -231,7 +232,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setUserId(userId);
         if (bookmark.getType() == 0) {
             pinYinService.changeBookmark(bookmark);
-            bookmark.setIcon(getIconPath(bookmark.getUrl()));
+            bookmark.setIcon(getIconPath(bookmark.getUrl(), null, null));
         }
         bookmarkDao.editBookmark(bookmark);
         userApi.versionPlus(userId);
@@ -290,7 +291,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         while ((deal = bookmarkDao.selectUserNoIcon(userId, start, size)).size() > 0) {
             start += size;
             deal.forEach(item -> {
-                String icon = getIconPath(item.getUrl());
+                String icon = getIconPath(item.getUrl(), null, null);
                 if (StrUtil.isNotEmpty(icon)) {
                     bookmarkDao.updateIcon(item.getBookmarkId(), icon);
                 }
@@ -322,58 +323,90 @@ public class BookmarkServiceImpl implements BookmarkService {
     }
 
     /**
-     * 获取icon
+     * 获取icon,通过网络获取，或者从base64还原
      *
-     * @param url url
+     * @param url     url
+     * @param icon    icon
+     * @param iconUrl iconUrl
      * @return {@link String}
      * @author fanxb
      */
-    private String getIconPath(String url) {
-        if (StrUtil.isEmpty(url)) {
-            return "";
-        }
+    private String getIconPath(String url, String icon, String iconUrl) {
         String host;
         try {
             URL urlObj = new URL(url);
-            host = urlObj.getHost();
+            host = urlObj.getAuthority();
         } catch (Exception e) {
             log.warn("url无法解析出domain:{}", url);
             return "";
         }
+        if (StrUtil.isNotBlank(icon)) {
+            //优先从base64还原出图片
+            try {
+                byte[] b = Base64Decoder.decode(icon.substring(icon.indexOf(",") + 1));
+                String iconPath = saveToFile(iconUrl, host, b);
+                hostIconDao.insert(host, iconPath);
+                return iconPath;
+            } catch (Exception e) {
+                log.error("解析base64获取icon故障:{}", iconUrl, e);
+            }
+        }
+
         String iconPath = hostIconDao.selectByHost(host);
         if (iconPath != null) {
             return iconPath;
         }
-        iconPath = saveFile(host, urlIconAddress + "/icon?url=" + host + "&size=16..64..256");
+        //再根据url解析
+        iconPath = saveFile(host, urlIconAddress + "/icon?url=" + host + "&size=16..128..256");
         if (StrUtil.isNotEmpty(iconPath)) {
             hostIconDao.insert(host, iconPath);
         }
         return iconPath;
     }
 
+    /**
+     * 保存文件到icon路径
+     *
+     * @param host host
+     * @param url  url
+     * @return {@link String}
+     * @author FleyX
+     */
     private String saveFile(String host, String url) {
-        try {
-            try (Response res = HttpUtil.getClient(false).newCall(new Request.Builder().url(url)
-                    .header("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36 Edg/100.0.1185.36")
-                    .get().build()).execute()) {
-                assert res.body() != null;
-                if (!HttpUtil.checkIsOk(res.code())) {
-                    throw new CustomException("请求错误:" + res.code());
-                }
-                byte[] data = res.body().byteStream().readAllBytes();
-                if (data.length > 0) {
-                    String iconUrl = res.request().url().toString();
-                    String fileName = URLEncoder.encode(host, StandardCharsets.UTF_8) + iconUrl.substring(iconUrl.lastIndexOf("."));
-                    String filePath = Paths.get(FileConstant.FAVICON_PATH, host.substring(0, 2), fileName).toString();
-                    FileUtil.writeBytes(data, Paths.get(CommonConstant.fileSavePath, filePath).toString());
-                    return File.separator + filePath;
-                } else {
-                    log.info("未获取到icon:{}", url);
-                }
+        try (Response res = HttpUtil.getClient(false).newCall(new Request.Builder().url(url)
+                .header("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36 Edg/100.0.1185.36")
+                .get().build()).execute()) {
+            assert res.body() != null;
+            if (!HttpUtil.checkIsOk(res.code())) {
+                throw new CustomException("请求错误:" + res.code());
+            }
+            byte[] data = res.body().byteStream().readAllBytes();
+            if (data.length > 0) {
+                String iconUrl = new URL(res.request().url().toString()).getPath();
+                return saveToFile(iconUrl, host, data);
+            } else {
+                log.info("未获取到icon:{}", url);
             }
         } catch (Exception e) {
             log.error("url获取icon故障:{}", url, e);
         }
         return "";
+    }
+
+
+    /**
+     * 保存到文件中
+     *
+     * @param iconUrl icon文件名
+     * @param host    host
+     * @param b       数据
+     * @return {@link String}
+     * @author FleyX
+     */
+    private String saveToFile(String iconUrl, String host, byte[] b) {
+        String fileName = URLEncoder.encode(host, StandardCharsets.UTF_8) + iconUrl.substring(iconUrl.lastIndexOf("."));
+        String filePath = Paths.get(FileConstant.FAVICON_PATH, host.replace("www", "").replaceAll("\\.", "").substring(0, 2), fileName).toString();
+        FileUtil.writeBytes(b, Paths.get(CommonConstant.fileSavePath, filePath).toString());
+        return File.separator + filePath;
     }
 }

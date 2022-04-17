@@ -58,7 +58,7 @@ router.beforeEach(async (to, from, next) => {
     await vuex.default.dispatch("treeData/clear");
     await vuex.default.dispatch("globalConfig/clear");
     next({
-      path: "/public/login?to=" + btoa(location.href),
+      path: "/public/login?to=" + btoa(to.fullPath),
       replace: true
     });
   } else {

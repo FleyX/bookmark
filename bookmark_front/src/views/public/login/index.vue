@@ -67,11 +67,15 @@ export default {
       loading: false, //是否加载中
       oauthLogining: false, //true:正在进行oauth后台操作
       page: null, //oauth打开的页面实例
+      redirect: null,
     };
   },
   async created() {
     let _this = this;
     window.addEventListener("storage", this.storageDeal.bind(this));
+    if (this.$route.query.to) {
+      this.redirect = atob(this.$route.query.to);
+    }
   },
   destroyed() {
     window.removeEventListener("storage", this.storageDeal);
@@ -85,7 +89,7 @@ export default {
             this.loading = true;
             let token = await httpUtil.post("/user/login", null, this.form);
             await this.$store.dispatch("globalConfig/setToken", token);
-            this.$router.replace("/");
+            this.$router.replace(this.redirect ? this.redirect : "/");
           } finally {
             this.loading = false;
           }

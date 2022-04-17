@@ -15,6 +15,7 @@ chrome.contextMenus.onClicked.addListener(async function (info, tab) {
   let body = {
     name: tab.title,
     url: tab.url,
+    iconUrl: tab.favIconUrl
   };
   sendToContent(tab.id, { code: "addBookmark", data: body, token: await getVal("token") });
 });
@@ -33,7 +34,8 @@ chrome.runtime.onMessage.addListener(async (data, sender, sendResponse) => {
     await sendToContent(sender.tab.id, { code: "setTokenOk" });
   } else if (data.code == 'getToken') {
     let token = await getVal("token");
-    sendToPopup({ code: "setToken", data: await getVal("token") });
+
+    sendToPopup({ code: "setToken", data: token });
   } else if (data.code == "clearToken") {
     await clearVal("token");
   }
@@ -83,7 +85,12 @@ function setVal (key, val) {
  */
 function getVal (key) {
   return new Promise((resolve, reject) => {
-    chrome.storage.local.get([key], function (res) {
+    chrome.storage.local.get([key], async function (res) {
+      if (key === 'token' && !checkTokenValid(res[key])) {
+        console.log("token过期");
+        await clearVal("token");
+        res[key] = null;
+      }
       console.log("取值成功", res);
       resolve(res[key]);
     })
@@ -97,4 +104,24 @@ function clearVal (key) {
       resolve();
     })
   })
+}
+
+/**
+ * 检查token是否有效
+ * @param {*} token 
+ * @returns 
+ */
+function checkTokenValid (token) {
+  try {
+    if (token && token.trim().length > 0) {
+      //检查token是否还有效
+      let content = JSON.parse(atob(token.split(".")[1]));
+      if (content.exp > Date.now() / 1000) {
+        return true;
+      }
+    }
+  } catch (err) {
+    console.error(token, err);
+  }
+  return false;
 }

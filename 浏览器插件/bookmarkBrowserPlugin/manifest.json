@@ -8,7 +8,11 @@
     "newtab": "tab/index.html"
   },
   "action": {
-    "default_popup": "popup/index.html"
+    "default_popup": "popup/index.html",
+    "default_icon": {
+      "48": "static/icons/favicon.png",
+      "128": "static/icons/favicon.png"
+    }
   },
   "icons": {
     "48": "static/icons/favicon.png",

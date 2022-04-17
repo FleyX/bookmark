@@ -22,7 +22,13 @@ export const refreshHomePinList = "refreshHomePinList";
  * 通过id获取书签数据
  */
 export const getById = "getById";
+/**
+ * 登录前初始化
+ */
 export const noLoginInit = "noLoginInit";
+/**
+ * 登陆后初始化
+ */
 export const loginInit = "loginInit";
 export const refresh = "refresh";
 export const clear = "clear";
@@ -39,6 +45,10 @@ export const addNode = "addNode";
  * 版本检查定时调度
  */
 let timer = null;
+/**
+ * 检查本地版本是否有更新
+ */
+let checkLocalDataTimer = null;
 /**
  * 刷新书签确认弹窗是否展示
  */
@@ -76,8 +86,8 @@ const getters = {
 };
 
 const actions = {
-  async [noLoginInit]() {},
-  async [loginInit](context) {
+  async [noLoginInit] () { },
+  async [loginInit] (context) {
     if (context.state.isInit || context.state.isIniting) {
       return;
     }
@@ -89,11 +99,12 @@ const actions = {
     context.commit(IS_INIT, true);
     context.commit(IS_INITING, false);
     timer = setInterval(() => treeDataCheck(context, false), CHECK_INTERVAL);
+    checkLocalDataTimer = setInterval(() => checkLocalData(context), 2000);
   },
   /**
    * 确保数据加载完毕
    */
-  ensureDataOk(context) {
+  ensureDataOk (context) {
     return new Promise((resolve, reject) => {
       let timer = setInterval(() => {
         try {
@@ -108,7 +119,7 @@ const actions = {
     });
   },
   //刷新缓存数据
-  async [refresh](context) {
+  async [refresh] (context) {
     let treeData = await HttpUtil.get("/bookmark/currentUser");
     if (!treeData[""]) {
       treeData[""] = [];
@@ -127,7 +138,7 @@ const actions = {
     await localforage.setItem(TOTAL_TREE_DATA, treeData);
   },
   //清除缓存数据
-  async [clear](context) {
+  async [clear] (context) {
     context.commit(TOTAL_TREE_DATA, null);
     context.commit(VERSION, null);
     context.commit(SHOW_REFRESH_TOAST, false);
@@ -137,13 +148,16 @@ const actions = {
     if (timer != null) {
       clearInterval(timer);
     }
+    if (checkLocalDataTimer != null) {
+      clearInterval(checkLocalDataTimer);
+    }
     await localforage.removeItem(TOTAL_TREE_DATA);
     await localforage.removeItem(VERSION);
   },
   /**
    * 移动节点
    */
-  async moveNode(context, info) {
+  async moveNode (context, info) {
     let data = context.state[TOTAL_TREE_DATA];
     const target = info.node.dataRef;
     const current = info.dragNode.dataRef;
@@ -211,7 +225,7 @@ const actions = {
     await localforage.setItem(TOTAL_TREE_DATA, state[TOTAL_TREE_DATA]);
     return body;
   },
-  async [refreshHomePinList]({ commit }) {
+  async [refreshHomePinList] ({ commit }) {
     let list = await HttpUtil.get("/home/pin");
     commit(HOME_PIN_LIST, list);
     let map = {};
@@ -221,14 +235,14 @@ const actions = {
   /**
    * 更新版本数据
    */
-  async updateVersion({ commit, state }, version) {
+  async updateVersion ({ commit, state }, version) {
     commit(VERSION, version == null ? state[VERSION] + 1 : version);
     await localforage.setItem(VERSION, state[VERSION]);
   },
   /**
    * 新增书签、文件夹
    */
-  async [addNode](context, { sourceNode, targetNode }) {
+  async [addNode] (context, { sourceNode, targetNode }) {
     if (sourceNode === null) {
       if (context.state[TOTAL_TREE_DATA][""] === undefined) {
         context.state[TOTAL_TREE_DATA][""] = [];
@@ -253,7 +267,7 @@ const actions = {
   /**
    * 删除节点数据
    */
-  async [deleteData](context, { pathList, bookmarkIdList }) {
+  async [deleteData] (context, { pathList, bookmarkIdList }) {
     //待删除的书签
     let bookmarkIdSet = new Set();
     bookmarkIdList.forEach(item => bookmarkIdSet.add(item));
@@ -281,7 +295,7 @@ const actions = {
   /**
    * 编辑书签节点
    */
-  async editNode({ dispatch, state, commit }, { node, newName, newUrl, newIcon }) {
+  async editNode ({ dispatch, state, commit }, { node, newName, newUrl, newIcon }) {
     node.name = newName;
     node.url = newUrl;
     node.icon = newIcon;
@@ -295,10 +309,10 @@ const mutations = {
   [TOTAL_TREE_DATA]: (state, totalTreeData) => {
     state.totalTreeData = totalTreeData;
   },
-  [IS_INIT](state, isInit) {
+  [IS_INIT] (state, isInit) {
     state.isInit = isInit;
   },
-  [IS_INITING](state, isIniting) {
+  [IS_INITING] (state, isIniting) {
     state.isIniting = isIniting;
   },
   [VERSION]: (state, version) => {
@@ -322,7 +336,7 @@ const mutations = {
  * @param {*} isFirst
  * @returns
  */
-async function treeDataCheck(context, isFirst) {
+async function treeDataCheck (context, isFirst) {
   if (toastShow || !checkJwtValid(context.rootState.globalConfig.token)) {
     return;
   }
@@ -336,14 +350,14 @@ async function treeDataCheck(context, isFirst) {
         closable: false,
         keyboard: false,
         maskClosable: false,
-        onOk() {
+        onOk () {
           toastShow = false;
           return new Promise(async resolve => {
             await context.dispatch(refresh);
             resolve();
           });
         },
-        onCancel() {
+        onCancel () {
           toastShow = false;
         }
       });
@@ -352,6 +366,24 @@ async function treeDataCheck(context, isFirst) {
       await context.dispatch(refresh);
     }
   }
+}
+
+/**
+ * 检查本地缓存数据是否有更新
+ * @param {*} context 
+ */
+async function checkLocalData (context) {
+  let data = await localforage.getItem(TOTAL_TREE_DATA);
+  let version = await localforage.getItem(VERSION);
+  if (!data || !version) {
+    return;
+  }
+  if (version > context.state[VERSION]) {
+    console.log("从local缓存更新数据：", version);
+    context.commit(TOTAL_TREE_DATA, data);
+    context.commit(VERSION, version);
+  }
+
 }
 
 export const store = {
