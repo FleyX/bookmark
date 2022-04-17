@@ -6,6 +6,8 @@
 
 部署教程：[docker-compose 部署](https://github.com/FleyX/bookmark/blob/master/DEPLOY.md)
 
+**为获得更好的体验，建议将主页设置为 fleyx.com,并安装浏览器拓展**
+
 # 缘由
 
 1. 主要用的是 chrome，但是有时候需要用其他的浏览器：Firefox，ie 等。然后这些浏览器上没有书签，想进个网站还得打开 chrome 复制 url，太麻烦。
