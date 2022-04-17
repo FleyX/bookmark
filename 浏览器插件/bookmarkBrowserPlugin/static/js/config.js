@@ -1,7 +1,7 @@
 var bookmarkHost = "https://fleyx.com";
 // var bookmarkHost = "http://localhost:8080";
 
-var version = "0.1";
+var version = "0.1.1";
 
 window.token = localStorage.getItem('token');
 axios.defaults.baseURL = bookmarkHost + '/bookmark/api';

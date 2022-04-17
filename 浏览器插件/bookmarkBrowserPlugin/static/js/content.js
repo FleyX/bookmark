@@ -46,6 +46,15 @@ async function addBookmark (data) {
     return;
   }
   //新增书签
+  try {
+    if (data.data.iconUrl) {
+      let icon = await axios.get(data.data.iconUrl, { responseType: 'arraybuffer' });
+      console.log(JSON.stringify(new Uint8Array(icon.data)));
+      data.data.icon = `data:` + icon.headers['content-type'] + ';base64,' + window.btoa(String.fromCharCode(...new Uint8Array(icon.data)));
+    }
+  } catch (error) {
+    console.error(error);
+  }
   console.log("新增书签", data.data);
   bookmarkInfo = data.data;
   addBlockDiv = document.createElement("div");

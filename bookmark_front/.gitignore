@@ -4,6 +4,7 @@ node_modules
 package-lock.json
 yarn.lock
 public/files
+public\static\bookmarkBrowserPlugin.zip
 
 # local env files
 .env.local

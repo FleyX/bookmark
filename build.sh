@@ -3,7 +3,10 @@ base=$(cd "$(dirname "$0")";pwd)
 echo $base
 cd $base
 
+cd 浏览器插件/bookmarkBrowserPlugin
+zip -q -r ../../bookmark_front/public/static/bookmarkBrowserPlugin.zip *
 
+cd ../../
 # 前端打包
 docker run  --rm --user ${UID} -v $base/bookmark_front:/opt/front node:lts-buster-slim  bash -c "cd /opt/front &&   yarn --registry https://registry.npm.taobao.org && yarn build"
 # 后端打包
