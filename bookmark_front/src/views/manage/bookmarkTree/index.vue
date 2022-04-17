@@ -15,7 +15,7 @@
         <a-tooltip
           v-if="
             (checkedKeys.length === 0 && (currentSelect == null || currentSelect.type === 1)) ||
-              (checkedKeys.length === 1 && checkedNodes[0].type === 1)
+            (checkedKeys.length === 1 && checkedNodes[0].type === 1)
           "
           title="添加书签"
         >
@@ -77,7 +77,7 @@
           <a-menu-item v-if="!rec.dataRef.isLeaf" key="add">新增</a-menu-item>
           <a-menu-item v-else key="copy" class="copy-to-board" :data="rec.dataRef.url">复制URL</a-menu-item>
           <a-menu-item v-if="rec.dataRef.isLeaf" key="pin">
-            {{ homePinList.filter(item => item.id && item.bookmarkId == rec.dataRef.bookmarkId).length > 0 ? "从首页移除" : "固定到首页" }}
+            {{ homePinList.filter((item) => item.id && item.bookmarkId == rec.dataRef.bookmarkId).length > 0 ? "从首页移除" : "固定到首页" }}
           </a-menu-item>
           <a-menu-item key="edit">编辑</a-menu-item>
           <a-menu-item key="delete">删除</a-menu-item>
@@ -114,7 +114,7 @@ export default {
       loadedKeys: [], // 已加载数据
       replaceFields: {
         title: "name",
-        key: "bookmarkId"
+        key: "bookmarkId",
       },
       mulSelect: false, // 多选框是否显示
       currentSelect: null, // 当前树的选择项
@@ -126,19 +126,19 @@ export default {
         // 新增、修改目标数据，null说明向根节点增加数据
         targetNode: null,
         // 是否为新增动作
-        isAdd: false
+        isAdd: false,
       },
-      copyBoard: null //剪贴板对象
+      copyBoard: null, //剪贴板对象
     };
   },
   computed: {
     ...mapState("treeData", ["totalTreeData", HOME_PIN_LIST]),
-    ...mapState("globalConfig", ["isPhone"])
+    ...mapState("globalConfig", ["isPhone"]),
   },
   watch: {
     totalTreeData(newVal, oldVal) {
       this.resetData();
-    }
+    },
   },
   async mounted() {
     this.$store.commit(TREE_DATA + "/" + SHOW_REFRESH_TOAST, true);
@@ -147,21 +147,14 @@ export default {
     this.loading = false;
     //初始化clipboard
     this.copyBoard = new ClipboardJS(".copy-to-board", {
-      text: function(trigger) {
+      text: function (trigger) {
         return trigger.attributes.data.nodeValue;
-      }
+      },
     });
-    this.copyBoard.on("success", e => {
+    this.copyBoard.on("success", (e) => {
       this.$message.success("复制成功");
       e.clearSelection();
     });
-
-    window.onblur = e => {
-      console.log("窗口非激活");
-    };
-    window.onfocus = e => {
-      console.log("窗口激活");
-    };
   },
   beforeDestroy() {
     this.$store.commit(TREE_DATA + "/" + SHOW_REFRESH_TOAST, false);
@@ -175,7 +168,7 @@ export default {
      */
     loadData(treeNode) {
       console.log("加载数据", treeNode);
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         const data = typeof treeNode === "number" ? this.$store.getters["treeData/getById"](treeNode) : treeNode.dataRef;
         let newPath = data.path + "." + data.bookmarkId;
         if (!this.totalTreeData[newPath]) {
@@ -219,9 +212,9 @@ export default {
         this.expandedKeys = [
           ...item.path
             .split(".")
-            .filter(item => item.length > 0)
-            .map(item => parseInt(item)),
-          item.bookmarkId
+            .filter((item) => item.length > 0)
+            .map((item) => parseInt(item)),
+          item.bookmarkId,
         ];
       } else {
         this.expandedKeys.pop();
@@ -235,7 +228,7 @@ export default {
       } else {
         this.checkedKeys.splice(this.checkedKeys.indexOf(item.bookmarkId), 1);
         this.checkedNodes.splice(
-          this.checkedNodes.findIndex(item1 => item1.bookmarkId === item.bookmarkId),
+          this.checkedNodes.findIndex((item1) => item1.bookmarkId === item.bookmarkId),
           1
         );
       }
@@ -255,9 +248,9 @@ export default {
           this.expandedKeys = [
             ...item.path
               .split(".")
-              .filter(item => item.length > 0)
-              .map(item => parseInt(item)),
-            item.bookmarkId
+              .filter((item) => item.length > 0)
+              .map((item) => parseInt(item)),
+            item.bookmarkId,
           ];
         }
       } else {
@@ -280,7 +273,7 @@ export default {
       const bookmarkIdList = [];
       const pathList = [];
       if (this.checkedNodes) {
-        this.checkedNodes.forEach(item =>
+        this.checkedNodes.forEach((item) =>
           item.type === 1 ? pathList.push(item.path + "." + item.bookmarkId) : bookmarkIdList.push(item.bookmarkId)
         );
       }
@@ -297,7 +290,7 @@ export default {
       await HttpUtil.post("/bookmark/batchDelete", null, { pathList, bookmarkIdList });
       await this.$store.dispatch(TREE_DATA + "/" + deleteData, { pathList, bookmarkIdList });
       //删除已经被删除的数据
-      pathList.forEach(item => {
+      pathList.forEach((item) => {
         const id = parseInt(item.split(".").reverse()[0]);
         let index = this.loadedKeys.indexOf(id);
         if (index > -1) {
@@ -329,13 +322,13 @@ export default {
       this.refresh(false);
       this.expandedKeys = item.path
         .split(".")
-        .filter(one => one.length > 0)
-        .map(one => parseInt(one));
+        .filter((one) => one.length > 0)
+        .map((one) => parseInt(one));
       this.loadedKeys = item.path
         .split(".")
-        .filter(one => one.length > 0)
-        .map(one => parseInt(one));
-      this.expandedKeys.forEach(async one => await this.loadData(one));
+        .filter((one) => one.length > 0)
+        .map((one) => parseInt(one));
+      this.expandedKeys.forEach(async (one) => await this.loadData(one));
       this.currentSelect = item;
     },
     /**
@@ -351,7 +344,7 @@ export default {
       this.addModal = {
         show: false,
         targetNode: null,
-        isAdd: false
+        isAdd: false,
       };
     },
     async onDrop(info) {
@@ -395,12 +388,12 @@ export default {
               await this.deleteBookmarks();
               resolve();
             });
-          }
+          },
         });
       } else if (key === "edit") {
         this.editData();
       } else if (key === "pin") {
-        let pin = this.homePinList.filter(one => one.id && one.bookmarkId == item.bookmarkId);
+        let pin = this.homePinList.filter((one) => one.id && one.bookmarkId == item.bookmarkId);
         if (pin.length > 0) {
           await HttpUtil.delete("/home/pin", { id: pin[0].id });
         } else {
@@ -418,8 +411,8 @@ export default {
       dealList(root, map[""], map);
       let content = exportFileHead + root.outerHTML;
       downloadFile(moment().format("YYYY-MM-DD") + "导出书签.html", content);
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -51,7 +51,7 @@
         </div>
       </div>
     </div>
-    <a ref="targetA" style="left: 1000000px" target="_blank" />
+    <a ref="targetA" style="left: 1000000px" />
   </div>
 </template>
 
@@ -123,6 +123,7 @@ export default {
       } else {
         this.list = this.dealSearch(val);
       }
+      this.selectIndex = null;
     },
     //下方列表点击
     itemClick(index) {

@@ -12,7 +12,6 @@ import java.util.List;
  * 类功能详述：
  *
  * @author fanxb
- * @date 2019/7/8 11:19
  */
 @Data
 public class Bookmark {
@@ -36,6 +35,7 @@ public class Bookmark {
     private String name;
     private String url = "";
     private String icon = "";
+    private String iconUrl;
     private Integer sort;
     private String searchKey = "";
     private Long addTime;

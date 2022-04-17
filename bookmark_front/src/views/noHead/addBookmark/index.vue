@@ -14,14 +14,16 @@ export default {
       form: {
         name: null,
         url: null,
+        icon: null,
+        iconUrl: null,
         type: 0,
-        path: ""
-      }
+        path: "",
+      },
     };
   },
   mounted() {
     //接受父节点传递的书签信息
-    window.addEventListener("message", event => {
+    window.addEventListener("message", (event) => {
       if (!event.data.code) {
         return;
       }
@@ -30,6 +32,8 @@ export default {
         console.log("新增书签");
         this.form.name = event.data.data.name;
         this.form.url = event.data.data.url;
+        this.form.icon = event.data.data.icon;
+        this.form.iconUrl = event.data.data.iconUrl;
         this.addBookmark();
       }
     });
@@ -46,8 +50,8 @@ export default {
       this.$message.success("添加成功");
       await this.$store.dispatch(TREE_DATA + "/" + addNode, { sourceNode: null, targetNode: res });
       setTimeout(this.closeIframe, 500);
-    }
-  }
+    },
+  },
 };
 </script>
 
