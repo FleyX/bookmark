@@ -11,7 +11,7 @@
     </div>
     <div>
       浏览器插件：
-      <a href="/static/bookmarkBrowserPlugin.zip" download="浏览器插件.zip" target="_blank">点击下载</a>
+      <a href="/static/bookmarkBrowserPlugin.zip" download="浏览器插件.zip" target="_blank">最新版本{{ serverConfig.map.pluginVersion }}(注意更新)</a>
       ,使用详情请参考使用教程
     </div>
     <div>交流反馈qq群：150056494,邮箱：fleyx20@outlook.com</div>
@@ -34,8 +34,14 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
+import { GLOBAL_CONFIG, SERVER_CONFIG } from "@/store/modules/globalConfig";
 export default {
   name: "about",
+  data() {
+    return { version: "" };
+  },
+  computed: { ...mapState(GLOBAL_CONFIG, [SERVER_CONFIG]) },
   mounted() {
     window.qieziStatisticKey = "b74c4b571b644782a837433209827874";
     let script = document.createElement("script");
@@ -43,6 +49,12 @@ export default {
     script.defer = true;
     script.src = "https://qiezi.fleyx.com/qiezijs/1.0/qiezi_statistic.min.js";
     document.getElementsByTagName("head")[0].appendChild(script);
+
+    let serverConfig = this.$store.state[GLOBAL_CONFIG + "/" + SERVER_CONFIG];
+    console.log(serverConfig);
+    if (serverConfig.map.pluginVersion) {
+      this.version = serverConfig.map.pluginVersion;
+    }
   },
 };
 </script>

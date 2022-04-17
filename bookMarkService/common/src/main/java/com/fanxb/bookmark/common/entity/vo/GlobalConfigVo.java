@@ -2,6 +2,8 @@ package com.fanxb.bookmark.common.entity.vo;
 
 import lombok.Data;
 
+import java.util.Map;
+
 /**
  * 全局公共配置
  *
@@ -17,4 +19,8 @@ public class GlobalConfigVo {
      * bing每日一图地址
      */
     private String bingImgSrc;
+    /**
+     * 浏览器插件版本plugin
+     */
+    private Map<String, String> map;
 }

@@ -9,7 +9,13 @@ var action = document.getElementById("action");
 	//初始化
 	login.href = bookmarkHost + "/manage/sso/auth";
 	document.getElementById("version").innerText = version;
+	document.getElementById("about").href = bookmarkHost + "/public/about";
 	sendToBg("getToken", null);
+	let newestBlock = document.getElementById("newestVersion");
+	newestBlock.href = bookmarkHost + "/static/bookmarkBrowserPlugin.zip";
+	let res = await axios.get("/common/config/global");
+	console.log(res);
+	newestBlock.innerText = res.data.data.map.pluginVersion;
 })();
 
 /**
