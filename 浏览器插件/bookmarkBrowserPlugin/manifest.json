@@ -4,6 +4,9 @@
   "version": "1.0",
   "manifest_version": 3,
   "permissions": ["contextMenus", "storage"],
+  "chrome_url_overrides": {
+    "newtab": "tab/index.html"
+  },
   "action": {
     "default_popup": "popup/index.html"
   },
