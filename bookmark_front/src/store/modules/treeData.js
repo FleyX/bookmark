@@ -249,12 +249,16 @@ const actions = {
       }
       context.state[TOTAL_TREE_DATA][""].push(targetNode);
     } else {
+      let path = sourceNode.path + "." + sourceNode.bookmarkId;
+      if (!context.state[TOTAL_TREE_DATA][path]) {
+        context.state[TOTAL_TREE_DATA][path] = [];
+      }
       if (sourceNode.children === undefined) {
-        sourceNode.children = [];
+        sourceNode.children = context.state[TOTAL_TREE_DATA][path];
       }
       sourceNode.children.push(targetNode);
     }
-    if (targetNode.type === 0) {
+    if (targetNode.type === 1) {
       context.state[TOTAL_TREE_DATA][targetNode.path + "." + targetNode.bookmarkId] = [];
     }
     targetNode.isLeaf = targetNode.type === 0;
