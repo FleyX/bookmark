@@ -249,8 +249,12 @@ const actions = {
       }
       context.state[TOTAL_TREE_DATA][""].push(targetNode);
     } else {
+      let path = sourceNode.path + "." + sourceNode.bookmarkId;
+      if (!context.state[TOTAL_TREE_DATA][path]) {
+        context.state[TOTAL_TREE_DATA][path] = [];
+      }
       if (sourceNode.children === undefined) {
-        sourceNode.children = [];
+        sourceNode.children = context.state[TOTAL_TREE_DATA][path];
       }
       sourceNode.children.push(targetNode);
     }

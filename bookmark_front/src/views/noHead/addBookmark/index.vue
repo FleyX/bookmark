@@ -30,7 +30,7 @@
       <a-button v-else type="link" @click="showAddInput = true">新建文件夹</a-button>
       <div>
         <a-button style="marging-right: 1em" type="" @click="closeIframe">取消</a-button>
-        <a-button type="primary" @click="closeIframe">{{ form.path === "" ? "保存到根" : "保存" }}</a-button>
+        <a-button type="primary" @click="addBookmark">{{ breadList.length === 0 ? "保存到根" : "保存" }}</a-button>
       </div>
     </div>
   </div>
@@ -88,9 +88,13 @@ export default {
     },
     //新增书签
     async addBookmark() {
+      this.form.path = this.getCurrentPath();
       let res = await HttpUtil.put("/bookmark", null, this.form);
       this.$message.success("添加成功");
-      await this.$store.dispatch(TREE_DATA + "/" + addNode, { sourceNode: null, targetNode: res });
+      await this.$store.dispatch(TREE_DATA + "/" + addNode, {
+        sourceNode: this.breadList.length == 0 ? null : this.breadList[this.breadList.length - 1],
+        targetNode: res,
+      });
       setTimeout(this.closeIframe, 500);
     },
     //面包屑点击
@@ -107,10 +111,12 @@ export default {
         this.breadList = [];
       } else {
         let index = this.breadList.indexOf(item);
-        this.breadList = [...this.breadList.slice(0, index)];
+        this.breadList = [...this.breadList.slice(0, index + 1)];
       }
     },
+    //点击文件夹
     folderClick(item) {
+      this.form.path = item.path + "." + item.bookmarkId;
       this.breadList.push(item);
     },
     //新增文件夹
