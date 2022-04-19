@@ -254,7 +254,7 @@ const actions = {
       }
       sourceNode.children.push(targetNode);
     }
-    if (targetNode.type === 0) {
+    if (targetNode.type === 1) {
       context.state[TOTAL_TREE_DATA][targetNode.path + "." + targetNode.bookmarkId] = [];
     }
     targetNode.isLeaf = targetNode.type === 0;

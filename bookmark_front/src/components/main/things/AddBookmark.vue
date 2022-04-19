@@ -62,7 +62,7 @@ export default {
         file: null,
       },
       rules: {
-        name: [{ required: true, min: 1, max: 1000, message: "名称长度为1-1000", trigger: "change" }],
+        name: [{ required: true, min: 1, max: 1000, message: "名称长度为1-200", trigger: "change" }],
         url: [{ required: true, min: 1, message: "不能为空", trigger: "change" }],
       },
     };
