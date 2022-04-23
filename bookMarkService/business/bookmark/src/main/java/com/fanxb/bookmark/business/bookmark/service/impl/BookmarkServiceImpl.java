@@ -345,6 +345,7 @@ public class BookmarkServiceImpl implements BookmarkService {
             try {
                 byte[] b = Base64Decoder.decode(icon.substring(icon.indexOf(",") + 1));
                 String iconPath = saveToFile(iconUrl, host, b);
+                hostIconDao.deleteByHost(host);
                 hostIconDao.insert(host, iconPath);
                 return iconPath;
             } catch (Exception e) {
