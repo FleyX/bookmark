@@ -22,7 +22,8 @@ let noLoginFinish = false;
 //执行各自的非登陆初始化
 (async () => {
 	await store.dispatch(globalConfig.GLOBAL_CONFIG + "/" + globalConfig.noLoginInit);
-	await store.dispatch(treeData.TREE_DATA + "/" + treeData.noLoginInit);
+	//无需等待执行
+	store.dispatch(treeData.TREE_DATA + "/" + treeData.noLoginInit);
 	noLoginFinish = true;
 })();
 
@@ -35,8 +36,9 @@ export async function loginInit () {
 	}
 	console.log(store.state[globalConfig.GLOBAL_CONFIG][globalConfig.TOKEN]);
 	if (checkJwtValid(store.state[globalConfig.GLOBAL_CONFIG][globalConfig.TOKEN])) {
-		await store.dispatch(globalConfig.GLOBAL_CONFIG + "/" + globalConfig.loginInit);
-		await store.dispatch(treeData.TREE_DATA + "/" + treeData.loginInit);
+		//无需等待执行完毕
+		store.dispatch(globalConfig.GLOBAL_CONFIG + "/" + globalConfig.loginInit);
+		store.dispatch(treeData.TREE_DATA + "/" + treeData.loginInit);
 	}
 }
 
