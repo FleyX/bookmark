@@ -6,6 +6,8 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.fanxb.bookmark.common.constant.NumberConstant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
+import com.fanxb.bookmark.common.dao.GlobalConfigDao;
+import com.fanxb.bookmark.common.entity.po.GlobalConfigPo;
 import com.fanxb.bookmark.common.entity.vo.GlobalConfigVo;
 import com.fanxb.bookmark.common.service.ConfigService;
 import com.fanxb.bookmark.common.util.HttpUtil;
@@ -15,10 +17,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author fanxb
@@ -30,10 +31,12 @@ public class ConfigServiceImpl implements ConfigService {
 
 
     private final StringRedisTemplate stringRedisTemplate;
+    private final GlobalConfigDao globalConfigDao;
 
     @Autowired
-    public ConfigServiceImpl(StringRedisTemplate stringRedisTemplate) {
+    public ConfigServiceImpl(StringRedisTemplate stringRedisTemplate, GlobalConfigDao globalConfigDao) {
         this.stringRedisTemplate = stringRedisTemplate;
+        this.globalConfigDao = globalConfigDao;
     }
 
     @Value("${bing.host}")
@@ -43,9 +46,12 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public GlobalConfigVo getGlobalConfig() {
+        List<GlobalConfigPo> pos = globalConfigDao.selectByMap(Collections.emptyMap());
+        Map<String, String> map = pos.stream().collect(Collectors.toMap(GlobalConfigPo::getCode, GlobalConfigPo::getValue));
         GlobalConfigVo vo = new GlobalConfigVo();
         vo.setProxyExist(HttpUtil.getProxyExist());
         vo.setBingImgSrc(getCacheBingImg());
+        vo.setMap(map);
         return vo;
     }
 

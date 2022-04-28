@@ -62,7 +62,7 @@ async function addBookmark (data) {
   document.getElementsByTagName("body")[0].appendChild(addBlockDiv);
   iframe = document.createElement("iframe");
   iframe.src = bookmarkHost + "/noHead/addBookmark?token=" + data.token;
-  iframe.setAttribute("style", "width:70%;min-height:60vh;margin-left:15%;margin-top:10vh;padding:0;border:0;border-radius:10px");
+  iframe.setAttribute("style", "width:640px;display:block;height:80vh;margin:0 auto;margin-top:10vh;padding:0;border:0;border-radius:10px");
   addBlockDiv.appendChild(iframe);
 }
 

@@ -345,6 +345,7 @@ public class BookmarkServiceImpl implements BookmarkService {
             try {
                 byte[] b = Base64Decoder.decode(icon.substring(icon.indexOf(",") + 1));
                 String iconPath = saveToFile(iconUrl, host, b);
+                hostIconDao.deleteByHost(host);
                 hostIconDao.insert(host, iconPath);
                 return iconPath;
             } catch (Exception e) {
@@ -404,7 +405,7 @@ public class BookmarkServiceImpl implements BookmarkService {
      * @author FleyX
      */
     private String saveToFile(String iconUrl, String host, byte[] b) {
-        String fileName = URLEncoder.encode(host, StandardCharsets.UTF_8) + iconUrl.substring(iconUrl.lastIndexOf("."));
+        String fileName = host.replace(":", ".") + iconUrl.substring(iconUrl.lastIndexOf("."));
         String filePath = Paths.get(FileConstant.FAVICON_PATH, host.replace("www", "").replaceAll("\\.", "").substring(0, 2), fileName).toString();
         FileUtil.writeBytes(b, Paths.get(CommonConstant.fileSavePath, filePath).toString());
         return File.separator + filePath;

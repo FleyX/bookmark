@@ -1,9 +1,6 @@
 package com.fanxb.bookmark.business.bookmark.dao;
 
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 /**
  * @author fanxb
@@ -28,6 +25,15 @@ public interface HostIconDao {
      * @return {@link String}
      * @author fanxb
      */
-    @Select("select iconPath from host_icon where host=#{host}")
+    @Select("select iconPath from host_icon where host=#{host} limit 1")
     String selectByHost(String host);
+
+    /**
+     * 删除一条
+     *
+     * @param host host
+     * @author FleyX
+     */
+    @Delete("delete from host_icon where host=#{host}")
+    void deleteByHost(String host);
 }
