@@ -4,14 +4,14 @@ chrome.runtime.onInstalled.addListener(() => {
       title: '添加到书签',
       id: "addBookmark",
     },
-    () => console.log("创建右键菜单成功")
+    () => console.debug("创建右键菜单成功")
   );
 });
 
 
 
 chrome.contextMenus.onClicked.addListener(async function (info, tab) {
-  console.log(info, tab);
+  console.debug(info, tab);
   let body = {
     name: tab.title,
     url: tab.url,
@@ -27,7 +27,7 @@ chrome.runtime.onMessage.addListener(async (data, sender, sendResponse) => {
     return;
   }
   sendResponse("ok");
-  console.log("收到消息：", data, sender);
+  console.debug("收到消息：", data, sender);
   if (data.code == 'setToken') {
     await setVal("token", data.data);
     // sendToContent
@@ -47,10 +47,10 @@ chrome.runtime.onMessage.addListener(async (data, sender, sendResponse) => {
  * @param {*} data 
  */
 function sendToContent (tabId, data) {
-  console.log(tabId, data);
+  console.debug(tabId, data);
   data.receiver = "content";
   chrome.tabs.sendMessage(tabId, data, res => {
-    console.log("接受响应", res);
+    console.debug("接受响应", res);
   })
 }
 
@@ -60,7 +60,7 @@ function sendToContent (tabId, data) {
  */
 function sendToPopup (data) {
   data.receiver = "popup";
-  chrome.runtime.sendMessage(data, res => console.log(res));
+  chrome.runtime.sendMessage(data, res => console.debug(res));
 }
 
 /**
@@ -72,7 +72,7 @@ function sendToPopup (data) {
 function setVal (key, val) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({ [key]: val }, function () {
-      console.log("设置值成功:", key, val)
+      console.debug("设置值成功:", key, val)
       resolve();
     })
   })
@@ -87,11 +87,11 @@ function getVal (key) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get([key], async function (res) {
       if (key === 'token' && !checkTokenValid(res[key])) {
-        console.log("token过期");
+        console.debug("token过期");
         await clearVal("token");
         res[key] = null;
       }
-      console.log("取值成功", res);
+      console.debug("取值成功", res);
       resolve(res[key]);
     })
   })
@@ -100,7 +100,7 @@ function getVal (key) {
 function clearVal (key) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.remove(key, function () {
-      console.log("remove成功", key);
+      console.debug("remove成功", key);
       resolve();
     })
   })

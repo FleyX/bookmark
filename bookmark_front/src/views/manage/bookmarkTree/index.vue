@@ -65,7 +65,7 @@
       @drop="onDrop"
     >
       <a-dropdown :trigger="['contextmenu']" slot="nodeTitle" slot-scope="rec">
-        <div class="titleContext">
+        <div class="titleContext" :title="rec.dataRef.url">
           <a-icon type="folder" v-if="!rec.dataRef.isLeaf" />
           <img v-else-if="rec.dataRef.icon.length > 0" :src="rec.dataRef.icon" style="width: 16px" />
           <a-icon type="book" v-else />

@@ -1,5 +1,5 @@
-console.log("asdf");
-console.log(bookmarkHost);
+console.debug("asdf");
+console.debug(bookmarkHost);
 
 var token;
 var login = document.getElementById("login");
@@ -14,7 +14,7 @@ var action = document.getElementById("action");
 	let newestBlock = document.getElementById("newestVersion");
 	newestBlock.href = bookmarkHost + "/static/bookmarkBrowserPlugin.zip";
 	let res = await axios.get("/common/config/global");
-	console.log(res);
+	console.debug(res);
 	newestBlock.innerText = res.data.data.map.pluginVersion;
 })();
 
@@ -22,7 +22,7 @@ var action = document.getElementById("action");
  * 退出登陆
  */
 document.getElementById("logout").addEventListener("click", () => {
-	console.log("click");
+	console.debug("click");
 	sendToBg("clearToken", null);
 	action.style.display = "none";
 	login.style.display = "block";
@@ -33,7 +33,7 @@ document.getElementById("logout").addEventListener("click", () => {
  * @param {*} data 
  */
 function sendToBg (code, data) {
-	chrome.runtime.sendMessage({ code, data, receiver: "background" }, res => console.log(res));
+	chrome.runtime.sendMessage({ code, data, receiver: "background" }, res => console.debug(res));
 }
 
 
@@ -43,7 +43,7 @@ chrome.runtime.onMessage.addListener(async (data, sender, sendResponse) => {
 		return;
 	}
 	sendResponse("ok");
-	console.log("popup收到消息：", data);
+	console.debug("popup收到消息：", data);
 	if (data.code == 'setToken') {
 		token = data.data;
 		if (token) {
