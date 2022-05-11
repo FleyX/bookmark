@@ -1,5 +1,5 @@
-var bookmarkHost = "https://fleyx.com";
-// var bookmarkHost = "http://localhost:8080";
+// var bookmarkHost = "https://fleyx.com";
+var bookmarkHost = "http://localhost:8080";
 
 var version = "0.1.2";
 
