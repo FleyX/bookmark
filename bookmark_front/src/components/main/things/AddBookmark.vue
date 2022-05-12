@@ -6,10 +6,10 @@
       </a-form-model-item>
       <template v-if="form.type !== 'file'">
         <a-form-model-item prop="name" label="名称" :required="false">
-          <a-input v-model="form.name" placeholder="名称" />
+          <a-input v-model="form.name" placeholder="名称" @pressEnter="submit" ref="inputName" />
         </a-form-model-item>
         <a-form-model-item v-if="form.type === 'bookmark'" prop="url" label="URL">
-          <a-input v-model="form.url" placeholder="url" />
+          <a-input v-model="form.url" placeholder="url" @pressEnter="submit" />
         </a-form-model-item>
         <div class="btns">
           <a-button type="primary" @click="submit" :loading="loading" :disabled="loading">提交</a-button>
@@ -78,6 +78,12 @@ export default {
     }
     this.token = this.$store.state.globalConfig.token;
     this.form.path = !this.targetNode ? "" : this.targetNode.path + (this.isAdd ? "." + this.targetNode.bookmarkId : "");
+
+    this.$nextTick(() => {
+      if (this.$refs.inputName) {
+        this.$refs.inputName.focus();
+      }
+    });
   },
   methods: {
     /**
