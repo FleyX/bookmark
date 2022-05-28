@@ -6,7 +6,7 @@
 
 部署教程：[docker-compose 部署](https://github.com/FleyX/bookmark/blob/master/DEPLOY.md)
 
-**为获得更好的体验，建议将主页设置为 fleyx.com,并安装浏览器拓展**
+**为获得更好的体验，建议将主页设置为 fleyx.com,并安装[浏览器拓展](https://github.com/FleyX/bookmark/blob/master/HELP.md#%E5%AE%89%E8%A3%85%E6%8F%92%E4%BB%B6)**
 
 # 缘由
 
