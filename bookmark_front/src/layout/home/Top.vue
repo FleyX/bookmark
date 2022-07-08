@@ -7,7 +7,7 @@
       <router-link to="/public/register">注册</router-link>
     </div>
     <div v-else class="topAction">
-      <a-tooltip>
+      <a-tooltip style="margin-right: 1em">
         <template #title>书签管理</template>
         <router-link to="/manage">
           <a-icon class="bookmarkIcon" type="setting" />
@@ -75,8 +75,6 @@ export default {
       font-size: 2em;
       background-color: rgb(74, 74, 74, 0.5);
       color: rgba(255, 255, 255, 0.8);
-      margin-right: 1em;
-      cursor: pointer;
     }
   }
 }
