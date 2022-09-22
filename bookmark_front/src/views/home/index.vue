@@ -5,7 +5,7 @@
       <search :style="{ width: isPhone ? '100%' : '60%' }" />
       <div :style="{ width: isPhone ? '100%' : '70%' }"><pin-bookmark /></div>
     </div>
-    <bottom />
+    <bottom :bgSrc="serverConfig.bingImgSrc"  />
   </div>
 </template>
 
