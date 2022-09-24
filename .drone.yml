@@ -5,7 +5,6 @@ name: bookmarkPublish
 trigger:
   branch:
     - master
-    - dev
 
 clone:
   disable: true
