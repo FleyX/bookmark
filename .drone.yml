@@ -1,0 +1,25 @@
+kind: pipeline
+type: docker
+name: bookmarkPublish
+
+trigger:
+  branch:
+    - master
+    - dev
+
+clone:
+  disable: true
+
+steps:
+  - name: deploy
+    image: appleboy/drone-ssh
+    settings:
+      host:
+        from_secret: bookmarkHost
+      port: 22000
+      user: root
+      key:
+        from_secret: privateSsh
+      timeout: 3m
+      script:
+        - cd /root/workspace/bookmark && git pull && docker-compose stop front backend && bash build.sh && docker-compose up -d && docker-compose restart front backend
