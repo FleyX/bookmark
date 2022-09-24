@@ -22,6 +22,8 @@ public class ScheduleConfig implements SchedulingConfigurer {
     @Override
     public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
         scheduledTaskRegistrar.setScheduler(ThreadPoolFactory.createPool("schedule"));
+        ScheduledExecutorService service = new ScheduledThreadPoolExecutor(5, new CustomThreadFactory("schedule"));
+        scheduledTaskRegistrar.setScheduler(service);
         log.info("自定义schedule线程池成功");
     }
 
