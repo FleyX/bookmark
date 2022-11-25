@@ -1,6 +1,6 @@
 本项目是一个云书签的项目，取名为：签签世界.
 
-部署地址:[fleyx.com](https://fleyx.com)，
+部署地址:[bm.fleyx.com](https://bm.fleyx.com)，
 
 也可自己搭建，教程如下：
 
