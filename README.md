@@ -1,12 +1,12 @@
-本项目是一个云书签的项目，取名为：签签世界.
+![图片](https://s3.fleyx.com/picbed/2022/12/4e9610d8b1289b6e604c205a80fb3ea5.png)
 
-部署地址:[bm.fleyx.com](https://bm.fleyx.com)，
+本项目是一个在线书签管理的项目，名为：签签世界.
 
-也可自己搭建，教程如下：
+在线使用地址(长期提供服务):[bm.fleyx.com](https://bm.fleyx.com)，
 
-部署教程：[docker-compose 部署](https://github.com/FleyX/bookmark/blob/master/DEPLOY.md)
+**为获得更好的体验，建议将主页设置为 fleyx.com,并安装浏览器拓展,[点击查看如何安装](https://blog.fleyx.com/blog/detail/20220329/#%e6%b5%8f%e8%a7%88%e5%99%a8%e6%8f%92%e4%bb%b6)**
 
-**为获得更好的体验，建议将主页设置为 fleyx.com,并安装[浏览器拓展](https://github.com/FleyX/bookmark/blob/master/HELP.md#%E5%AE%89%E8%A3%85%E6%8F%92%E4%BB%B6)**
+也可自己部署搭建，教程见：[docker-compose 部署](https://github.com/FleyX/bookmark/blob/master/DEPLOY.md)
 
 # 缘由
 
@@ -20,27 +20,11 @@
 
 # 主要功能
 
-使用帮助见：[使用帮助](https://github.com/FleyX/bookmark/blob/master/HELP.md)
-
-1. 基础的书签增删改查功能。支持 chrome、firefox 等浏览器书签文件导入，导出。
-
-![](https://qiniupic.fleyx.com/blog/20220329214126.png?imageView2/2/w/1920)
-
-2. 强大的书签检索功能，毫秒级的关键字检索。
-
-![](https://qiniupic.fleyx.com/blog/20220329214210.png?imageView2/2/w/1920)
-
-3. 首页功能，参考 bing 首页实现
-
-![](https://qiniupic.fleyx.com/blog/20220329214236.png?imageView2/2/w/1920)
-
-4. 移动端支持，手机端也可使用（部分功能比如拖拽等无法使用）
-
-![](https://qiniupic.fleyx.com/blog/20220329214312.png?imageView2/2/w/1920)
+帮助文档：[点击跳转](https://blog.fleyx.com/blog/detail/20220329/)
 
 # TODO
 
-- 主页功能 Ok!
-- 拼音检索 Ok!
-- 书签导出 OK！
-- 侧边栏显示
+- [x] 主页功能
+- [x] 拼音检索
+- [x] 书签导出
+- [x] 浏览器插件
