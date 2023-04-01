@@ -19,6 +19,6 @@ steps:
       user: root
       key:
         from_secret: privateSsh
-      timeout: 3m
+      command_timeout: 30m
       script:
         - cd /root/bookmark && git pull && bash build.sh && bash syncFile.sh
