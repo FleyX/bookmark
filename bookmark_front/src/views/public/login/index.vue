@@ -24,7 +24,7 @@
           </div>
           <div class="thirdPart">
             <span>第三方登陆</span>
-            <a-tooltip v-if="serverConfig.proxyExist" title="github登陆" class="oneIcon" placement="bottom">
+            <a-tooltip title="github登陆" class="oneIcon" placement="bottom">
               <a-icon type="github" @click="toGithub" style="font-size: 1.4em" />
             </a-tooltip>
           </div>
@@ -39,35 +39,36 @@ import Header from "@/components/public/Switch.vue";
 import httpUtil from "../../../util/HttpUtil.js";
 import { mapMutations, mapState } from "vuex";
 import HttpUtil from "../../../util/HttpUtil.js";
+
 export default {
   name: "Login",
   components: {
-    Header,
+    Header
   },
   computed: {
-    ...mapState("globalConfig", ["serverConfig"]),
+    ...mapState("globalConfig", ["serverConfig"])
   },
   data() {
     return {
       form: {
         str: "",
         password: "",
-        rememberMe: false,
+        rememberMe: false
       },
       rules: {
         str: [
           { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 1, max: 50, message: "最短1，最长50", trigger: "change" },
+          { min: 1, max: 50, message: "最短1，最长50", trigger: "change" }
         ],
         password: [
           { required: true, message: "请输入密码", trigger: "blur" },
-          { pattern: "^\\w{6,18}$", message: "密码为6-18位数字,字母,下划线组合", trigger: "change" },
-        ],
+          { pattern: "^\\w{6,18}$", message: "密码为6-18位数字,字母,下划线组合", trigger: "change" }
+        ]
       },
       loading: false, //是否加载中
       oauthLogining: false, //true:正在进行oauth后台操作
       page: null, //oauth打开的页面实例
-      redirect: null,
+      redirect: null
     };
   },
   async created() {
@@ -130,8 +131,8 @@ export default {
       } finally {
         this.loading = false;
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -139,11 +140,13 @@ export default {
 .form {
   margin: 0.3rem;
   margin-bottom: 0.1rem;
+
   .reset {
     display: flex;
     justify-content: space-between;
   }
 }
+
 .thirdPart {
   display: flex;
   justify-content: space-between;

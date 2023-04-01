@@ -49,7 +49,6 @@ public class ConfigServiceImpl implements ConfigService {
         List<GlobalConfigPo> pos = globalConfigDao.selectByMap(Collections.emptyMap());
         Map<String, String> map = pos.stream().collect(Collectors.toMap(GlobalConfigPo::getCode, GlobalConfigPo::getValue));
         GlobalConfigVo vo = new GlobalConfigVo();
-        vo.setProxyExist(HttpUtil.getProxyExist());
         vo.setBingImgSrc(getCacheBingImg());
         vo.setMap(map);
         return vo;
