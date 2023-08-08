@@ -60,6 +60,7 @@
         </a-tooltip>
         <a-tooltip title="点击修改" v-if="currentAction != 'defaultSearchEngine'">
           <span style="cursor: pointer" @click="() => (this.currentAction = 'defaultSearchEngine')">{{ defaultSearchEngine }}</span>
+          <span>管理搜索引擎</span>
         </a-tooltip>
         <div class="inputGroup" v-else-if="currentAction === 'defaultSearchEngine'">
           <a-select :default-value="userInfo.defaultSearchEngine" style="width: 100%" @change="submit">
