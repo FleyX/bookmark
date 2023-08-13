@@ -14,11 +14,11 @@ steps:
     image: appleboy/drone-ssh
     settings:
       host:
-        from_secret: bookmarkHost
-      port: 22000
+        from_secret: devHost
+      port: 22
       user: root
       key:
         from_secret: privateSsh
-      timeout: 3m
+      command_timeout: 30m
       script:
-        - cd /root/workspace/bookmark && git pull && docker-compose stop front backend && bash build.sh && docker-compose up -d && docker-compose restart front backend
+        - cd /root/bookmark && git pull && bash build.sh && bash syncFile.sh
