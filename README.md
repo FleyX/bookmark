@@ -22,6 +22,16 @@
 
 帮助文档：[点击跳转](https://blog.fleyx.com/blog/detail/20220329/)
 
+# 更新日志
+
+## 2023-08-13
+
+![pic](https://s3.fleyx.com/picbed/2023/08/Snipaste_2023-08-13_15-01-20.png)
+
+搜索引擎支持自定义[#43](https://github.com/FleyX/bookmark/issues/43)
+
+位置：右上角个人中心-管理搜索引擎
+
 # TODO
 
 - [x] 主页功能
