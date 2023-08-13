@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.fanxb.bookmark.business.user.dao.UserDao;
 import com.fanxb.bookmark.business.user.service.OauthService;
+import com.fanxb.bookmark.business.user.service.SearchEngineService;
 import com.fanxb.bookmark.business.user.service.UserService;
 import com.fanxb.bookmark.business.user.vo.OauthBody;
 import com.fanxb.bookmark.common.constant.CommonConstant;
@@ -38,6 +39,8 @@ public class OauthServiceImpl implements OauthService {
     private String githubClientId;
     @Value("${OAuth.github.secret}")
     private String githubSecret;
+    @Autowired
+    private SearchEngineService searchEngineService;
     private final UserDao userDao;
     private final UserService userService;
 
@@ -105,6 +108,7 @@ public class OauthServiceImpl implements OauthService {
             other.setLastLoginTime(System.currentTimeMillis());
             other.setVersion(0);
             userDao.addOne(other);
+            searchEngineService.newUserInit(other.getUserId());
             return other;
         } else {
             if (!current.getEmail().equals(other.getEmail()) || !current.getGithubId().equals(other.getGithubId())) {

@@ -1,5 +1,6 @@
 package com.fanxb.bookmark.business.user.dao;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.fanxb.bookmark.common.entity.po.User;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -16,7 +17,7 @@ import java.util.List;
  * @date 2019/7/6 11:36
  */
 @Component
-public interface UserDao {
+public interface UserDao extends BaseMapper<User> {
 
     /**
      * Description: 新增一个用户
@@ -182,16 +183,6 @@ public interface UserDao {
     @Select("select userId from user order by userId limit #{start},#{size}")
     List<Integer> selectUserIdPage(@Param("start") int start, @Param("size") int size);
 
-    /**
-     * 更新用户搜索引擎
-     *
-     * @param userId userId
-     * @param engine engine
-     * @author fanxb
-     * @date 2021/3/14
-     **/
-    @Update("update user set defaultSearchEngine=#{engine} where userId=#{userId}")
-    void updateSearchEngine(@Param("userId") int userId, @Param("engine") String engine);
 
     /**
      * 更新一个字段-一个条件

@@ -37,16 +37,10 @@
             <artifactId>commons-pool2</artifactId>
         </dependency>
 
-        <!--mybatis依赖-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.mybatis.spring.boot</groupId>-->
-        <!--            <artifactId>mybatis-spring-boot-starter</artifactId>-->
-        <!--            <version>2.0.1</version>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.5.1</version>
+            <version>3.5.3.2</version>
         </dependency>
 
         <dependency>
@@ -59,19 +53,25 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid-spring-boot-starter</artifactId>
-            <version>1.1.18</version>
+            <version>1.2.18</version>
         </dependency>
 
         <!--数据库版本管理-->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>5.2.4</version>
+            <version>9.21.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+            <version>9.21.1</version>
         </dependency>
         <!--mysql jdbc依赖-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
         </dependency>
 
         <!--邮件依赖-->
@@ -101,7 +101,46 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>5.8.12</version>
+            <version>5.8.21</version>
+        </dependency>
+
+        <!--单元测试-->
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+        <!--mysql jdbc依赖-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+
+        <!--邮件依赖-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
+        <!--减负依赖-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <!--json工具依赖-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.83</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.8.21</version>
         </dependency>
 
         <!--单元测试-->

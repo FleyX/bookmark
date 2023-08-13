@@ -87,6 +87,6 @@ public class BaseInfoServiceImpl implements BaseInfoService {
 
     @Override
     public void changeDefaultSearchEngine(User user) {
-        userDao.updateSearchEngine(user.getUserId(), user.getDefaultSearchEngine());
+        userDao.updateById(user);
     }
 }

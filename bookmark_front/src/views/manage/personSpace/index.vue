@@ -1,5 +1,5 @@
 <template>
-  <div class="userInfo">
+  <div v-if="userInfo" class="userInfo">
     <div class="icon">
       <img :src="userInfo.icon" class="full" />
       <label class="full">
@@ -12,7 +12,8 @@
     <div class="baseInfo">
       <div class="item">
         <a-tooltip title="点击修改" v-if="currentAction != 'name'">
-          <span style="font-size: 2em; cursor: pointer" @click="() => (this.currentAction = 'name')">{{ userInfo.username }}</span>
+          <span style="font-size: 2em; cursor: pointer"
+                @click="() => (this.currentAction = 'name')">{{ userInfo.username }}</span>
         </a-tooltip>
         <div class="inputGroup" v-else-if="currentAction === 'name'">
           <a-input type="text" v-model="name" placeholder="修改昵称" />
@@ -26,7 +27,9 @@
       <div class="item">
         <span style="width: 5em">密码</span>
         <a-tooltip title="点击修改" v-if="currentAction != 'password'">
-          <span style="cursor: pointer" @click="() => (this.currentAction = 'password')">{{ userInfo.noPassword ? "设置密码" : "**********" }}</span>
+          <span style="cursor: pointer"
+                @click="() => (this.currentAction = 'password')">{{ userInfo.noPassword ? "设置密码" : "**********"
+            }}</span>
         </a-tooltip>
         <div class="inputGroup" v-else-if="currentAction === 'password'">
           <a-input type="password" v-model="oldPassword" placeholder="旧密码(如无置空)" />
@@ -58,26 +61,24 @@
         <a-tooltip title="搜索框默认搜索引擎">
           <span style="width: 5em">搜索</span>
         </a-tooltip>
-        <a-tooltip title="点击修改" v-if="currentAction != 'defaultSearchEngine'">
-          <span style="cursor: pointer" @click="() => (this.currentAction = 'defaultSearchEngine')">{{ defaultSearchEngine }}</span>
-        </a-tooltip>
-        <div class="inputGroup" v-else-if="currentAction === 'defaultSearchEngine'">
-          <a-select :default-value="userInfo.defaultSearchEngine" style="width: 100%" @change="submit">
-            <a-select-option value="baidu">百度</a-select-option>
-            <a-select-option value="google">谷歌</a-select-option>
-            <a-select-option value="bing">Bing</a-select-option>
-          </a-select>
-        </div>
+        <div @click="showSearchEngineManage=true" style=" cursor: pointer;color:blue">管理搜索引擎</div>
       </div>
     </div>
+
+    <a-modal v-model="showSearchEngineManage" title="管理搜索引擎" :footer="null" width="70%">
+      <manage-search-engine />
+    </a-modal>
   </div>
 </template>
 
 <script>
+import manageSearchEngine from "./components/manageSearchEngine.vue";
 import { mapState } from "vuex";
 import HttpUtil from "@/util/HttpUtil";
+
 export default {
   name: "UserInfo",
+  components: { manageSearchEngine },
   data() {
     return {
       currentAction: null, //当前操作,name,password,email
@@ -86,21 +87,11 @@ export default {
       password: "",
       rePassword: "",
       email: "",
+      showSearchEngineManage: false
     };
   },
   computed: {
-    ...mapState("globalConfig", ["userInfo"]),
-    defaultSearchEngine() {
-      switch (this.userInfo.defaultSearchEngine) {
-        case "baidu":
-          return "百度";
-        case "google":
-          return "谷歌";
-        case "bing":
-          return "Bing";
-      }
-      return "";
-    },
+    ...mapState("globalConfig", ["userInfo"])
   },
   methods: {
     async changeIcon(e) {
@@ -127,21 +118,18 @@ export default {
         url = "/baseInfo/password";
         body = {
           oldPassword: this.oldPassword,
-          password: this.password,
+          password: this.password
         };
       } else if (this.currentAction === "email") {
         url = "/baseInfo/email";
         body = { oldPassword: this.oldPassword, email: this.email };
-      } else if (this.currentAction === "defaultSearchEngine") {
-        url = "/baseInfo/updateSearchEngine";
-        body = { defaultSearchEngine: e };
       }
       await HttpUtil.post(url, null, body);
       await this.$store.dispatch("globalConfig/refreshUserInfo");
       this.$message.success("操作成功");
       this.currentAction = null;
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -195,6 +183,7 @@ export default {
     border-bottom: 1px solid #ebebeb;
 
     display: flex;
+
     .inputGroup {
       flex: 1;
     }
