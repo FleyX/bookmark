@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.fanxb.bookmark.business.api.BookmarkApi;
 import com.fanxb.bookmark.business.user.constant.FileConstant;
 import com.fanxb.bookmark.business.user.dao.UserDao;
+import com.fanxb.bookmark.business.user.service.SearchEngineService;
 import com.fanxb.bookmark.business.user.service.UserService;
 import com.fanxb.bookmark.business.user.vo.LoginBody;
 import com.fanxb.bookmark.business.user.vo.RegisterBody;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -42,6 +44,8 @@ public class UserServiceImpl implements UserService {
      * 登陆最大重试次数
      */
     private static final int LOGIN_COUNT = 5;
+    @Autowired
+    private SearchEngineService searchEngineService;
 
     private final UserDao userDao;
     private final StringRedisTemplate redisTemplate;
@@ -83,6 +87,7 @@ public class UserServiceImpl implements UserService {
      * @author fanxb
      * @date 2019/7/6 11:30
      */
+    @Transactional(rollbackFor = Exception.class)
     public String register(RegisterBody body) {
         User user = userDao.selectByUsernameOrEmail(body.getUsername(), body.getEmail());
         if (user != null) {
@@ -102,6 +107,7 @@ public class UserServiceImpl implements UserService {
         user.setLastLoginTime(System.currentTimeMillis());
         user.setVersion(0);
         userDao.addOne(user);
+        searchEngineService.newUserInit(user.getUserId());
         Map<String, String> data = new HashMap<>(1);
         data.put("userId", String.valueOf(user.getUserId()));
         return JwtUtil.encode(data, CommonConstant.jwtSecret, LONG_EXPIRE_TIME);

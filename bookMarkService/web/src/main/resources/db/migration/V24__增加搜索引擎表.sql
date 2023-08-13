@@ -2,15 +2,21 @@ create table search_engine
 (
     id   int auto_increment
         primary key,
+    userId int not null,
+    checked tinyint not null default 0,
     name varchar(20)  null,
     url  varchar(500) null,
     icon varchar(20)  null
-);
-INSERT INTO bookmark.search_engine (name, url, icon)
-VALUES ('谷歌', 'https://www.google.com/search?q=%s', 'icon-google');
+) auto_increment=1001;
+create index search_engine_userId_index
+    on search_engine (userId);
 
-INSERT INTO bookmark.search_engine (name, url, icon)
-VALUES ('必应', 'https://www.bing.com/search?q=%s', 'icon-bing');
-
-INSERT INTO bookmark.search_engine (name, url, icon)
-VALUES ('百度', 'https://www.bing.com/search?q=%s', 'icon-baidu');
+insert into search_engine(userId, checked, name, url, icon)
+select userId, if(defaultSearchEngine = 'baidu', 1, 0), '百度', 'https://www.baidu.com/s?ie=UTF-8&wd=%s', 'icon-baidu'
+from user;
+insert into search_engine(userId, checked, name, url, icon)
+select userId, if(defaultSearchEngine = 'bing', 1, 0), '必应', 'https://www.bing.com/search?q=%s', 'icon-bing'
+from user;
+insert into search_engine(userId, checked, name, url, icon)
+select userId, if(defaultSearchEngine = 'google', 1, 0), '谷歌', 'https://www.google.com/search?q=%s', 'icon-google'
+from user;

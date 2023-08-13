@@ -2,6 +2,10 @@ package com.fanxb.bookmark.common.entity.po;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
@@ -16,9 +20,11 @@ import java.util.Map;
  * @date 2019/7/4 20:14
  */
 @Data
+@TableName("user")
 public class User {
 
-    private int userId;
+    @TableId(type = IdType.AUTO)
+    private Integer userId;
     /**
      * 第三方github登陆id,-1说明非github登陆
      */
@@ -30,6 +36,7 @@ public class User {
     /**
      * 是否未设置密码
      */
+    @TableField(exist = false)
     private Boolean noPassword;
     @JSONField(serialize = false)
     private String password;
@@ -42,9 +49,10 @@ public class User {
      * 书签同步版本
      */
     private int version;
+
     /**
      * 默认搜索引擎
      */
-    private String defaultSearchEngine;
+    private Integer searchEngineId;
 
 }
