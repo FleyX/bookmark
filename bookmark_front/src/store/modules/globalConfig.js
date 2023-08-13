@@ -69,6 +69,7 @@ const actions = {
     let userInfo = await HttpUtil.get("/user/currentUserInfo");
     context.commit(USER_INFO, userInfo);
     context.commit(IS_INIT, true);
+    console.log("用户完了");
   },
   async [setToken]({ commit }, token) {
     await localforage.setItem(TOKEN, token);
