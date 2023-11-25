@@ -4,7 +4,7 @@
 
 在线使用地址(长期提供服务):[bm.fleyx.com](https://bm.fleyx.com)，
 
-**为获得更好的体验，建议将主页设置为 fleyx.com,并安装浏览器拓展,[点击查看如何安装](https://blog.fleyx.com/blog/detail/20220329/#%e6%b5%8f%e8%a7%88%e5%99%a8%e6%8f%92%e4%bb%b6)**
+**为获得更好的体验，建议将主页设置为 bm.fleyx.com,并安装浏览器拓展,[点击查看如何安装](https://blog.fleyx.com/blog/detail/20220329/#%e6%b5%8f%e8%a7%88%e5%99%a8%e6%8f%92%e4%bb%b6)**
 
 也可自己部署搭建，教程见：[docker-compose 部署](https://github.com/FleyX/bookmark/blob/master/DEPLOY.md)
 
