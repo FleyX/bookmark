@@ -69,9 +69,7 @@ public class ConfigServiceImpl implements ConfigService {
             return str;
         }
         str = getBingImg();
-        if (str != null) {
-            stringRedisTemplate.opsForValue().set(RedisConstant.BING_IMG, str, 2, TimeUnit.HOURS);
-        }
+        stringRedisTemplate.opsForValue().set(RedisConstant.BING_IMG, str, 2, TimeUnit.HOURS);
         return str;
     }
 
