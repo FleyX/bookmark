@@ -64,6 +64,9 @@ export default {
   },
   methods: {
     checkVersion: function(version, latestVersion) {
+      if (version === latestVersion) {
+        return false;
+      }
       let versions = version.split(".");
       let latestVersions = latestVersion.split(".");
       for (let i = 0; i < versions.length; i++) {
