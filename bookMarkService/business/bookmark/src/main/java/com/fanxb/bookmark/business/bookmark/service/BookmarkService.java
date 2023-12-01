@@ -3,6 +3,7 @@ package com.fanxb.bookmark.business.bookmark.service;
 import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
 import com.fanxb.bookmark.common.entity.po.Bookmark;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.List;
@@ -54,7 +55,7 @@ public interface BookmarkService {
      * @author fanxb
      * @date 2019/7/9 18:44
      */
-    void parseBookmarkFile(int userId, InputStream stream, String path) throws Exception;
+    void parseBookmarkFile(int userId, MultipartFile file, String path) throws Exception;
 
     /**
      * Description: 详情

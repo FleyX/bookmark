@@ -69,7 +69,7 @@ public class BookmarkController {
      */
     @RequestMapping("/uploadBookmarkFile")
     public Result uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("path") String path) throws Exception {
-        bookmarkService.parseBookmarkFile(UserContextHolder.get().getUserId(), file.getInputStream(), path);
+        bookmarkService.parseBookmarkFile(UserContextHolder.get().getUserId(), file, path);
         return Result.success(null);
     }
 

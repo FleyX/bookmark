@@ -21,6 +21,7 @@
           :data="{ path: form.path }"
           :headers="{ 'jwt-token': token }"
           action="/bookmark/api/bookmark/uploadBookmarkFile"
+          accept=".html,.db3"
           @change="fileChange"
         >
           <p class="ant-upload-drag-icon">

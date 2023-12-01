@@ -2,8 +2,11 @@ package com.fanxb.bookmark.common.service.impl;
 
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.fanxb.bookmark.common.constant.CommonConstant;
 import com.fanxb.bookmark.common.constant.NumberConstant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.dao.GlobalConfigDao;
@@ -12,11 +15,16 @@ import com.fanxb.bookmark.common.entity.vo.GlobalConfigVo;
 import com.fanxb.bookmark.common.service.ConfigService;
 import com.fanxb.bookmark.common.util.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -61,21 +69,23 @@ public class ConfigServiceImpl implements ConfigService {
             return str;
         }
         str = getBingImg();
-        if (str != null) {
-            stringRedisTemplate.opsForValue().set(RedisConstant.BING_IMG, str, 2, TimeUnit.HOURS);
-        }
+        stringRedisTemplate.opsForValue().set(RedisConstant.BING_IMG, str, 2, TimeUnit.HOURS);
         return str;
     }
 
     private String getBingImg() {
-        try {
-            JSONObject bingObj = HttpUtil.getObj(bingHost + bingUrl, null, false);
-            String path = bingObj.getJSONArray("images").getJSONObject(0).getString("url");
-            return bingHost + path;
+        JSONObject bingObj = HttpUtil.getObj(bingHost + bingUrl, null, false);
+        String path = bingObj.getJSONArray("images").getJSONObject(0).getString("url");
+        String picUrl = bingHost + path;
+        Request request = new Request.Builder().url(picUrl).build();
+        try (Response res = HttpUtil.getClient(false).newCall(request).execute()) {
+            byte[] bytes = res.body().bytes();
+            String filePath = CommonConstant.fileSavePath + "/files/public/bing.jpg";
+            FileUtil.writeBytes(bytes, filePath);
         } catch (Exception e) {
             log.error("获取bing每日一图错误：{}", e.getLocalizedMessage(), e);
         }
-        return null;
+        return "/files/public/bing.jpg";
     }
 
 

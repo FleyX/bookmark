@@ -2,10 +2,8 @@ package com.fanxb.bookmark.business.bookmark.service.impl;
 
 import cn.hutool.core.codec.Base64Decoder;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.core.util.HashUtil;
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.fanxb.bookmark.business.api.UserApi;
 import com.fanxb.bookmark.business.bookmark.constant.FileConstant;
@@ -38,7 +36,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.print.Book;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -49,6 +49,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -81,18 +85,25 @@ public class BookmarkServiceImpl implements BookmarkService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void parseBookmarkFile(int userId, InputStream stream, String path) throws Exception {
-        Document doc = Jsoup.parse(stream, "utf-8", "");
-        Elements elements = doc.select("html>body>dl>dt");
+    public void parseBookmarkFile(int userId, MultipartFile file, String path) throws Exception {
+        List<Bookmark> bookmarks = new ArrayList<>();
         //获取当前层sort最大值
         Integer sortBase = bookmarkDao.selectMaxSort(userId, path);
         if (sortBase == null) {
             sortBase = 0;
         }
-        List<Bookmark> bookmarks = new ArrayList<>();
-        for (int i = 0, length = elements.size(); i < length; i++) {
-            dealBookmark(userId, elements.get(i), path, sortBase + i, bookmarks);
+        if (file.getOriginalFilename().endsWith(".db3")) {
+            //处理db文件
+            readFromOneEnv(bookmarks, userId, file, path, sortBase);
+        } else {
+            InputStream stream = file.getInputStream();
+            Document doc = Jsoup.parse(stream, "utf-8", "");
+            Elements elements = doc.select("html>body>dl>dt");
+            for (int i = 0, length = elements.size(); i < length; i++) {
+                dealBookmark(userId, elements.get(i), path, sortBase + i, bookmarks);
+            }
         }
+
         //每一千条处理插入一次,批量更新搜索字段
         List<Bookmark> tempList = new ArrayList<>(1000);
         for (int i = 0; i < bookmarks.size(); i++) {
@@ -148,6 +159,57 @@ public class BookmarkServiceImpl implements BookmarkService {
             for (int i = 0, size = children.size(); i < size; i++) {
                 dealBookmark(userId, children.get(i), childPath, sortBase + i + 1, bookmarks);
             }
+        }
+    }
+
+    /**
+     * 处理oneenv的导出
+     *
+     * @param bookmarks 书签列表
+     * @param userId    用户id
+     * @param file      file
+     * @param path      path
+     * @param sort      sort
+     */
+    private void readFromOneEnv(List<Bookmark> bookmarks, int userId, MultipartFile file, String path, int sort) {
+        String filePath = CommonConstant.fileSavePath + "/files/" + IdUtil.simpleUUID() + ".db3";
+        try {
+            file.transferTo(FileUtil.newFile(filePath));
+            try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + filePath)) {
+                Statement stat = conn.createStatement();
+                ResultSet rs = stat.executeQuery("select * from on_categorys");
+                Map<Long, Bookmark> folderMap = new HashMap<>();
+                Map<Long, Integer> childSortBaseMap = new HashMap<>();
+                while (rs.next()) {
+                    long addTime = rs.getLong("add_time");
+                    Bookmark folder = new Bookmark(userId, path, StrUtil.nullToEmpty(rs.getString("name")), addTime == 0 ? System.currentTimeMillis() : addTime * 1000, sort++);
+                    int childSortBase = 0;
+                    if (insertOne(folder)) {
+                        childSortBase = ObjectUtil.defaultIfNull(bookmarkDao.selectMaxSort(userId, path), 0);
+                    }
+                    long id = rs.getLong("id");
+                    folderMap.put(id, folder);
+                    childSortBaseMap.put(id, childSortBase);
+                }
+                rs.close();
+                rs = stat.executeQuery("select * from on_links");
+                while (rs.next()) {
+                    long fId = rs.getLong("fid");
+                    long addTime = rs.getLong("add_time");
+                    int tempSort = childSortBaseMap.get(fId);
+                    childSortBaseMap.put(fId, tempSort + 1);
+                    Bookmark folder = folderMap.get(fId);
+                    String curPath = folder == null ? "" : folder.getPath() + "." + folder.getBookmarkId();
+                    Bookmark bookmark = new Bookmark(userId, curPath, StrUtil.nullToEmpty(rs.getString("title"))
+                            , StrUtil.nullToEmpty(rs.getString("url")), "", addTime == 0 ? System.currentTimeMillis() : addTime * 1000, tempSort);
+                    bookmarks.add(bookmark);
+                    insertOne(bookmark);
+                }
+                rs.close();
+                stat.close();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -288,7 +350,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         int size = 100;
         int start = 0;
         List<Bookmark> deal;
-        while ((deal = bookmarkDao.selectUserNoIcon(userId, start, size)).size() > 0) {
+        while (!(deal = bookmarkDao.selectUserNoIcon(userId, start, size)).isEmpty()) {
             start += size;
             deal.forEach(item -> {
                 String icon = getIconPath(item.getUrl(), null, null);
