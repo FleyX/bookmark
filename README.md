@@ -22,23 +22,31 @@
 
 帮助文档：[点击跳转](https://blog.fleyx.com/blog/detail/20220329/)
 
-- 支持从chrome,edge,firefox等浏览器导入书签数据。
-- 支持从OneEnv导入书签数据
+- 支持从 chrome,edge,firefox 等浏览器导入书签数据。
+- 支持从 OneEnv 导入书签数据
 - 树型多级目录支持
-- 支持导出标准html书签文件
+- 支持导出标准 html 书签文件
 - 强大的检索功能，支持拼音检索
 - 支持浏览器插件，安装插件以后可右键添加书签
 
 # 更新日志
 
-## 2023-08-13
+## 1.4.1
+
+- 修复书签名过长无法导入问题
+
+## 1.4
+
+- 优化首图加载逻辑
+- 支持 OneEnv 备份文件导入
+
+## 1.3
 
 ![pic](https://s3.fleyx.com/picbed/2023/08/Snipaste_2023-08-13_15-01-20.png)
 
 搜索引擎支持自定义[#43](https://github.com/FleyX/bookmark/issues/43)
 
 位置：右上角个人中心-管理搜索引擎
-
 
 # TODO
 
