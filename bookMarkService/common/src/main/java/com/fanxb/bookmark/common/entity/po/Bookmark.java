@@ -53,7 +53,7 @@ public class Bookmark {
         this.setUserId(userId);
         this.setPath(path);
         this.setType(FOLDER_TYPE);
-        this.setName(name);
+        this.setName(name.length() > 2000 ? name.substring(0, 1999) : name);
         this.setAddTime(addTime);
         this.setSort(sort);
         this.setCreateTime(System.currentTimeMillis());
@@ -64,7 +64,7 @@ public class Bookmark {
         this.setUserId(userId);
         this.setPath(path);
         this.setType(BOOKMARK_TYPE);
-        this.setName(name);
+        this.setName(name.length() > 2000 ? name.substring(0, 1999) : name);
         this.setUrl(url);
         this.setIcon(icon);
         this.setSort(sort);
