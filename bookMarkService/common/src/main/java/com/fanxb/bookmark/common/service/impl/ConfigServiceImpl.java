@@ -74,14 +74,18 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     private String getBingImg() {
-        JSONObject bingObj = HttpUtil.getObj(bingHost + bingUrl, null, false);
-        String path = bingObj.getJSONArray("images").getJSONObject(0).getString("url");
-        String picUrl = bingHost + path;
-        Request request = new Request.Builder().url(picUrl).build();
-        try (Response res = HttpUtil.getClient(false).newCall(request).execute()) {
-            byte[] bytes = res.body().bytes();
-            String filePath = CommonConstant.fileSavePath + "/files/public/bing.jpg";
-            FileUtil.writeBytes(bytes, filePath);
+        try {
+            JSONObject bingObj = HttpUtil.getObj(bingHost + bingUrl, null, false);
+            String path = bingObj.getJSONArray("images").getJSONObject(0).getString("url");
+            String picUrl = bingHost + path;
+            Request request = new Request.Builder().url(picUrl).build();
+            try (Response res = HttpUtil.getClient(false).newCall(request).execute()) {
+                byte[] bytes = res.body().bytes();
+                String filePath = CommonConstant.fileSavePath + "/files/public/bing.jpg";
+                FileUtil.writeBytes(bytes, filePath);
+            } catch (Exception e) {
+                log.error("获取bing每日一图错误：{}", e.getLocalizedMessage(), e);
+            }
         } catch (Exception e) {
             log.error("获取bing每日一图错误：{}", e.getLocalizedMessage(), e);
         }
