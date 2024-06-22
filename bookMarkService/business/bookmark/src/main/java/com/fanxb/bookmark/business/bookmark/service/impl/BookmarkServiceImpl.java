@@ -43,6 +43,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -280,11 +281,14 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setUserId(userId);
         bookmark.setCreateTime(System.currentTimeMillis());
         bookmark.setAddTime(bookmark.getCreateTime());
-        bookmark.setIcon(getIconPath(bookmark.getUrl(), bookmark.getIcon(), bookmark.getIconUrl()));
+        bookmark.setIcon(bookmark.getType() == 1 ? "" : getIconPath(bookmark.getUrl(), bookmark.getIcon(), bookmark.getIconUrl(), true));
         //文件夹和书签都建立搜索key
         pinYinService.changeBookmark(bookmark);
         bookmarkDao.insertOne(bookmark);
         userApi.versionPlus(userId);
+        if (StrUtil.isEmpty(bookmark.getIcon()) && bookmark.getType() == 0) {
+            updateIconAsync(bookmark.getBookmarkId(), bookmark.getUrl(), userId);
+        }
         return bookmark;
     }
 
@@ -294,11 +298,31 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setUserId(userId);
         if (bookmark.getType() == 0) {
             pinYinService.changeBookmark(bookmark);
-            bookmark.setIcon(getIconPath(bookmark.getUrl(), null, null));
+            bookmark.setIcon(getIconPath(bookmark.getUrl(), null, null, true));
+            if (StrUtil.isEmpty(bookmark.getIcon())) {
+                updateIconAsync(bookmark.getBookmarkId(), bookmark.getUrl(), userId);
+            }
         }
         bookmarkDao.editBookmark(bookmark);
         userApi.versionPlus(userId);
         return bookmark.getIcon();
+    }
+
+    /**
+     * 异步更新书签icon
+     *
+     * @param id     书签id
+     * @param url    书签url
+     * @param userId userId
+     */
+    private void updateIconAsync(int id, String url, int userId) {
+        ThreadPoolUtil.execute(() -> {
+            String icon = getIconPath(url, null, null, false);
+            if (StrUtil.isEmpty(icon)) {
+                return;
+            }
+            bookmarkDao.updateIcon(id, icon);
+        });
     }
 
 
@@ -353,7 +377,7 @@ public class BookmarkServiceImpl implements BookmarkService {
         while (!(deal = bookmarkDao.selectUserNoIcon(userId, start, size)).isEmpty()) {
             start += size;
             deal.forEach(item -> {
-                String icon = getIconPath(item.getUrl(), null, null);
+                String icon = getIconPath(item.getUrl(), null, null, false);
                 if (StrUtil.isNotEmpty(icon)) {
                     bookmarkDao.updateIcon(item.getBookmarkId(), icon);
                 }
@@ -387,13 +411,14 @@ public class BookmarkServiceImpl implements BookmarkService {
     /**
      * 获取icon,通过网络获取，或者从base64还原
      *
-     * @param url     url
-     * @param icon    icon
-     * @param iconUrl iconUrl
+     * @param url     书签url路径
+     * @param icon    base64编码的icon
+     * @param iconUrl base64编码的文件，文件名,用于获取文件名后缀
+     * @param quick   是否快速获取
      * @return {@link String}
      * @author fanxb
      */
-    private String getIconPath(String url, String icon, String iconUrl) {
+    private String getIconPath(String url, String icon, String iconUrl, boolean quick) {
         String host;
         try {
             URL urlObj = new URL(url);
@@ -420,7 +445,7 @@ public class BookmarkServiceImpl implements BookmarkService {
             return iconPath;
         }
         //再根据url解析
-        iconPath = saveFile(host, urlIconAddress + "/icon?url=" + host + "&size=16..128..256");
+        iconPath = saveFile(host, urlIconAddress + "/icon?url=" + host + "&size=16..128..256", quick);
         if (StrUtil.isNotEmpty(iconPath)) {
             hostIconDao.insert(host, iconPath);
         }
@@ -430,13 +455,14 @@ public class BookmarkServiceImpl implements BookmarkService {
     /**
      * 保存文件到icon路径
      *
-     * @param host host
-     * @param url  url
+     * @param host  host
+     * @param url   url
+     * @param quick 是否快速获取,快速获取超时时间1s
      * @return {@link String}
      * @author FleyX
      */
-    private String saveFile(String host, String url) {
-        try (Response res = HttpUtil.getClient(false).newCall(new Request.Builder().url(url)
+    private String saveFile(String host, String url, boolean quick) {
+        try (Response res = (quick ? HttpUtil.getSHORT_CLIENT() : HttpUtil.getClient(false)).newCall(new Request.Builder().url(url)
                 .header("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36 Edg/100.0.1185.36")
                 .get().build()).execute()) {
             assert res.body() != null;
@@ -450,6 +476,8 @@ public class BookmarkServiceImpl implements BookmarkService {
             } else {
                 log.info("未获取到icon:{}", url);
             }
+        } catch (SocketTimeoutException timeoutException) {
+            log.info("获取icon超时：{}", host);
         } catch (Exception e) {
             log.error("url获取icon故障:{}", url, e);
         }

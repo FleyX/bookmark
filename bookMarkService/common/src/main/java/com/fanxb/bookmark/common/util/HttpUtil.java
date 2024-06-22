@@ -54,6 +54,14 @@ public class HttpUtil {
             .build();
 
     /**
+     * 超时时间1s
+     */
+    @Getter
+    private static final OkHttpClient SHORT_CLIENT = new OkHttpClient.Builder().connectTimeout(1, TimeUnit.SECONDS)
+            .readTimeout(1, TimeUnit.SECONDS)
+            .build();
+
+    /**
      * 获取客户端
      *
      * @param proxy 是否代理
