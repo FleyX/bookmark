@@ -4,14 +4,14 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fanxb.bookmark.common.exception.CustomException;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Map;

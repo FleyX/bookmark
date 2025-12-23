@@ -1,15 +1,12 @@
 package com.fanxb.bookmark.business.user.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.druid.support.ibatis.SpringIbatisBeanNameAutoProxyCreator;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.fanxb.bookmark.business.user.dao.SearchEngineDao;
 import com.fanxb.bookmark.business.user.dao.UserDao;
 import com.fanxb.bookmark.business.user.entity.SearchEngine;
 import com.fanxb.bookmark.business.user.service.SearchEngineService;
-import com.fanxb.bookmark.common.entity.UserContext;
-import com.fanxb.bookmark.common.entity.po.User;
 import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.UserContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;

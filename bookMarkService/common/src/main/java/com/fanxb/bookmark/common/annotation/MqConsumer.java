@@ -3,7 +3,7 @@ package com.fanxb.bookmark.common.annotation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.validation.constraints.Null;
+import jakarta.validation.constraints.Null;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

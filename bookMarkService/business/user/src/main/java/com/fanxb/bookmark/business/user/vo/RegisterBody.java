@@ -2,8 +2,8 @@ package com.fanxb.bookmark.business.user.vo;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 /**
  * 类功能简述： 注册表单

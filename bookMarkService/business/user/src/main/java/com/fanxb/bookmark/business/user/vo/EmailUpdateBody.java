@@ -3,9 +3,9 @@ package com.fanxb.bookmark.business.user.vo;
 import com.fanxb.bookmark.business.user.constant.ValidatedConstant;
 import lombok.Data;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 /**
  * 类功能简述：修改邮箱表单
