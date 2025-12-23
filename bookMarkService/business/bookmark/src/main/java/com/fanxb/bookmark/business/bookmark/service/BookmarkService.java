@@ -1,21 +1,20 @@
 package com.fanxb.bookmark.business.bookmark.service;
 
-import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
-import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
-import com.fanxb.bookmark.common.entity.po.Bookmark;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
+import com.fanxb.bookmark.common.entity.po.Bookmark;
 
 /**
  * Created with IntelliJ IDEA
  *
  * @author fanxb
- * Date: 2020/3/29
- * Time: 12:25
+ *         Date: 2020/3/29
+ *         Time: 12:25
  */
 public interface BookmarkService {
     /**
@@ -39,7 +38,8 @@ public interface BookmarkService {
      * 功能描述: 获取某个用户的书签map
      *
      * @param userId userId
-     * @return java.util.Map<java.lang.String, java.util.List < com.fanxb.bookmark.common.entity.po.Bookmark>>
+     * @return java.util.Map<java.lang.String, java.util.List <
+     *         com.fanxb.bookmark.common.entity.po.Bookmark>>
      * @author fanxb
      * @date 2019/12/14 0:02
      */
@@ -100,17 +100,6 @@ public interface BookmarkService {
     void moveNode(int userId, MoveNodeBody body);
 
     /**
-     * Description: 根据context搜索
-     *
-     * @param userId  userId
-     * @param context context
-     * @return es搜索结果
-     * @author fanxb
-     * @date 2019/7/25 10:45
-     */
-    List<BookmarkEs> searchUserBookmark(int userId, String context);
-
-    /**
      * 功能描述: 当前用户书签访问次数+1
      *
      * @param id 书签id
@@ -140,6 +129,7 @@ public interface BookmarkService {
 
     /***
      * 检查无父节点的数据
+     * 
      * @author fanxb
      * @param delete 是否删除数据
      * @param userId 用户id

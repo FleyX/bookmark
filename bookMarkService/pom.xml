@@ -1,22 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.fanxb</groupId>
     <artifactId>bookMarkService</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
-    <modules>
-        <module>common</module>
-        <module>business</module>
-        <module>web</module>
-    </modules>
+    
     <properties>
         <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
+        <springboot.version>2.7.17</springboot.version>
     </properties>
 
     <parent>
@@ -25,41 +21,28 @@
         <version>2.7.17</version>
         <relativePath/>
     </parent>
-
-    <dependencyManagement>
-        <dependencies>
-            <!--定义es版本号,因为spring-boot-start-parent中引入了es的依赖，会导致es的版本问题，无法正常使用high-level-client-->
-            <dependency>
-                <groupId>org.elasticsearch.client</groupId>
-                <artifactId>elasticsearch-rest-high-level-client</artifactId>
-                <version>7.14.0</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/org.elasticsearch/elasticsearch -->
-            <dependency>
-                <groupId>org.elasticsearch</groupId>
-                <artifactId>elasticsearch</artifactId>
-                <version>7.14.0</version>
-            </dependency>
-            <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.elasticsearch.client/elasticsearch-rest-client &ndash;&gt;-->
-            <dependency>
-                <groupId>org.elasticsearch.client</groupId>
-                <artifactId>elasticsearch-rest-client</artifactId>
-                <version>7.14.0</version>
-            </dependency>
-            <!--减负依赖-->
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>1.18.20</version>
-            </dependency>
-
-        </dependencies>
-    </dependencyManagement>
+    
+    <modules>
+        <module>common</module>
+        <module>business</module>
+        <module>web</module>
+    </modules>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-dependencies</artifactId>
+            <version>${springboot.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
     </dependencies>
 
