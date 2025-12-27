@@ -47,7 +47,7 @@ export default {
   name: "about",
   data() {
     return {
-      appVersion: "1.4", //应用版本
+      appVersion: "1.5", //应用版本
       latestVersion: null,
       showNewVersion: false
     };
