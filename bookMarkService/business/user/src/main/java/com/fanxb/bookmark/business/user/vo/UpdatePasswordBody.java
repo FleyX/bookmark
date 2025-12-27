@@ -3,7 +3,7 @@ package com.fanxb.bookmark.business.user.vo;
 import com.fanxb.bookmark.business.user.constant.ValidatedConstant;
 import lombok.Data;
 
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.Pattern;
 
 /**
  * 类功能简述：修改密码表单

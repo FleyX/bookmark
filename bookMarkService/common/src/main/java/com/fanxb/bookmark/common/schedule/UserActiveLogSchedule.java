@@ -1,28 +1,25 @@
 package com.fanxb.bookmark.common.schedule;
 
 import com.fanxb.bookmark.common.service.ConfigService;
+import com.fanxb.bookmark.common.service.LoginUserLogService;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import jakarta.annotation.PostConstruct;
 
 /**
  * @author fanxb
  */
 @Component
-public class BingImgSchedule {
-    private final ConfigService configService;
-
-    @Autowired
-    public BingImgSchedule(ConfigService configService) {
-        this.configService = configService;
-    }
+@RequiredArgsConstructor
+public class UserActiveLogSchedule {
+    private final LoginUserLogService loginUserLogService;
 
     @PostConstruct
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0/5 * * * *")
     public void cache() {
-        configService.getCacheBingImg();
+        loginUserLogService.saveToDb();
     }
 
 }

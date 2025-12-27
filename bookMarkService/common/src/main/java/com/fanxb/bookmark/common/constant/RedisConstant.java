@@ -37,4 +37,9 @@ public class RedisConstant {
     }
 
     public static final String BING_IMG = "bing_img";
+
+    public static final String USER_USE_TIME_SET="user:use_time_set";
+
+    public static final String USER_USE_TIME_SAVE_DB_TIME="user:use_time_save_db_time";
+    public static final String USER_USE_TIME_SAVE_DB_TIME_UNI="user:use_time_save_db_time_uni";
 }

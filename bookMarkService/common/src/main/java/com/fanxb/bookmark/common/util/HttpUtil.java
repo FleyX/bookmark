@@ -1,17 +1,18 @@
 package com.fanxb.bookmark.common.util;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.fanxb.bookmark.common.exception.CustomException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Map;
@@ -97,8 +98,8 @@ public class HttpUtil {
      * @author fanxb
      * @date 2020/3/22 21:07
      */
-    public static JSONObject getObj(String url, Map<String, String> headers, boolean proxy) {
-        return get(url, headers, JSONObject.class, proxy);
+    public static ObjectNode getObj(String url, Map<String, String> headers, boolean proxy) {
+        return get(url, headers, ObjectNode.class, proxy);
     }
 
     /**
@@ -111,8 +112,8 @@ public class HttpUtil {
      * @author fanxb
      * @date 2020/3/22 21:07
      */
-    public static JSONArray getArray(String url, Map<String, String> headers, boolean proxy) {
-        return get(url, headers, JSONArray.class, proxy);
+    public static ArrayNode getArray(String url, Map<String, String> headers, boolean proxy) {
+        return get(url, headers, ArrayNode.class, proxy);
     }
 
     /**
@@ -147,8 +148,8 @@ public class HttpUtil {
      * @author fanxb
      * @date 2021/3/15
      **/
-    public static JSONObject postObj(String url, String jsonObj, Map<String, String> headers, boolean proxy) {
-        return post(url, jsonObj, headers, JSONObject.class, proxy);
+    public static ObjectNode postObj(String url, String jsonObj, Map<String, String> headers, boolean proxy) {
+        return post(url, jsonObj, headers, ObjectNode.class, proxy);
     }
 
     /**
@@ -161,8 +162,8 @@ public class HttpUtil {
      * @author fanxb
      * @date 2021/3/15
      **/
-    public static JSONArray postArray(String url, String jsonObj, Map<String, String> headers, boolean proxy) {
-        return post(url, jsonObj, headers, JSONArray.class, proxy);
+    public static ArrayNode postArray(String url, String jsonObj, Map<String, String> headers, boolean proxy) {
+        return post(url, jsonObj, headers, ArrayNode.class, proxy);
     }
 
     /**
@@ -218,10 +219,10 @@ public class HttpUtil {
             assert res.body() != null;
             if (checkIsOk(res.code())) {
                 String str = res.body().string();
-                if (typeClass.getCanonicalName().equals(JSONObject.class.getCanonicalName())) {
-                    return (T) JSONObject.parseObject(str);
-                } else if (typeClass.getCanonicalName().equals(JSONArray.class.getCanonicalName())) {
-                    return (T) JSONArray.parseArray(str);
+                if (typeClass == ObjectNode.class) {
+                    return (T) JsonUtil.OBJECT_MAPPER.readTree(str);
+                } else if (typeClass == ArrayNode.class) {
+                    return (T) JsonUtil.OBJECT_MAPPER.readTree(str);
                 } else {
                     throw new CustomException("仅支持JSONObject,JSONArray");
                 }

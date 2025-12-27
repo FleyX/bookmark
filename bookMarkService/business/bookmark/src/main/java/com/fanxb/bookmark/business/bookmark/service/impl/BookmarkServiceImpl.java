@@ -1,61 +1,56 @@
 package com.fanxb.bookmark.business.bookmark.service.impl;
 
-import cn.hutool.core.codec.Base64Decoder;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.*;
-import cn.hutool.core.util.HashUtil;
-import com.alibaba.fastjson.JSON;
+import java.io.File;
+import java.io.InputStream;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import com.fanxb.bookmark.common.util.*;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.fanxb.bookmark.business.api.UserApi;
 import com.fanxb.bookmark.business.bookmark.constant.FileConstant;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.business.bookmark.dao.HostIconDao;
-import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
 import com.fanxb.bookmark.business.bookmark.entity.redis.BookmarkDeleteMessage;
 import com.fanxb.bookmark.business.bookmark.entity.redis.VisitNumPlus;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
 import com.fanxb.bookmark.business.bookmark.service.PinYinService;
 import com.fanxb.bookmark.common.constant.CommonConstant;
-import com.fanxb.bookmark.common.constant.EsConstant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.po.Bookmark;
 import com.fanxb.bookmark.common.exception.CustomException;
-import com.fanxb.bookmark.common.util.*;
-import com.mysql.cj.conf.url.SingleConnectionUrl;
+
+import cn.hutool.core.codec.Base64Decoder;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.awt.print.Book;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 类功能简述：
@@ -65,6 +60,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class BookmarkServiceImpl implements BookmarkService {
     @Value("${urlIconAddress}")
     private String urlIconAddress;
@@ -72,17 +68,8 @@ public class BookmarkServiceImpl implements BookmarkService {
     private final BookmarkDao bookmarkDao;
     private final PinYinService pinYinService;
     private final UserApi userApi;
-    private final EsUtil esUtil;
     private final HostIconDao hostIconDao;
-
-    @Autowired
-    public BookmarkServiceImpl(BookmarkDao bookmarkDao, PinYinService pinYinService, UserApi userApi, EsUtil esUtil, HostIconDao hostIconDao) {
-        this.bookmarkDao = bookmarkDao;
-        this.pinYinService = pinYinService;
-        this.userApi = userApi;
-        this.esUtil = esUtil;
-        this.hostIconDao = hostIconDao;
-    }
+    
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -346,21 +333,11 @@ public class BookmarkServiceImpl implements BookmarkService {
         userApi.versionPlus(userId);
     }
 
-    @Override
-    public List<BookmarkEs> searchUserBookmark(int userId, String context) {
-        BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
-        boolQueryBuilder.must(QueryBuilders.termQuery("userId", userId));
-        boolQueryBuilder.must(QueryBuilders.multiMatchQuery(context, "name", "url"));
-        SearchSourceBuilder builder = new SearchSourceBuilder();
-        builder.size(5);
-        builder.query(boolQueryBuilder);
-        return esUtil.search(EsConstant.BOOKMARK_INDEX, builder, BookmarkEs.class);
-    }
 
     @Override
     public void visitNumPlus(int id) {
         VisitNumPlus item = new VisitNumPlus(UserContextHolder.get().getUserId(), id);
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_VISIT_NUM_PLUS, JSON.toJSONString(item));
+        RedisUtil.addToMq(RedisConstant.BOOKMARK_VISIT_NUM_PLUS, JsonUtil.obj2String(item));
     }
 
     @Override

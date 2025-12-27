@@ -1,6 +1,5 @@
 package com.fanxb.bookmark.common.util;
 
-import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -75,7 +74,7 @@ public class RedisUtil {
             if (STRING_TYPE_NAME.equals(tt.getTypeName())) {
                 return (T) str;
             } else {
-                return JSON.parseObject(str, tt);
+                return JsonUtil.string2Obj(str, tt);
             }
         }
     }
@@ -93,7 +92,7 @@ public class RedisUtil {
         if (obj instanceof String) {
             data = (String) obj;
         } else {
-            data = JSON.toJSONString(obj);
+            data = JsonUtil.obj2String(obj);
         }
         redisTemplate.opsForList().leftPush(topic, data);
     }

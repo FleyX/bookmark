@@ -25,3 +25,5 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
+.pnpm-store
+public/static/bookmarkBrowserPlugin.zip

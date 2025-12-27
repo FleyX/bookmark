@@ -1,11 +1,11 @@
 package com.fanxb.bookmark.business.bookmark.consumer;
 
-import com.alibaba.fastjson.JSON;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.business.bookmark.entity.redis.VisitNumPlus;
 import com.fanxb.bookmark.common.annotation.MqConsumer;
 import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.redis.RedisConsumer;
+import com.fanxb.bookmark.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -31,7 +31,7 @@ public class BookmarkVisitNumPlusConsumer implements RedisConsumer {
 
     @Override
     public void deal(String message) {
-        VisitNumPlus item = JSON.parseObject(message, VisitNumPlus.class);
+        VisitNumPlus item = JsonUtil.string2Obj(message, VisitNumPlus.class);
         try {
             bookmarkDao.updateVisitNum(item);
         } catch (Exception e) {

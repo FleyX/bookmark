@@ -1,20 +1,17 @@
 package com.fanxb.bookmark.business.bookmark.controller;
 
-import com.alibaba.fastjson.JSONObject;
+
 import com.fanxb.bookmark.business.bookmark.entity.BatchDeleteBody;
-import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
-import com.fanxb.bookmark.business.bookmark.service.BookmarkBackupService;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
 import com.fanxb.bookmark.business.bookmark.service.PinYinService;
-import com.fanxb.bookmark.common.entity.po.Bookmark;
 import com.fanxb.bookmark.common.entity.Result;
+import com.fanxb.bookmark.common.entity.po.Bookmark;
 import com.fanxb.bookmark.common.util.UserContextHolder;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 /**
  * 类功能简述：
@@ -26,8 +23,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/bookmark")
 public class BookmarkController {
-    @Autowired
-    private BookmarkBackupService bookmarkBackupService;
     @Autowired
     private BookmarkService bookmarkService;
     @Autowired
@@ -68,7 +63,8 @@ public class BookmarkController {
      * @date 2019/7/8 15:17
      */
     @RequestMapping("/uploadBookmarkFile")
-    public Result uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("path") String path) throws Exception {
+    public Result uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("path") String path)
+            throws Exception {
         bookmarkService.parseBookmarkFile(UserContextHolder.get().getUserId(), file, path);
         return Result.success(null);
     }
@@ -86,7 +82,6 @@ public class BookmarkController {
         bookmark = bookmarkService.addOne(bookmark);
         return Result.success(bookmark);
     }
-
 
     /**
      * Description: 编辑当前用户的一个书签节点
@@ -126,25 +121,6 @@ public class BookmarkController {
     @PostMapping("/moveNode")
     public Result moveNode(@RequestBody MoveNodeBody body) {
         bookmarkService.moveNode(UserContextHolder.get().getUserId(), body);
-        return Result.success(null);
-    }
-
-    @GetMapping("/searchUserBookmark")
-    public Result searchUserBookmark(String content) {
-        List<BookmarkEs> res = bookmarkService.searchUserBookmark(UserContextHolder.get().getUserId(), content);
-        return Result.success(res);
-    }
-
-    /**
-     * Description: 同步当前用户的书签到es中
-     *
-     * @return com.fanxb.bookmark.common.entity.Result
-     * @author fanxb
-     * @date 2019/7/26 15:33
-     */
-    @PostMapping("/syncBookmark")
-    public Result syncBookmark() {
-        bookmarkBackupService.syncUserBookmark(UserContextHolder.get().getUserId());
         return Result.success(null);
     }
 
@@ -205,8 +181,9 @@ public class BookmarkController {
      * @date 2021/3/17
      **/
     @PostMapping("/dealBadBookmark")
-    public Result dealBadBookmark(@RequestBody JSONObject obj) {
-        return Result.success(bookmarkService.dealBadBookmark(obj.getBoolean("delete"), UserContextHolder.get().getUserId()));
+    public Result dealBadBookmark(@RequestBody ObjectNode obj) {
+        return Result.success(
+                bookmarkService.dealBadBookmark(obj.get("delete").asBoolean(), UserContextHolder.get().getUserId()));
 
     }
 
