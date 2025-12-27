@@ -1,10 +1,11 @@
 package com.fanxb.bookmark.common.entity.redis;
 
-import com.alibaba.fastjson.JSON;
+import com.fanxb.bookmark.common.util.JsonUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 
 @Data
 @Builder
@@ -27,6 +28,6 @@ public class UserBookmarkUpdate {
 
     @Override
     public String toString() {
-        return JSON.toJSONString(this);
+        return JsonUtil.obj2String(this);
     }
 }

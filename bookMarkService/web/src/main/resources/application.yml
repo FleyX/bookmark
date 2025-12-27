@@ -22,9 +22,9 @@ spring:
     type: redis
   data:
     redis:
-      host: localhost
+      host: pvearch.lan
+      port: 6379
       database: 0
-      password:
       timeout: 20000ms
       lettuce:
         pool:
@@ -34,7 +34,7 @@ spring:
           min-idle: 2
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://nas2.fleyx.com:3306/bookmark?useUnicode=true&characterEncoding=utf-8&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    url: jdbc:mysql://pvearch.lan:3306/bookmark?useUnicode=true&characterEncoding=utf-8&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
     username: root
     password: 123456
   mail:

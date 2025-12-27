@@ -1,2 +1,2 @@
 ALTER TABLE `bookmark`.`user`
-add COLUMN `lastActiveTime` bigint  NOT NULL default 0 COMMENT '上次活跃时间' ;
+add COLUMN `lastActiveTime` datetime NOT NULL default CURRENT_TIMESTAMP COMMENT '上次活跃时间' ;

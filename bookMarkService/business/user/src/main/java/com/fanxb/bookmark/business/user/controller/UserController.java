@@ -1,20 +1,20 @@
 package com.fanxb.bookmark.business.user.controller;
 
-import com.alibaba.fastjson.JSONObject;
+
 import com.fanxb.bookmark.business.user.service.OauthService;
 import com.fanxb.bookmark.business.user.service.UserService;
+import com.fanxb.bookmark.business.user.service.impl.UserServiceImpl;
 import com.fanxb.bookmark.business.user.vo.LoginBody;
 import com.fanxb.bookmark.business.user.vo.OauthBody;
 import com.fanxb.bookmark.business.user.vo.RegisterBody;
-import com.fanxb.bookmark.business.user.service.impl.UserServiceImpl;
 import com.fanxb.bookmark.common.entity.Result;
 import com.fanxb.bookmark.common.util.UserContextHolder;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.validation.Valid;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import jakarta.validation.Valid;
 
 /**
  * 类功能简述：
@@ -124,8 +124,8 @@ public class UserController {
      * @date 2019/11/11 23:31
      */
     @PostMapping("/checkPassword")
-    public Result checkPassword(@RequestBody JSONObject obj) {
-        return Result.success(userServiceImpl.checkPassword(obj.getString("password")));
+    public Result checkPassword(@RequestBody ObjectNode obj) {
+        return Result.success(userServiceImpl.checkPassword(obj.get("password").asText()));
     }
 
     @GetMapping("/loginStatus")
@@ -178,8 +178,8 @@ public class UserController {
      * @date 2021/3/17
      **/
     @PostMapping("/dealAllUserBookmark")
-    public Result dealAllUserBookmark(@RequestBody JSONObject obj) {
-        return Result.success(userService.dealAllUserBookmark(obj.getBoolean("delete")));
+    public Result dealAllUserBookmark(@RequestBody ObjectNode obj) {
+        return Result.success(userService.dealAllUserBookmark(obj.get("delete").asBoolean()));
     }
 
 

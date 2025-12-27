@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fanxb.bookmark.common.util.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -26,7 +27,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.alibaba.fastjson.JSON;
 import com.fanxb.bookmark.business.api.UserApi;
 import com.fanxb.bookmark.business.bookmark.constant.FileConstant;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
@@ -40,10 +40,6 @@ import com.fanxb.bookmark.common.constant.CommonConstant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.entity.po.Bookmark;
 import com.fanxb.bookmark.common.exception.CustomException;
-import com.fanxb.bookmark.common.util.HttpUtil;
-import com.fanxb.bookmark.common.util.RedisUtil;
-import com.fanxb.bookmark.common.util.ThreadPoolUtil;
-import com.fanxb.bookmark.common.util.UserContextHolder;
 
 import cn.hutool.core.codec.Base64Decoder;
 import cn.hutool.core.io.FileUtil;
@@ -341,7 +337,7 @@ public class BookmarkServiceImpl implements BookmarkService {
     @Override
     public void visitNumPlus(int id) {
         VisitNumPlus item = new VisitNumPlus(UserContextHolder.get().getUserId(), id);
-        RedisUtil.addToMq(RedisConstant.BOOKMARK_VISIT_NUM_PLUS, JSON.toJSONString(item));
+        RedisUtil.addToMq(RedisConstant.BOOKMARK_VISIT_NUM_PLUS, JsonUtil.obj2String(item));
     }
 
     @Override

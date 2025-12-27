@@ -1,19 +1,17 @@
 package com.fanxb.bookmark.business.bookmark.controller;
 
-import com.alibaba.fastjson.JSONObject;
+
 import com.fanxb.bookmark.business.bookmark.entity.BatchDeleteBody;
-import com.fanxb.bookmark.business.bookmark.entity.BookmarkEs;
 import com.fanxb.bookmark.business.bookmark.entity.MoveNodeBody;
 import com.fanxb.bookmark.business.bookmark.service.BookmarkService;
 import com.fanxb.bookmark.business.bookmark.service.PinYinService;
-import com.fanxb.bookmark.common.entity.po.Bookmark;
 import com.fanxb.bookmark.common.entity.Result;
+import com.fanxb.bookmark.common.entity.po.Bookmark;
 import com.fanxb.bookmark.common.util.UserContextHolder;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 /**
  * 类功能简述：
@@ -183,9 +181,9 @@ public class BookmarkController {
      * @date 2021/3/17
      **/
     @PostMapping("/dealBadBookmark")
-    public Result dealBadBookmark(@RequestBody JSONObject obj) {
+    public Result dealBadBookmark(@RequestBody ObjectNode obj) {
         return Result.success(
-                bookmarkService.dealBadBookmark(obj.getBoolean("delete"), UserContextHolder.get().getUserId()));
+                bookmarkService.dealBadBookmark(obj.get("delete").asBoolean(), UserContextHolder.get().getUserId()));
 
     }
 

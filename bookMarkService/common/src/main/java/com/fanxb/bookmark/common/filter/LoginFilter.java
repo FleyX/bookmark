@@ -1,18 +1,23 @@
 package com.fanxb.bookmark.common.filter;
 
-import com.alibaba.fastjson.JSON;
 import com.auth0.jwt.interfaces.Claim;
 import com.fanxb.bookmark.common.constant.CommonConstant;
 import com.fanxb.bookmark.common.dao.UrlDao;
 import com.fanxb.bookmark.common.entity.Result;
-import com.fanxb.bookmark.common.entity.po.Url;
 import com.fanxb.bookmark.common.entity.UserContext;
+import com.fanxb.bookmark.common.entity.po.Url;
 import com.fanxb.bookmark.common.exception.NoLoginException;
+import com.fanxb.bookmark.common.service.LoginUserLogService;
+import com.fanxb.bookmark.common.util.JsonUtil;
 import com.fanxb.bookmark.common.util.JwtUtil;
 import com.fanxb.bookmark.common.util.StringUtil;
 import com.fanxb.bookmark.common.util.UserContextHolder;
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
@@ -20,10 +25,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
-import jakarta.servlet.*;
-import jakarta.servlet.annotation.WebFilter;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import java.util.Map;
 @Slf4j
 @WebFilter(urlPatterns = "/*", filterName = "loginFilter")
 @Order(1000)
+@RequiredArgsConstructor
 public class LoginFilter implements Filter {
 
     @Value("${server.servlet.context-path}")
@@ -51,8 +53,8 @@ public class LoginFilter implements Filter {
     @Value("${jwtSecret}")
     private String secret;
 
-    @Autowired
-    private UrlDao urlDao;
+    private final UrlDao urlDao;
+    private final LoginUserLogService loginUserLogService;
 
     private static final AntPathMatcher matcher = new AntPathMatcher();
 
@@ -104,6 +106,7 @@ public class LoginFilter implements Filter {
         //登陆用户
         if (login) {
             try {
+                loginUserLogService.logToRedis();
                 filterChain.doFilter(servletRequest, servletResponse);
             } finally {
                 UserContextHolder.remove();
@@ -112,7 +115,7 @@ public class LoginFilter implements Filter {
             response.setStatus(HttpStatus.OK.value());
             response.setContentType("application/json");
             response.setCharacterEncoding("utf-8");
-            response.getWriter().write(JSON.toJSONString(new Result(NoLoginException.CODE, NoLoginException.MESSAGE, null)));
+            response.getWriter().write(JsonUtil.obj2String(new Result(NoLoginException.CODE, NoLoginException.MESSAGE, null)));
         }
 
     }

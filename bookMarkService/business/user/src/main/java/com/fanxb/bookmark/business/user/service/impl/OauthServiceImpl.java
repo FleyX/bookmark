@@ -1,7 +1,7 @@
 package com.fanxb.bookmark.business.user.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONObject;
+
 import com.fanxb.bookmark.business.user.dao.UserDao;
 import com.fanxb.bookmark.business.user.service.OauthService;
 import com.fanxb.bookmark.business.user.service.SearchEngineService;
@@ -12,6 +12,7 @@ import com.fanxb.bookmark.common.entity.po.User;
 import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.util.HttpUtil;
 import com.fanxb.bookmark.common.util.JwtUtil;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,21 +59,21 @@ public class OauthServiceImpl implements OauthService {
             Map<String, String> header = new HashMap<>(2);
             header.put("accept", "application/json");
             String url = "https://github.com/login/oauth/access_token?client_id=" + githubClientId + "&client_secret=" + githubSecret + "&code=" + body.getCode();
-            JSONObject obj = HttpUtil.getObj(url, header, true);
-            String accessToken = obj.getString("access_token");
+            ObjectNode obj = HttpUtil.getObj(url, header, true);
+            String accessToken = obj.get("access_token").asText();
             if (StrUtil.isEmpty(accessToken)) {
                 throw new CustomException("github登陆失败，请稍后重试");
             }
             header.put("Authorization", "token " + accessToken);
-            JSONObject userInfo = HttpUtil.getObj("https://api.github.com/user", header, true);
-            other.setGithubId(userInfo.getLong("id"));
+            ObjectNode userInfo = HttpUtil.getObj("https://api.github.com/user", header, true);
+            other.setGithubId(userInfo.get("id").asLong());
             if (other.getGithubId() == null) {
                 log.error("github返回异常:{}", userInfo);
                 throw new CustomException("登陆异常，请稍后重试");
             }
-            other.setEmail(userInfo.getString("email"));
-            other.setIcon(userInfo.getString("avatar_url"));
-            other.setUsername(userInfo.getString("login"));
+            other.setEmail(userInfo.get("email").asText());
+            other.setIcon(userInfo.get("avatar_url").asText());
+            other.setUsername(userInfo.get("login").asText());
             current = userDao.selectByUserIdOrGithubId(null, other.getGithubId());
             if (current == null) {
                 current = userDao.selectByUsernameOrEmail(null, other.getEmail());
