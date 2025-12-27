@@ -21,4 +21,4 @@ steps:
         from_secret: privateSsh
       command_timeout: 30m
       script:
-        - cd /root/bookmark && git pull && bash build.sh && bash syncFile.sh
+        - cd /root/workspace/bookmark && git checkout master && git pull && bash build.sh && bash syncFile.sh
