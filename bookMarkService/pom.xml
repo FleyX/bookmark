@@ -14,12 +14,14 @@
         <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
         <java.version>25</java.version>
         <lombok.version>1.18.42</lombok.version>
+        <mysql.version>9.5.0</mysql.version>
+        <okhttp3.version>4.9.2</okhttp3.version>
     </properties>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.7</version>
+        <version>3.5.9</version>
         <relativePath/>
     </parent>
 
@@ -33,7 +35,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-dependencies</artifactId>
-            <version>3.5.7</version>
+            <version>3.5.9</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
