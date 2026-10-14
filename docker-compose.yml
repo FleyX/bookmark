@@ -86,7 +86,6 @@ services:
         -Dproxy.port=${PROXY_PORT} \
         -DOAuth.github.clientId=${GITHUB_CLIENT_ID} \
         -DOAuth.github.secret=${GITHUB_SECRET} \
-        -DmanageUserId=${MANAGE_USER_ID} \
         service.jar
 networks:
   bookmark:

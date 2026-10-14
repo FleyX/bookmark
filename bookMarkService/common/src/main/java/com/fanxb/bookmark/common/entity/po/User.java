@@ -53,11 +53,6 @@ public class User {
      */
     private Integer status;
 
-    /**
-     * 默认搜索引擎
-     */
-    private Integer searchEngineId;
-
     private LocalDateTime lastActiveTime;
 
     /**
