@@ -12,9 +12,9 @@ import com.fanxb.bookmark.business.user.vo.RegisterBody;
 import com.fanxb.bookmark.common.constant.CommonConstant;
 import com.fanxb.bookmark.common.constant.NumberConstant;
 import com.fanxb.bookmark.common.constant.RedisConstant;
+import com.fanxb.bookmark.common.dao.RoleDao;
 import com.fanxb.bookmark.common.entity.MailInfo;
 import com.fanxb.bookmark.common.entity.po.User;
-import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.exception.FormDataException;
 import com.fanxb.bookmark.common.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -50,12 +50,14 @@ public class UserServiceImpl implements UserService {
     private final UserDao userDao;
     private final StringRedisTemplate redisTemplate;
     private final BookmarkApi bookmarkApi;
+    private final RoleDao roleDao;
 
     @Autowired
-    public UserServiceImpl(UserDao userDao, StringRedisTemplate redisTemplate, BookmarkApi bookmarkApi) {
+    public UserServiceImpl(UserDao userDao, StringRedisTemplate redisTemplate, BookmarkApi bookmarkApi, RoleDao roleDao) {
         this.userDao = userDao;
         this.redisTemplate = redisTemplate;
         this.bookmarkApi = bookmarkApi;
+        this.roleDao = roleDao;
     }
 
     /**
@@ -107,6 +109,13 @@ public class UserServiceImpl implements UserService {
         user.setLastLoginTime(System.currentTimeMillis());
         user.setVersion(0);
         userDao.addOne(user);
+        //首个注册用户绑定超级管理员角色
+        if (userDao.selectCount(null) == 1) {
+            Integer roleId = roleDao.selectRoleIdByCode(CommonConstant.SUPER_ADMIN_ROLE_CODE);
+            if (roleId != null) {
+                roleDao.insertUserRole(user.getUserId(), roleId, System.currentTimeMillis());
+            }
+        }
         searchEngineService.newUserInit(user.getUserId());
         Map<String, String> data = new HashMap<>(1);
         data.put("userId", String.valueOf(user.getUserId()));
@@ -235,9 +244,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateAllUserIcon() {
-        if (!UserContextHolder.get().getManageUser()) {
-            throw new CustomException("非管理员用户，无法执行操作");
-        }
         ThreadPoolUtil.execute(() -> {
             log.info("开始更新所有人icon");
             int start = 0, size = 1000;
@@ -252,9 +258,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Map<Integer, Set<String>> dealAllUserBookmark(boolean delete) {
-        if (!UserContextHolder.get().getManageUser()) {
-            throw new CustomException("非管理员用户，无法执行操作");
-        }
         log.info("开始处理所有问题书签数据");
         int start = 0, size = 1000;
         List<Integer> ids;

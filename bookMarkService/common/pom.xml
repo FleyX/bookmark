@@ -90,6 +90,12 @@
             <version>3.52.0</version>
         </dependency>
 
+        <!--yaml解析，权限注册表使用-->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
+
         <!--单元测试-->
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
         <dependency>

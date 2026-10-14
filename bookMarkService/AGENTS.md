@@ -53,9 +53,9 @@ PO 写法：`@Data`（按需 `@NoArgsConstructor @AllArgsConstructor @Accessors(
 
 ## 统一返回与异常
 
-- `Result` code 约定：**1 成功 / 0 一般错误 / -1 未认证 / -2 表单错误**。Jackson 配置 `non_null`，null 字段不输出。
+- `Result` code 约定：**1 成功 / 0 一般错误 / -1 未认证 / -2 表单错误 / -3 无权限**。Jackson 配置 `non_null`，null 字段不输出。
 - 业务错误抛 `CustomException("中文提示")`；表单错误 `FormDataException`；未登录 `NoLoginException`。全局兜底在 `common/exception/ExceptionHandle.java`（`@RestControllerAdvice`）。
-- 认证：`LoginFilter` 校验请求头 `jwt-token`，失败返回 HTTP 200 + `Result(-1)`；公共 URL 由 `urlDao.getPublicUrl()` 放行。
+- 认证：`LoginFilter` 三段式鉴权——`permissions.yml` 的 public 免登录放行；其余校验请求头 `jwt-token`（失败返回 HTTP 200 + `Result(-1)`）；受权限控制的接口按 `METHOD:路径` 与用户资源 Ant 匹配，不匹配返回 `Result(-3)`，`super_admin` 角色短路放行。
 
 ## Redis MQ（自研，不是 RabbitMQ/Kafka）
 
@@ -81,3 +81,5 @@ PO 写法：`@Data`（按需 `@NoArgsConstructor @AllArgsConstructor @Accessors(
 ## 配置
 
 `web/src/main/resources/application.yml`：`server.port=8088`、`context-path=/bookmark/api`。部署期配置经 docker-compose 的 `-D` 参数注入，新增配置项需同步更新 compose。
+
+`web/src/main/resources/permissions.yml`：权限/资源/公共 URL 的唯一定义来源，启动时 fail-fast 校验；新增受控接口需在此登记（漏登记 = 非超管 403）。

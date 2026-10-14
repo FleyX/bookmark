@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fanxb.bookmark.common.dao.RoleDao">
+
+    <select id="selectRoleCodesByUserId" resultType="java.lang.String">
+        select r.code
+        from user_role ur
+                 join role r on ur.roleId = r.roleId
+        where ur.userId = #{userId}
+          and r.status = 1
+    </select>
+
+    <select id="selectPermissionCodesByUserId" resultType="java.lang.String">
+        select distinct rp.permissionCode
+        from user_role ur
+                 join role r on ur.roleId = r.roleId
+                 join role_permission rp on ur.roleId = rp.roleId
+        where ur.userId = #{userId}
+          and r.status = 1
+    </select>
+
+    <select id="selectRoleIdByCode" resultType="java.lang.Integer">
+        select roleId
+        from role
+        where code = #{code}
+    </select>
+
+    <insert id="insertUserRole">
+        insert into user_role (userId, roleId, createTime)
+        value (#{userId}, #{roleId}, #{createTime})
+    </insert>
+
+</mapper>

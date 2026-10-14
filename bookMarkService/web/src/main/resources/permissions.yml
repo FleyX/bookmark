@@ -1,0 +1,30 @@
+# 权限注册表：权限、资源、公共 URL 的唯一定义来源，启动时 fail-fast 校验
+# 资源 code 格式：METHOD:路径（后端接口，Ant 风格匹配）或 VIEW:路径（前端页面）
+# public：免登录接口；login：登录即可的显式声明（语义锚点）；permissions：权限树，角色绑定权限 code
+public:
+  - "PUT:/user"
+  - "POST:/user/login"
+  - "GET:/user/authCode"
+  - "POST:/user/resetPassword"
+  - "POST:/user/oAuthLogin"
+  - "GET:/baseInfo/verifyEmail"
+  - "GET:/common/config/global"
+  - "GET:/home/pin"
+login: []
+permissions:
+  - code: system:user
+    name: 用户管理
+    resources:
+      - { code: "VIEW:/admin/user", name: "用户管理页面" }
+      - { code: "GET:/user/manage/page", name: "用户分页列表" }
+  - code: system:role
+    name: 角色管理
+    resources:
+      - { code: "VIEW:/admin/role", name: "角色管理页面" }
+      - { code: "GET:/role/manage/page", name: "角色分页列表" }
+  - code: ops:bookmark
+    name: 书签运维
+    resources:
+      - { code: "POST:/user/updateAllUserIcon", name: "全量更新用户书签图标" }
+      - { code: "POST:/user/dealAllUserBookmark", name: "批量处理问题书签" }
+      - { code: "POST:/bookmark/allPinyinCreate", name: "全量重建拼音索引" }

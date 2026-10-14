@@ -18,6 +18,15 @@ public class CommonConstant {
      */
     public static final String JWT_KEY = "jwt-token";
 
+    /**
+     * 超级管理员角色code
+     */
+    public static final String SUPER_ADMIN_ROLE_CODE = "super_admin";
+
+    /**
+     * 无权限访问返回码
+     */
+    public static final int NO_PERMISSION_CODE = -3;
 
     /**
      * 验证码过期时间

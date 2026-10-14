@@ -5,8 +5,6 @@ import com.fanxb.bookmark.business.api.UserApi;
 import com.fanxb.bookmark.business.bookmark.dao.BookmarkDao;
 import com.fanxb.bookmark.business.bookmark.service.PinYinService;
 import com.fanxb.bookmark.common.entity.po.Bookmark;
-import com.fanxb.bookmark.common.exception.CustomException;
-import com.fanxb.bookmark.common.util.UserContextHolder;
 import com.github.houbb.pinyin.constant.enums.PinyinStyleEnum;
 import com.github.houbb.pinyin.util.PinyinHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +35,6 @@ public class PinYinServiceImpl implements PinYinService {
 
     @Override
     public void changeAll() {
-        if (!UserContextHolder.get().getManageUser()) {
-            throw new CustomException("非管理员用户，无法执行本操作");
-        }
         int i = 0;
         while (true) {
             List<Bookmark> bookmarks = changeBookmarks(bookmarkDao.selectPinyinEmpty(i, SIZE));

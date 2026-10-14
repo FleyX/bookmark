@@ -2,12 +2,12 @@ package com.fanxb.bookmark.common.filter;
 
 import com.auth0.jwt.interfaces.Claim;
 import com.fanxb.bookmark.common.constant.CommonConstant;
-import com.fanxb.bookmark.common.dao.UrlDao;
 import com.fanxb.bookmark.common.entity.Result;
 import com.fanxb.bookmark.common.entity.UserContext;
-import com.fanxb.bookmark.common.entity.po.Url;
 import com.fanxb.bookmark.common.exception.NoLoginException;
+import com.fanxb.bookmark.common.permission.PermissionRegistry;
 import com.fanxb.bookmark.common.service.LoginUserLogService;
+import com.fanxb.bookmark.common.service.PermissionService;
 import com.fanxb.bookmark.common.util.JsonUtil;
 import com.fanxb.bookmark.common.util.JwtUtil;
 import com.fanxb.bookmark.common.util.StringUtil;
@@ -26,11 +26,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * 类功能简述：
+ * 类功能简述：登录过滤器，三段式鉴权：公共放行 -> 登录校验 -> 角色资源匹配
  * 类功能详述：
  *
  * @author fanxb
@@ -44,21 +45,19 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class LoginFilter implements Filter {
 
+    private static final AntPathMatcher MATCHER = new AntPathMatcher();
+
+    private static final String NO_PERMISSION_MESSAGE = "无权限访问";
+
     @Value("${server.servlet.context-path}")
     private String urlPrefix;
-
-    @Value("${manageUserId}")
-    private int manageUserId;
 
     @Value("${jwtSecret}")
     private String secret;
 
-    private final UrlDao urlDao;
+    private final PermissionRegistry permissionRegistry;
+    private final PermissionService permissionService;
     private final LoginUserLogService loginUserLogService;
-
-    private static final AntPathMatcher matcher = new AntPathMatcher();
-
-    volatile private static List<Url> publicUrl;
 
     @Override
     public void init(FilterConfig filterConfig) {
@@ -94,41 +93,54 @@ public class LoginFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
+        String resourceKey = requestMethod.toUpperCase(Locale.ROOT) + ":" + requestUrl;
+        //解析jwt填充用户上下文，公共url不强制登录，解析失败不影响放行
         boolean login = this.checkJwt(request.getHeader(CommonConstant.JWT_KEY));
-        //检查是否公共方法
-        List<Url> publicUrl = this.getPublicUrl();
-        for (Url url : publicUrl) {
-            if (url.getMethod().equalsIgnoreCase(requestMethod) && matcher.match(url.getUrl(), requestUrl)) {
+        try {
+            //检查是否公共方法
+            if (this.matchAny(permissionRegistry.getPublicPatterns(), resourceKey)) {
                 filterChain.doFilter(servletRequest, servletResponse);
                 return;
             }
-        }
-        //登陆用户
-        if (login) {
-            try {
-                loginUserLogService.logToRedis();
-                filterChain.doFilter(servletRequest, servletResponse);
-            } finally {
-                UserContextHolder.remove();
+            if (!login) {
+                this.writeResult(response, new Result(NoLoginException.CODE, NoLoginException.MESSAGE, null));
+                return;
             }
-        } else {
-            response.setStatus(HttpStatus.OK.value());
-            response.setContentType("application/json");
-            response.setCharacterEncoding("utf-8");
-            response.getWriter().write(JsonUtil.obj2String(new Result(NoLoginException.CODE, NoLoginException.MESSAGE, null)));
+            //受权限控制的接口需要用户资源匹配
+            if (permissionRegistry.isProtected(resourceKey) && !this.hasPermission(resourceKey)) {
+                this.writeResult(response, new Result(CommonConstant.NO_PERMISSION_CODE, NO_PERMISSION_MESSAGE, null));
+                return;
+            }
+            loginUserLogService.logToRedis();
+            filterChain.doFilter(servletRequest, servletResponse);
+        } finally {
+            UserContextHolder.remove();
         }
-
     }
 
-    private List<Url> getPublicUrl() {
-        if (publicUrl == null) {
-            synchronized (LoginFilter.class) {
-                if (publicUrl == null) {
-                    publicUrl = this.urlDao.getPublicUrl();
-                }
+    private boolean hasPermission(String resourceKey) {
+        int userId = UserContextHolder.get().getUserId();
+        if (permissionService.isSuperAdmin(userId)) {
+            return true;
+        }
+        Set<String> resourceCodes = permissionService.resolveResourceCodes(userId);
+        return resourceCodes != null && this.matchAny(resourceCodes, resourceKey);
+    }
+
+    private boolean matchAny(Iterable<String> patterns, String resourceKey) {
+        for (String pattern : patterns) {
+            if (MATCHER.match(pattern, resourceKey)) {
+                return true;
             }
         }
-        return publicUrl;
+        return false;
+    }
+
+    private void writeResult(HttpServletResponse response, Result result) throws IOException {
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+        response.getWriter().write(JsonUtil.obj2String(result));
     }
 
     private boolean checkJwt(String jwt) {
@@ -141,7 +153,6 @@ public class LoginFilter implements Filter {
             UserContext context = new UserContext();
             context.setJwt(jwt);
             context.setUserId(userId);
-            context.setManageUser(userId == manageUserId);
             UserContextHolder.set(context);
             return true;
         } catch (Exception e) {
