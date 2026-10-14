@@ -6,28 +6,31 @@
         <img :src="userInfo.icon" class="userIcon" />
         <span class="name">{{ userInfo.username }}</span>
       </div>
-      <a-menu slot="overlay" :trigger="['hover', 'click']" @click="menuClick">
-        <a-menu-item key="manage">
-          <a href="javascript:;">书签管理</a>
-        </a-menu-item>
-        <a-menu-item key="personSpace">
-          <a href="javascript:;">个人中心</a>
-        </a-menu-item>
-        <a-menu-item key="logout">
-          <a href="javascript:;">退出</a>
-        </a-menu-item>
-      </a-menu>
+      <template #overlay>
+        <a-menu @click="menuClick">
+          <a-menu-item key="manage">
+            <a href="javascript:;">书签管理</a>
+          </a-menu-item>
+          <a-menu-item key="personSpace">
+            <a href="javascript:;">个人中心</a>
+          </a-menu-item>
+          <a-menu-item key="logout">
+            <a href="javascript:;">退出</a>
+          </a-menu-item>
+        </a-menu>
+      </template>
     </a-dropdown>
   </div>
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState } from "pinia";
+import { useGlobalConfigStore } from "@/store/globalConfig";
 import { logoutClear } from "@/store/index";
 export default {
-  name: "Top",
+  name: "manageTop",
   computed: {
-    ...mapState("globalConfig", ["userInfo"]),
+    ...mapState(useGlobalConfigStore, ["userInfo"]),
   },
   methods: {
     async menuClick({ key }) {
@@ -45,7 +48,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import "../../global";
+@import (reference) "../../assets/global.less";
 .main {
   position: fixed;
   top: 0;

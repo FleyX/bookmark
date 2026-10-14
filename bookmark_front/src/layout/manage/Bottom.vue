@@ -11,12 +11,12 @@
 
 <script>
 export default {
-  name: "Bottom",
+  name: "manageBottom",
 };
 </script>
 
 <style lang="less" scoped>
-@import "../../global";
+@import (reference) "../../assets/global.less";
 .main {
   background-color: rgb(207, 198, 198);
   height: @bottomHeight;

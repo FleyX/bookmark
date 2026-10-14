@@ -11,7 +11,7 @@
 | 目录 | 说明 | 详细规则 |
 |---|---|---|
 | `bookMarkService/` | 后端，Maven 多模块（Spring Boot 3.5 / Java 25） | `bookMarkService/AGENTS.md` |
-| `bookmark_front/` | 前端，Vue 2 + ant-design-vue 1.x，pnpm | `bookmark_front/AGENTS.md` |
+| `bookmark_front/` | 前端，Vue 3 + ant-design-vue 4 + Vite，pnpm | `bookmark_front/AGENTS.md` |
 | `浏览器插件/bookmarkBrowserPlugin/` | Chrome 插件（MV3，原生 JS，无构建） | `浏览器插件/AGENTS.md` |
 | `data/` | 部署用数据/配置（mysql、nginx、maven 仓库缓存等），不要改业务代码时动它 | — |
 
@@ -23,9 +23,9 @@
 # 后端：编译 + 单元测试（改后端代码后必须全绿）
 cd bookMarkService && mvn clean install
 
-# 前端：构建（改前端代码后必须全绿）
+# 前端：构建 + lint（改前端代码后必须全绿）
 cd bookmark_front && pnpm build
-# 注意：pnpm lint 当前因 eslint 6 与 cli-plugin-eslint 5 不兼容而损坏，详见 bookmark_front/AGENTS.md
+cd bookmark_front && pnpm lint
 ```
 
 根目录 `build.sh` 是**服务器部署脚本**（docker 内构建 + 插件打 zip），本地开发不要跑它；CI（`.drone.yml`）在 master 推送后到服务器执行它。
@@ -42,7 +42,7 @@ cd bookmark_front && pnpm build
 ## Agent 工作流约束（必须遵守）
 
 1. **代码风格与存量保持一致**：先读相邻代码再动手；本仓无 Java 格式化工具，风格规则靠各子模块 AGENTS.md 明文约定。
-2. **改完必须验证**：后端 `mvn clean install`（含单测）全绿；前端 `pnpm build` 全绿（`pnpm lint` 当前损坏，见 `bookmark_front/AGENTS.md`）。没有验证通过不算完成。
+2. **改完必须验证**：后端 `mvn clean install`（含单测）全绿；前端 `pnpm build` 与 `pnpm lint` 全绿。没有验证通过不算完成。
 3. **后端增量单测强制**：新增或修改的 service/业务逻辑必须配单元测试（JUnit 5 + Mockito，外部依赖全部 mock，不连真实 MySQL/Redis）。存量代码暂不强求补测。
 4. **数据库变更必须加 Flyway 迁移**：`web/src/main/resources/db/migration/V{n}__中文描述.sql`，编号顺延，不改已发布的迁移文件。
 5. **跨模块调用必须走 `business/api`**：禁止 business 子模块之间直接依赖实现类。

@@ -1,41 +1,43 @@
 <template>
   <div>
-    <a-form-model ref="addForm" :model="form" :rules="rules" :label-col="labelCol" :wrapper-col="wrapperCol">
-      <a-form-model-item v-if="isAdd && !addType" prop="type" label="类别">
-        <a-radio-group v-model="form.type" :options="options" />
-      </a-form-model-item>
+    <a-form ref="addForm" :model="form" :rules="rules" :label-col="labelCol" :wrapper-col="wrapperCol">
+      <a-form-item v-if="isAdd && !addType" name="type" label="类别">
+        <a-radio-group v-model:value="form.type" :options="options" />
+      </a-form-item>
       <template v-if="form.type !== 'file'">
-        <a-form-model-item prop="name" label="名称" :required="false">
-          <a-input v-model="form.name" placeholder="名称" @pressEnter="submit" ref="inputName" />
-        </a-form-model-item>
-        <a-form-model-item v-if="form.type === 'bookmark'" prop="url" label="URL">
-          <a-input v-model="form.url" placeholder="url" @pressEnter="submit" />
-        </a-form-model-item>
+        <a-form-item name="name" label="名称" :required="false">
+          <a-input ref="inputName" v-model:value="form.name" placeholder="名称" @pressEnter="submit" />
+        </a-form-item>
+        <a-form-item v-if="form.type === 'bookmark'" name="url" label="URL">
+          <a-input v-model:value="form.url" placeholder="url" @pressEnter="submit" />
+        </a-form-item>
         <div class="btns">
-          <a-button type="primary" @click="submit" :loading="loading" :disabled="loading">提交</a-button>
+          <a-button type="primary" :loading="loading" :disabled="loading" @click="submit">提交</a-button>
         </div>
       </template>
-      <div v-else prop="file">
+      <div v-else>
         <a-upload-dragger
           name="file"
           :data="{ path: form.path }"
           :headers="{ 'jwt-token': token }"
           action="/bookmark/api/bookmark/uploadBookmarkFile"
           accept=".html,.db3"
-          @change="fileChange"
-        >
+          @change="fileChange">
           <p class="ant-upload-drag-icon">
-            <a-icon type="inbox" />
+            <InboxOutlined />
           </p>
           <p class="ant-upload-text">单击选中或者拖拽文件到此处</p>
         </a-upload-dragger>
       </div>
-    </a-form-model>
+    </a-form>
   </div>
 </template>
 
 <script>
+import { InboxOutlined } from "@ant-design/icons-vue";
 import HttpUtil from "@/util/HttpUtil";
+import { useGlobalConfigStore } from "@/store/globalConfig";
+import { useTreeDataStore } from "@/store/treeData";
 const options = [
   { label: "书签", value: "bookmark" },
   { label: "文件夹", value: "folder" },
@@ -43,6 +45,7 @@ const options = [
 ];
 export default {
   name: "addBookmark",
+  components: { InboxOutlined },
   props: {
     isAdd: Boolean, //是否新增
     addType: String, //新增的类别
@@ -77,7 +80,7 @@ export default {
       this.form.name = this.targetNode.name;
       this.form.url = this.form.type === "bookmark" ? this.targetNode.url : "";
     }
-    this.token = this.$store.state.globalConfig.token;
+    this.token = useGlobalConfigStore().token;
     this.form.path = !this.targetNode ? "" : this.targetNode.path + (this.isAdd ? "." + this.targetNode.bookmarkId : "");
 
     this.$nextTick(() => {
@@ -93,26 +96,26 @@ export default {
     async submit() {
       //名称校验
       this.loading = true;
-      this.$refs["addForm"].validate(async (pass) => {
-        if (!pass) {
-          this.loading = false;
-          return;
-        }
-        let res = null;
-        let body = JSON.parse(JSON.stringify(this.form));
-        body.type = body.type === "bookmark" ? 0 : 1;
-        if (this.isAdd) {
-          res = await HttpUtil.put("/bookmark", null, body);
-          await this.$store.dispatch("treeData/addNode", { sourceNode: this.targetNode, targetNode: res });
-        } else {
-          body.bookmarkId = this.targetNode.bookmarkId;
-          let newIcon = await HttpUtil.post("/bookmark/updateOne", null, body);
-          await this.$store.dispatch("treeData/editNode", { node: this.targetNode, newName: this.form.name, newUrl: this.form.url, newIcon });
-        }
-        this.$message.success("操作成功");
-        this.$emit("close", this.form.type, res);
+      try {
+        await this.$refs["addForm"].validate();
+      } catch {
         this.loading = false;
-      });
+        return;
+      }
+      let res = null;
+      let body = JSON.parse(JSON.stringify(this.form));
+      body.type = body.type === "bookmark" ? 0 : 1;
+      if (this.isAdd) {
+        res = await HttpUtil.put("/bookmark", null, body);
+        await useTreeDataStore().addNode({ sourceNode: this.targetNode, targetNode: res });
+      } else {
+        body.bookmarkId = this.targetNode.bookmarkId;
+        let newIcon = await HttpUtil.post("/bookmark/updateOne", null, body);
+        await useTreeDataStore().editNode({ node: this.targetNode, newName: this.form.name, newUrl: this.form.url, newIcon });
+      }
+      this.$message.success("操作成功");
+      this.$emit("close", this.form.type, res);
+      this.loading = false;
     },
     fileChange(info) {
       console.log(info);

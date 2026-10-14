@@ -6,9 +6,8 @@
       <a href="https://github.com/FleyX/bookmark" target="_blank">github.com/FleyX/bookmark</a>
     </div>
     <div>
-      当前版本：{{ appVersion }}&emsp;&emsp;<a v-if="showNewVersion"
-                                              href="https://github.com/FleyX/bookmark/blob/master/DEPLOY.md">最新版本：{{ latestVersion
-      }}</a>
+      当前版本：{{ appVersion }}&emsp;&emsp;
+      <a v-if="showNewVersion" href="https://github.com/FleyX/bookmark/blob/master/DEPLOY.md">最新版本：{{ latestVersion }}</a>
     </div>
     <div>
       使用教程：
@@ -16,8 +15,7 @@
     </div>
     <div>
       浏览器插件：
-      <a href="/static/bookmarkBrowserPlugin.zip" download="浏览器插件.zip"
-         target="_blank">最新版本{{ serverConfig.map.pluginVersion }}(注意更新)</a>
+      <a href="/static/bookmarkBrowserPlugin.zip" download="浏览器插件.zip" target="_blank">最新版本{{ serverConfig.map.pluginVersion }}(注意更新)</a>
       ,使用详情请参考使用教程
     </div>
     <div>交流反馈qq群：150056494,邮箱：fleyx20@outlook.com</div>
@@ -39,9 +37,8 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
-import { GLOBAL_CONFIG, SERVER_CONFIG } from "@/store/modules/globalConfig";
 import httpUtil from "@/util/HttpUtil";
+import { useGlobalConfigStore } from "@/store/globalConfig";
 
 export default {
   name: "about",
@@ -49,13 +46,15 @@ export default {
     return {
       appVersion: "1.5", //应用版本
       latestVersion: null,
-      showNewVersion: false
+      showNewVersion: false,
     };
   },
-  computed: { ...mapState(GLOBAL_CONFIG, [SERVER_CONFIG]) },
+  computed: {
+    serverConfig() {
+      return useGlobalConfigStore().serverConfig;
+    },
+  },
   async mounted() {
-
-
     //获取最新版本
     let res = await httpUtil.http.default.get("https://s3.fleyx.com/picbed/bookmark/config.json");
     console.log(res);
@@ -63,7 +62,7 @@ export default {
     this.showNewVersion = this.checkVersion(this.appVersion, this.latestVersion);
   },
   methods: {
-    checkVersion: function(version, latestVersion) {
+    checkVersion(version, latestVersion) {
       if (version === latestVersion) {
         return false;
       }
@@ -80,10 +79,9 @@ export default {
         }
       }
       return true;
-    }
-  }
-}
-;
+    },
+  },
+};
 </script>
 
 <style lang="less" scoped></style>

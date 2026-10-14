@@ -2,6 +2,6 @@
   "printWidth": 150,
   "singleQuote": false,
   "bracketSpacing": true,
-  "jsxBracketSameLine": true,
+  "bracketSameLine": true,
   "htmlWhitespaceSensitivity": "ignore"
 }

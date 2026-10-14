@@ -15,14 +15,14 @@ export default {
   props: {
     current: {
       type: String,
-      default: "login"
-    }
+      default: "login",
+    },
   },
   methods: {
     go(target) {
       this.$router.replace(target);
-    }
-  }
+    },
+  },
 };
 </script>
 

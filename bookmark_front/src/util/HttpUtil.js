@@ -1,6 +1,9 @@
 import * as http from "axios";
-import vuex from "../store/index.js";
+import { message, notification } from "ant-design-vue";
 import router from "../router/index";
+import { pinia } from "../store/index";
+import { useGlobalConfigStore } from "../store/globalConfig";
+import { useTreeDataStore } from "../store/treeData";
 
 /**
  * 请求
@@ -19,8 +22,8 @@ async function request(url, method, params, body, isForm, redirect) {
     method,
     params,
     headers: {
-      "jwt-token": window.jwtToken
-    }
+      "jwt-token": window.jwtToken,
+    },
   };
   //如果是表单类型的请求，添加请求头
   if (isForm) {
@@ -33,32 +36,32 @@ async function request(url, method, params, body, isForm, redirect) {
   try {
     res = await http.default.request(options);
   } catch (err) {
-    window.vueInstance.$message.error("网络连接异常");
+    message.error("网络连接异常");
     console.error(err);
     throw err;
   }
-  const { code, data, message } = res.data;
+  const { code, data, message: msg } = res.data;
   if (code === 1) {
     return data;
   } else if (code === -1 && redirect) {
     //未登陆，根据redirect参数判断是否需要跳转到登陆页
-    window.vueInstance.$message.error("您尚未登陆，请先登陆");
+    message.error("您尚未登陆，请先登陆");
     //跳转到登录页面需要清理缓存
-    await this.$store.dispatch("treeData/clear");
-    await this.$store.dispatch("globalConfig/clear");
-    router.replace(`/public/login?redirect=${encodeURIComponent(router.currentRoute.fullPath)}`);
-    throw new Error(message);
+    await useTreeDataStore(pinia).clear();
+    await useGlobalConfigStore(pinia).clear();
+    router.replace(`/public/login?redirect=${encodeURIComponent(router.currentRoute.value.fullPath)}`);
+    throw new Error(msg);
   } else if (code === 0) {
     //通用异常，使用error提示
-    window.vueInstance.$notification.error({
+    notification.error({
       message: "异常",
-      description: message
+      description: msg,
     });
-    throw new Error(message);
+    throw new Error(msg);
   } else if (code === -2) {
     //表单异常，使用message提示
-    window.vueInstance.$message.error(message);
-    throw new Error(message);
+    message.error(msg);
+    throw new Error(msg);
   }
 }
 
@@ -103,7 +106,7 @@ async function put(url, params, body, isForm = false, redirect = true) {
  * @param {*} redirect 是否重定向
  */
 async function deletes(url, params = null, redirect = true) {
-  return request(url, "delete", params, null, redirect);
+  return request(url, "delete", params, null, false, redirect);
 }
 
 export default {
@@ -111,5 +114,5 @@ export default {
   post,
   put,
   delete: deletes,
-  http
+  http,
 };

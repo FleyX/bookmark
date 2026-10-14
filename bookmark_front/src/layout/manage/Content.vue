@@ -5,11 +5,13 @@
 </template>
 
 <script>
-export default {};
+export default {
+  name: "manageContent",
+};
 </script>
 
 <style lang="less" scoped>
-@import "../../global.less";
+@import (reference) "../../assets/global.less";
 
 @sum: @topHeight + @bottomHeight;
 

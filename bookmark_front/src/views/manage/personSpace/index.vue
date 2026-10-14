@@ -12,11 +12,10 @@
     <div class="baseInfo">
       <div class="item">
         <a-tooltip title="点击修改" v-if="currentAction != 'name'">
-          <span style="font-size: 2em; cursor: pointer"
-                @click="() => (this.currentAction = 'name')">{{ userInfo.username }}</span>
+          <span style="font-size: 2em; cursor: pointer" @click="() => (this.currentAction = 'name')">{{ userInfo.username }}</span>
         </a-tooltip>
         <div class="inputGroup" v-else-if="currentAction === 'name'">
-          <a-input type="text" v-model="name" placeholder="修改昵称" />
+          <a-input type="text" v-model:value="name" placeholder="修改昵称" />
           <div style="padding-top: 0.2em">
             <a-button style="margin-right: 2em" type="warn" @click="() => (this.currentAction = null)">取消</a-button>
             <a-button type="primary" @click="submit">确定</a-button>
@@ -27,14 +26,12 @@
       <div class="item">
         <span style="width: 5em">密码</span>
         <a-tooltip title="点击修改" v-if="currentAction != 'password'">
-          <span style="cursor: pointer"
-                @click="() => (this.currentAction = 'password')">{{ userInfo.noPassword ? "设置密码" : "**********"
-            }}</span>
+          <span style="cursor: pointer" @click="() => (this.currentAction = 'password')">{{ userInfo.noPassword ? "设置密码" : "**********" }}</span>
         </a-tooltip>
         <div class="inputGroup" v-else-if="currentAction === 'password'">
-          <a-input type="password" v-model="oldPassword" placeholder="旧密码(如无置空)" />
-          <a-input type="password" v-model="password" placeholder="新密码" />
-          <a-input type="password" v-model="rePassword" placeholder="重复新密码" />
+          <a-input type="password" v-model:value="oldPassword" placeholder="旧密码(如无置空)" />
+          <a-input type="password" v-model:value="password" placeholder="新密码" />
+          <a-input type="password" v-model:value="rePassword" placeholder="重复新密码" />
           <div style="padding-top: 0.2em">
             <a-button style="margin-right: 2em" type="warn" @click="() => (this.currentAction = null)">取消</a-button>
             <a-button type="primary" @click="submit">确定</a-button>
@@ -48,8 +45,8 @@
           <span style="cursor: pointer" @click="() => (this.currentAction = 'email')">{{ userInfo.email }}</span>
         </a-tooltip>
         <div class="inputGroup" v-else-if="currentAction === 'email'">
-          <a-input type="password" v-model="oldPassword" placeholder="旧密码" />
-          <a-input type="email" v-model="email" placeholder="email" />
+          <a-input type="password" v-model:value="oldPassword" placeholder="旧密码" />
+          <a-input type="email" v-model:value="email" placeholder="email" />
           <div style="padding-top: 0.2em">
             <a-button style="margin-right: 2em" type="warn" @click="() => (this.currentAction = null)">取消</a-button>
             <a-button type="primary" @click="submit">确定</a-button>
@@ -61,11 +58,11 @@
         <a-tooltip title="搜索框默认搜索引擎">
           <span style="width: 5em">搜索</span>
         </a-tooltip>
-        <div @click="showSearchEngineManage=true" style=" cursor: pointer;color:blue">管理搜索引擎</div>
+        <div @click="showSearchEngineManage = true" style="cursor: pointer; color: blue">管理搜索引擎</div>
       </div>
     </div>
 
-    <a-modal v-model="showSearchEngineManage" title="管理搜索引擎" :footer="null" width="70%">
+    <a-modal v-model:open="showSearchEngineManage" title="管理搜索引擎" :footer="null" width="70%">
       <manage-search-engine />
     </a-modal>
   </div>
@@ -73,11 +70,12 @@
 
 <script>
 import manageSearchEngine from "./components/manageSearchEngine.vue";
-import { mapState } from "vuex";
+import { mapState } from "pinia";
 import HttpUtil from "@/util/HttpUtil";
+import { useGlobalConfigStore } from "@/store/globalConfig";
 
 export default {
-  name: "UserInfo",
+  name: "PersonSpace",
   components: { manageSearchEngine },
   data() {
     return {
@@ -87,25 +85,25 @@ export default {
       password: "",
       rePassword: "",
       email: "",
-      showSearchEngineManage: false
+      showSearchEngineManage: false,
     };
   },
   computed: {
-    ...mapState("globalConfig", ["userInfo"])
+    ...mapState(useGlobalConfigStore, ["userInfo"]),
   },
   methods: {
     async changeIcon(e) {
       let file = e.target.files[0];
       if (!file || file.size > 200 * 1024) {
-        message.error("文件大小请勿超过200KB");
+        this.$message.error("文件大小请勿超过200KB");
         return;
       }
       let formData = new FormData();
       formData.append("file", file);
       let res = await HttpUtil.post("/user/icon", null, formData, true);
-      this.$set(this.userInfo, "icon", res);
+      this.userInfo.icon = res;
     },
-    async submit(e) {
+    async submit() {
       let url, body;
       if (this.currentAction === "name") {
         url = "/baseInfo/username";
@@ -118,18 +116,18 @@ export default {
         url = "/baseInfo/password";
         body = {
           oldPassword: this.oldPassword,
-          password: this.password
+          password: this.password,
         };
       } else if (this.currentAction === "email") {
         url = "/baseInfo/email";
         body = { oldPassword: this.oldPassword, email: this.email };
       }
       await HttpUtil.post(url, null, body);
-      await this.$store.dispatch("globalConfig/refreshUserInfo");
+      useGlobalConfigStore().userInfo = await HttpUtil.get("/user/currentUserInfo");
       this.$message.success("操作成功");
       this.currentAction = null;
-    }
-  }
+    },
+  },
 };
 </script>
 

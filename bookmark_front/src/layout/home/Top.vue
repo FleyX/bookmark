@@ -10,36 +10,38 @@
       <a-tooltip style="margin-right: 1em">
         <template #title>书签管理</template>
         <router-link to="/manage">
-          <a-icon class="bookmarkIcon" type="setting" />
+          <SettingOutlined class="bookmarkIcon" />
         </router-link>
       </a-tooltip>
       <a-dropdown>
         <div class="user">
           <img :src="userInfo.icon" class="userIcon" />
         </div>
-        <a-menu slot="overlay" :trigger="['hover', 'click']" @click="menuClick">
-          <a-menu-item key="personSpace">
-            <router-link to="/manage/personSpace/userInfo">个人中心</router-link>
-          </a-menu-item>
-          <a-menu-item key="logout">
-            <a href="javascript:;">退出</a>
-          </a-menu-item>
-        </a-menu>
+        <template #overlay>
+          <a-menu @click="menuClick">
+            <a-menu-item key="personSpace">
+              <router-link to="/manage/personSpace/userInfo">个人中心</router-link>
+            </a-menu-item>
+            <a-menu-item key="logout">
+              <a href="javascript:;">退出</a>
+            </a-menu-item>
+          </a-menu>
+        </template>
       </a-dropdown>
     </div>
   </div>
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState } from "pinia";
+import { SettingOutlined } from "@ant-design/icons-vue";
+import { useGlobalConfigStore } from "@/store/globalConfig";
 import { logoutClear } from "@/store/index";
 export default {
   name: "homeTop",
-  data() {
-    return {};
-  },
+  components: { SettingOutlined },
   computed: {
-    ...mapState("globalConfig", ["userInfo"]),
+    ...mapState(useGlobalConfigStore, ["userInfo"]),
   },
   methods: {
     async menuClick(item) {

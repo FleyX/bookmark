@@ -2,39 +2,35 @@
   <div class="main" :style="{ backgroundImage: backgroundImg }">
     <top />
     <div class="content">
-      <search :style="{ width: isPhone ? '100%' : '60%' }" />
+      <main-search :style="{ width: isPhone ? '100%' : '60%' }" />
       <div :style="{ width: isPhone ? '100%' : '70%' }"><pin-bookmark /></div>
     </div>
-    <bottom :bgSrc="serverConfig.bingImgSrc"  />
+    <bottom :bgSrc="serverConfig.bingImgSrc" />
   </div>
 </template>
 
 <script>
+import { mapState } from "pinia";
 import Top from "@/layout/home/Top.vue";
 import Bottom from "@/layout/home/Bottom.vue";
-import Search from "@/components/main/Search.vue";
+import MainSearch from "@/components/main/Search.vue";
 import PinBookmark from "./PinBookmark.vue";
-import { mapState } from "vuex";
-import { GLOBAL_CONFIG, IS_PHONE, SERVER_CONFIG } from "@/store/modules/globalConfig";
+import { useGlobalConfigStore } from "@/store/globalConfig";
 export default {
   name: "HOME",
   components: {
     Top,
     Bottom,
-    Search,
+    MainSearch,
     PinBookmark,
   },
-  data() {
-    return {};
-  },
   computed: {
-    ...mapState(GLOBAL_CONFIG, [IS_PHONE, SERVER_CONFIG]),
+    ...mapState(useGlobalConfigStore, ["isPhone", "serverConfig"]),
     backgroundImg() {
       let url = this.serverConfig.bingImgSrc ? this.serverConfig.bingImgSrc : "/static/img/homeBg.jpg";
       return `url("${url}")`;
     },
   },
-  methods: {},
 };
 </script>
 

@@ -1,29 +1,19 @@
-import Vue from "vue";
-import Vuex from "vuex";
-import * as globalConfig from "./modules/globalConfig";
-import * as treeData from "./modules/treeData";
-
+import { createPinia } from "pinia";
+import { useGlobalConfigStore } from "./globalConfig";
+import { useTreeDataStore } from "./treeData";
 import { checkJwtValid } from "@/util/UserUtil";
 
-Vue.use(Vuex);
-
-let store = new Vuex.Store({
-  state: {},
-  mutations: {},
-  actions: {},
-  modules: {
-    [globalConfig.GLOBAL_CONFIG]: globalConfig.store,
-    [treeData.TREE_DATA]: treeData.store
-  }
-});
+export const pinia = createPinia();
 
 let noLoginFinish = false;
 
 //执行各自的非登陆初始化
 (async () => {
-  await store.dispatch(globalConfig.GLOBAL_CONFIG + "/" + globalConfig.noLoginInit);
+  const globalConfig = useGlobalConfigStore(pinia);
+  const treeData = useTreeDataStore(pinia);
+  await globalConfig.noLoginInit();
   //无需等待执行
-  store.dispatch(treeData.TREE_DATA + "/" + treeData.noLoginInit);
+  treeData.noLoginInit();
   noLoginFinish = true;
 })();
 
@@ -34,21 +24,21 @@ export async function loginInit() {
   if (!noLoginFinish) {
     await finishNoLogin();
   }
-  console.log(store.state[globalConfig.GLOBAL_CONFIG][globalConfig.TOKEN]);
-  if (checkJwtValid(store.state[globalConfig.GLOBAL_CONFIG][globalConfig.TOKEN])) {
+  const globalConfig = useGlobalConfigStore(pinia);
+  const treeData = useTreeDataStore(pinia);
+  if (checkJwtValid(globalConfig.token)) {
     //无需等待执行完毕
-    store.dispatch(globalConfig.GLOBAL_CONFIG + "/" + globalConfig.loginInit);
-    store.dispatch(treeData.TREE_DATA + "/" + treeData.loginInit);
+    globalConfig.loginInit();
+    treeData.loginInit();
   }
-  console.log("初始化完成");
 }
 
 /**
  * 推出登陆时需要清理的
  */
 export async function logoutClear() {
-  await store.dispatch(globalConfig.GLOBAL_CONFIG + "/" + globalConfig.clear);
-  await store.dispatch(treeData.TREE_DATA + "/" + treeData.clear);
+  await useGlobalConfigStore(pinia).clear();
+  await useTreeDataStore(pinia).clear();
 }
 
 /**
@@ -64,6 +54,3 @@ async function finishNoLogin() {
     }, 100);
   });
 }
-
-export default store;
-

@@ -14,12 +14,12 @@ export default {
     script.defer = true;
     script.src = "https://qiezi.fleyx.com/qiezijs/1.0/qiezi_statistic.min.js";
     document.getElementsByTagName("head")[0].appendChild(script);
-  }
+  },
 };
 </script>
 
 <style lang="less">
-@import "./global.less";
+@import (reference) "./assets/global.less";
 
 html,
 body {

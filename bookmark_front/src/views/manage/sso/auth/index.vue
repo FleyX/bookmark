@@ -3,16 +3,16 @@
 </template>
 
 <script>
-import { GLOBAL_CONFIG, TOKEN } from "@/store/modules/globalConfig";
+import { useGlobalConfigStore } from "@/store/globalConfig";
 export default {
-  name: "ssoPage",
+  name: "SsoAuth",
   data() {
     return {
-      message: "loading"
+      message: "loading",
     };
   },
   mounted() {
-    window.addEventListener("message", event => {
+    window.addEventListener("message", (event) => {
       if (!event.data.code) {
         return;
       }
@@ -23,12 +23,12 @@ export default {
       }
     });
 
-    let token = this.$store.state[GLOBAL_CONFIG][TOKEN];
+    let token = useGlobalConfigStore().token;
     window.postMessage({ code: "setToken", data: token }, "*");
   },
-  beforeDestroy() {
+  unmounted() {
     window.removeEventListener("message");
-  }
+  },
 };
 </script>
 

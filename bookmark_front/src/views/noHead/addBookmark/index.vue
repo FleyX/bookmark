@@ -2,8 +2,8 @@
   <div class="ssoAddBookmark">
     <div class="body">
       <div>
-        <a-input placeholder="标题" v-model="form.name" @pressEnter="addBookmark" ref="nameInput" />
-        <a-input placeholder="网址" v-model="form.url" @pressEnter="addBookmark" />
+        <a-input placeholder="标题" v-model:value="form.name" @pressEnter="addBookmark" ref="nameInput" />
+        <a-input placeholder="网址" v-model:value="form.url" @pressEnter="addBookmark" />
       </div>
       <div class="list">
         <div class="path">
@@ -19,7 +19,7 @@
           <div :class="{ item: true, bg: item.type == 1 }" v-for="item in dataList" :key="item.bookmarkId" :title="item.url">
             <span class="text" @click="folderClick(item)">{{ item.name }}</span>
             <a-popconfirm class="actionBar" placement="left" title="确认删除?" ok-text="是" cancel-text="否" @confirm="deleteOne(item, $event)">
-              <a-icon type="delete" />
+              <DeleteOutlined />
             </a-popconfirm>
           </div>
         </div>
@@ -28,9 +28,9 @@
 
     <div class="action">
       <div v-if="showAddInput" style="display: flex">
-        <a-input v-model="addFolderName" style="width: 8em" @pressEnter="addFolder" ref="folderInput" />
-        <a-button shape="circle" icon="close" @click="showAddInput = false" />
-        <a-button type="primary" shape="circle" icon="check" @click="addFolder" />
+        <a-input v-model:value="addFolderName" style="width: 8em" @pressEnter="addFolder" ref="folderInput" />
+        <a-button shape="circle" @click="showAddInput = false"><CloseOutlined /></a-button>
+        <a-button type="primary" shape="circle" @click="addFolder"><CheckOutlined /></a-button>
       </div>
       <a-button v-else type="link" @click="showFolderInput">新建文件夹</a-button>
       <div>
@@ -43,9 +43,16 @@
 
 <script>
 import HttpUtil from "@/util/HttpUtil";
-import { mapState } from "vuex";
-import { TREE_DATA, TOTAL_TREE_DATA, addNode, deleteData } from "@/store/modules/treeData";
+import { mapState } from "pinia";
+import { CheckOutlined, CloseOutlined, DeleteOutlined } from "@ant-design/icons-vue";
+import { useTreeDataStore } from "@/store/treeData";
 export default {
+  name: "AddBookmark",
+  components: {
+    CheckOutlined,
+    CloseOutlined,
+    DeleteOutlined,
+  },
   data() {
     return {
       breadList: [],
@@ -62,7 +69,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(TREE_DATA, [TOTAL_TREE_DATA]),
+    ...mapState(useTreeDataStore, ["totalTreeData"]),
     dataList() {
       let path = this.getCurrentPath();
       return this.totalTreeData[path] ? this.totalTreeData[path] : [];
@@ -96,7 +103,7 @@ export default {
       this.form.path = this.getCurrentPath();
       let res = await HttpUtil.put("/bookmark", null, this.form);
       this.$message.success("添加成功");
-      await this.$store.dispatch(TREE_DATA + "/" + addNode, {
+      await useTreeDataStore().addNode({
         sourceNode: this.breadList.length == 0 ? null : this.breadList[this.breadList.length - 1],
         targetNode: res,
       });
@@ -142,7 +149,7 @@ export default {
         url: "",
       };
       let res = await HttpUtil.put("/bookmark", null, form);
-      await this.$store.dispatch(TREE_DATA + "/" + addNode, {
+      await useTreeDataStore().addNode({
         sourceNode: this.breadList.length == 0 ? null : this.breadList[this.breadList.length - 1],
         targetNode: res,
       });
@@ -165,7 +172,7 @@ export default {
       let body = { pathList: [], bookmarkIdList: [] };
       item.type == 0 ? body.bookmarkIdList.push(item.bookmarkId) : body.pathList.push(item.path + "." + item.bookmarkId);
       await HttpUtil.post("/bookmark/batchDelete", null, body);
-      await this.$store.dispatch(TREE_DATA + "/" + deleteData, body);
+      await useTreeDataStore().deleteData(body);
       this.$message.success("删除成功");
     },
     //显示输入框

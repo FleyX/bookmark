@@ -14,7 +14,7 @@ import Bottom from "@/layout/manage/Bottom.vue";
 import Top from "@/layout/manage/Top.vue";
 
 export default {
-  name: "Home",
+  name: "Manage",
   components: { Top, Content, Bottom },
 };
 </script>

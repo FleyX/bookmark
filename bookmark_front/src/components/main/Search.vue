@@ -1,19 +1,19 @@
 <template>
   <div class="search">
     <div :class="{ listShow: focused && list.length > 0 }" class="newSearch">
-      <input ref="searchInput" class="input" type="text" v-model="value" @keydown="keyPress" @focus="inputFocus"
-             @blur="inputBlur" />
+      <input ref="searchInput" class="input" type="text" v-model="value" @keydown="keyPress" @focus="inputFocus" @blur="inputBlur" />
       <div class="action">
         <a-dropdown :trigger="['click']">
           <a-tooltip title="点击切换网页搜索">
-            <my-icon class="icon" style="margin-right: 0.5em" :type="checkedSearchEngine.icon"
-                     @click="searchIconClick" />
+            <my-icon class="icon" style="margin-right: 0.5em" :type="checkedSearchEngine.icon" @click="searchIconClick" />
           </a-tooltip>
-          <a-menu slot="overlay" @click="searchEngineChange">
-            <a-menu-item v-for="item in searchEngineList" :key="item.id">{{ item.name }}</a-menu-item>
-          </a-menu>
+          <template #overlay>
+            <a-menu @click="searchEngineChange">
+              <a-menu-item v-for="item in searchEngineList" :key="item.id">{{ item.name }}</a-menu-item>
+            </a-menu>
+          </template>
         </a-dropdown>
-        <a-icon class="icon" type="search" @click="submit(true)" />
+        <SearchOutlined class="icon" @click="submit(true)" />
       </div>
     </div>
     <div v-if="focused && list.length > 0" class="searchContent">
@@ -23,32 +23,25 @@
         v-for="(item, index) in list"
         :key="item.bookmarkId"
         @mousedown="itemClick(index)"
-        :id="'bookmark:' + item.bookmarkId"
-      >
+        :id="'bookmark:' + item.bookmarkId">
         <div class="name" target="_blank" :title="item.url.substr(0, 50)">
           {{ item.name }}
         </div>
         <div class="icons">
           <a-tooltip title="定位到书签树中" v-if="showLocation">
-            <my-icon style="color: white; font-size: 1.3em" type="icon-et-location"
-                     @mousedown="location($event, item)" />
+            <my-icon style="color: white; font-size: 1.3em" type="icon-et-location" @mousedown="location($event, item)" />
           </a-tooltip>
           <a-tooltip title="复制链接">
-            <a-icon
-              type="copy"
+            <CopyOutlined
               style="color: white; font-size: 1.3em; padding-left: 0.5em"
               class="search-copy-to-board"
-              @mousedown.prevent="copy($event, item)"
-              :data="item.url"
-            />
+              @mousedown.prevent="copy($event, item)" />
           </a-tooltip>
-          <a-icon
+          <PushpinOutlined
             v-if="!homePinBookmarkIdMap[item.bookmarkId]"
             style="color: white; font-size: 1.3em; padding-left: 0.5em"
-            type="pushpin"
             title="固定到首页"
-            @mousedown.prevent="pinBookmark($event, item)"
-          />
+            @mousedown.prevent="pinBookmark($event, item)" />
         </div>
       </div>
     </div>
@@ -57,16 +50,17 @@
 </template>
 
 <script>
+import { mapState } from "pinia";
+import { CopyOutlined, PushpinOutlined, SearchOutlined } from "@ant-design/icons-vue";
 import HttpUtil from "@/util/HttpUtil";
-import { mapState } from "vuex";
-import ClipboardJS from "clipboard";
-import { GLOBAL_CONFIG, USER_INFO } from "@/store/modules/globalConfig";
-import { TREE_DATA, refreshHomePinList, HOME_PIN_BOOKMARK_ID_MAP } from "@/store/modules/treeData";
+import { useGlobalConfigStore } from "@/store/globalConfig";
+import { useTreeDataStore } from "@/store/treeData";
 
 export default {
-  name: "Search",
+  name: "MainSearch",
+  components: { CopyOutlined, PushpinOutlined, SearchOutlined },
   props: {
-    showLocation: Boolean //是否显示定位等按钮
+    showLocation: Boolean, //是否显示定位等按钮
   },
   data() {
     return {
@@ -75,40 +69,24 @@ export default {
       list: [],
       //上下选中
       selectIndex: null,
-      copyBoard: null, //剪贴板对象
       searchEngineList: [],
-      checkedSearchEngine: { icon: "icon-baidu", name: "百度", url: "https://www.baidu.com/s?ie=UTF-8&wd=%s" }
+      checkedSearchEngine: { icon: "icon-baidu", name: "百度", url: "https://www.baidu.com/s?ie=UTF-8&wd=%s" },
     };
   },
   async mounted() {
-    //初始化clipboard
-    this.copyBoard = new ClipboardJS(".search-copy-to-board", {
-      text: function(trigger) {
-        return trigger.attributes.data.nodeValue;
-      }
-    });
-    this.copyBoard.on("success", (e) => {
-      this.$message.success("复制成功");
-      e.clearSelection();
-    });
-    if (this.$store.state.globalConfig.token != null) {
+    if (useGlobalConfigStore().token != null) {
       this.searchEngineList = await HttpUtil.get("/searchEngine/list");
-      this.checkedSearchEngine = this.searchEngineList.find(item => item.checked === 1);
-    }
-  },
-  destroyed() {
-    if (this.copyBoard != null) {
-      this.copyBoard.destroy();
+      this.checkedSearchEngine = this.searchEngineList.find((item) => item.checked === 1);
     }
   },
   computed: {
-    ...mapState("treeData", ["totalTreeData", HOME_PIN_BOOKMARK_ID_MAP]),
-    ...mapState("globalConfig", ["userInfo"])
+    ...mapState(useTreeDataStore, ["totalTreeData", "homePinBookmarkIdMap"]),
+    ...mapState(useGlobalConfigStore, ["userInfo"]),
   },
   watch: {
-    value(newVal, oldVal) {
+    value(newVal) {
       this.search(newVal);
-    }
+    },
   },
   methods: {
     searchIconClick() {
@@ -178,8 +156,7 @@ export default {
     },
     //修改默认搜索引擎
     async searchEngineChange(item) {
-
-      let target = this.searchEngineList.find(one => one.id === item.key);
+      let target = this.searchEngineList.find((one) => one.id === item.key);
       await HttpUtil.post("/searchEngine/setChecked", null, { id: item.key });
       this.checkedSearchEngine = target;
     },
@@ -187,7 +164,7 @@ export default {
     async pinBookmark(event, { bookmarkId }) {
       this.stopDefault(event);
       await HttpUtil.put("/home/pin", null, { bookmarkId });
-      await this.$store.dispatch(TREE_DATA + "/" + refreshHomePinList);
+      await useTreeDataStore().refreshHomePinList();
     },
     dealSearch(content) {
       let res = [];
@@ -209,8 +186,15 @@ export default {
       return res;
     },
     //复制
-    async copy(event) {
-      return this.stopDefault(event);
+    async copy(event, item) {
+      this.stopDefault(event);
+      try {
+        await navigator.clipboard.writeText(item.url);
+        this.$message.success("复制成功");
+      } catch (err) {
+        console.error(err);
+        this.$message.error("复制失败");
+      }
     },
     /**
      * 阻止默认事件
@@ -225,8 +209,8 @@ export default {
       }
       console.log("阻止成功");
       return false;
-    }
-  }
+    },
+  },
 };
 </script>
 

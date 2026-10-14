@@ -1,7 +1,5 @@
 <template>
-  <div class="main">
-    页面走丢了，3s后返回首页
-  </div>
+  <div class="main">页面走丢了，3s后返回首页</div>
 </template>
 
 <script>

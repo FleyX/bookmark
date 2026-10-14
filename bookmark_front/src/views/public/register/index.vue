@@ -1,46 +1,59 @@
 <template>
   <div>
-    <Header current="register" />
+    <PublicSwitch current="register" />
     <div class="form">
-      <a-form-model ref="registerForm" :model="form" :rules="rules">
-        <a-form-model-item prop="username">
-          <a-input v-model="form.username" placeholder="用户名">
-            <a-icon slot="prefix" type="user" style="color: rgba(0, 0, 0, 0.25)" />
+      <a-form ref="registerForm" :model="form" :rules="rules">
+        <a-form-item name="username">
+          <a-input v-model:value="form.username" placeholder="用户名">
+            <template #prefix>
+              <UserOutlined style="color: rgba(0, 0, 0, 0.25)" />
+            </template>
           </a-input>
-        </a-form-model-item>
-        <a-form-model-item prop="email">
-          <a-input v-model="form.email" placeholder="邮箱">
-            <a-icon slot="prefix" type="password" style="color: rgba(0, 0, 0, 0.25)" />
+        </a-form-item>
+        <a-form-item name="email">
+          <a-input v-model:value="form.email" placeholder="邮箱">
+            <template #prefix>
+              <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
+            </template>
           </a-input>
-        </a-form-model-item>
-        <a-form-model-item prop="password">
-          <a-input v-model="form.password" placeholder="密码" type="password">
-            <a-icon slot="prefix" type="password" style="color: rgba(0, 0, 0, 0.25)" />
+        </a-form-item>
+        <a-form-item name="password">
+          <a-input v-model:value="form.password" placeholder="密码" type="password">
+            <template #prefix>
+              <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
+            </template>
           </a-input>
-        </a-form-model-item>
-        <a-form-model-item prop="repeatPass">
-          <a-input v-model="form.repeatPass" placeholder="重复密码" type="password">
-            <a-icon slot="prefix" type="password" style="color: rgba(0, 0, 0, 0.25)" />
+        </a-form-item>
+        <a-form-item name="repeatPass">
+          <a-input v-model:value="form.repeatPass" placeholder="重复密码" type="password">
+            <template #prefix>
+              <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
+            </template>
           </a-input>
-        </a-form-model-item>
+        </a-form-item>
 
-        <a-form-model-item>
+        <a-form-item>
           <div class="btns">
             <a-button type="primary" block @click="submit">注册</a-button>
           </div>
-        </a-form-model-item>
-      </a-form-model>
+        </a-form-item>
+      </a-form>
     </div>
   </div>
 </template>
 
 <script>
-import Header from "@/components/public/Switch.vue";
-import httpUtil from "../../../util/HttpUtil.js";
+import PublicSwitch from "@/components/public/Switch.vue";
+import httpUtil from "@/util/HttpUtil.js";
+import { LockOutlined, UserOutlined } from "@ant-design/icons-vue";
+import { useGlobalConfigStore } from "@/store/globalConfig";
+
 export default {
-  name: "Login",
+  name: "Register",
   components: {
-    Header,
+    PublicSwitch,
+    LockOutlined,
+    UserOutlined,
   },
   data() {
     let repeatPass = (rule, value, cb) => {
@@ -82,14 +95,14 @@ export default {
   },
   methods: {
     async submit() {
-      let _this = this;
-      this.$refs.registerForm.validate(async (status) => {
-        if (status) {
-          let res = await httpUtil.put("/user", null, _this.form);
-          await this.$store.dispatch("globalConfig/setToken", res);
-          this.$router.replace("/");
-        }
-      });
+      try {
+        await this.$refs.registerForm.validate();
+      } catch {
+        return;
+      }
+      let res = await httpUtil.put("/user", null, this.form);
+      await useGlobalConfigStore().setToken(res);
+      this.$router.replace("/");
     },
   },
 };

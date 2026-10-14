@@ -15,7 +15,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import "../../global.less";
+@import (reference) "../../assets/global.less";
 .main {
   width: 100%;
   height: 100vh;

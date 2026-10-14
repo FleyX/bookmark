@@ -1,47 +1,59 @@
 <template>
   <a-spin :spinning="loading" :delay="300">
     <div class="search">
-      <search :showLocation="true" @location="location" />
+      <main-search :showLocation="true" @location="location" />
     </div>
     <div class="actions">
       <div class="left">
         <span class="myBookmark">我的书签</span>
         <a-tooltip title="刷新书签缓存">
-          <a-button @click="refresh(true)" type="primary" shape="circle" icon="sync" />
+          <a-button @click="refresh(true)" type="primary" shape="circle">
+            <SyncOutlined />
+          </a-button>
         </a-tooltip>
         <a-tooltip title="多选">
-          <a-button type="primary" shape="circle" icon="check" @click="switchMul" />
+          <a-button type="primary" shape="circle" @click="switchMul">
+            <CheckOutlined />
+          </a-button>
         </a-tooltip>
         <a-tooltip
           v-if="
             (checkedKeys.length === 0 && (currentSelect == null || currentSelect.type === 1)) ||
             (checkedKeys.length === 1 && checkedNodes[0].type === 1)
           "
-          title="添加书签"
-        >
-          <a-button type="primary" shape="circle" icon="plus" @click="addData" />
+          title="添加书签">
+          <a-button type="primary" shape="circle" @click="addData">
+            <PlusOutlined />
+          </a-button>
         </a-tooltip>
         <a-tooltip v-if="currentSelect || checkedKeys.length === 1" title="编辑书签">
-          <a-button type="primary" shape="circle" icon="edit" @click="editData" />
+          <a-button type="primary" shape="circle" @click="editData">
+            <EditOutlined />
+          </a-button>
         </a-tooltip>
         <a-tooltip v-if="moveShow" title="移动书签">
-          <a-button type="primary" shape="circle" icon="scissor" />
+          <a-button type="primary" shape="circle">
+            <ScissorOutlined />
+          </a-button>
         </a-tooltip>
         <a-popconfirm
           v-if="checkedKeys.length > 0 || currentSelect"
           title="此操作同时也会删除子节点数据，确认？"
           ok-text="是"
           cancel-text="否"
-          @confirm="deleteBookmarks"
-        >
+          @confirm="deleteBookmarks">
           <a-tooltip title="删除书签">
-            <a-button type="danger" shape="circle" icon="delete" />
+            <a-button type="danger" shape="circle">
+              <DeleteOutlined />
+            </a-button>
           </a-tooltip>
         </a-popconfirm>
       </div>
       <div>
         <a-tooltip title="导出书签">
-          <a-button @click="exportBookmark" type="primary" shape="circle" icon="export" />
+          <a-button @click="exportBookmark" type="primary" shape="circle">
+            <ExportOutlined />
+          </a-button>
         </a-tooltip>
       </div>
     </div>
@@ -53,7 +65,7 @@
       :selected-keys="currentSelect ? [currentSelect.bookmarkId] : []"
       :load-data="loadData"
       :checked-keys="checkedKeys"
-      :replace-fields="replaceFields"
+      :field-names="fieldNames"
       :expandedKeys="expandedKeys"
       @select="select"
       @expand="expand"
@@ -62,30 +74,33 @@
       :checkable="mulSelect"
       checkStrictly
       :draggable="!isPhone"
-      @drop="onDrop"
-    >
-      <a-dropdown :trigger="['contextmenu']" slot="nodeTitle" slot-scope="rec">
-        <div class="titleContext" :title="rec.dataRef.url">
-          <a-icon type="folder" v-if="!rec.dataRef.isLeaf" />
-          <img v-else-if="rec.dataRef.icon.length > 0" :src="rec.dataRef.icon" style="width: 16px" />
-          <a-icon type="book" v-else />
-          <span @click.prevent style="display: inline-block; min-width: 50%; padding-left: 0.4em">
-            {{ rec.dataRef.name }}
-          </span>
-        </div>
-        <a-menu slot="overlay" @click="rightClick($event, rec.dataRef)">
-          <a-menu-item v-if="!rec.dataRef.isLeaf" key="add">新增</a-menu-item>
-          <a-menu-item v-else key="copy" class="copy-to-board" :data="rec.dataRef.url">复制URL</a-menu-item>
-          <a-menu-item v-if="rec.dataRef.isLeaf" key="pin">
-            {{ homePinList.filter((item) => item.id && item.bookmarkId == rec.dataRef.bookmarkId).length > 0 ? "从首页移除" : "固定到首页" }}
-          </a-menu-item>
-          <a-menu-item key="edit">编辑</a-menu-item>
-          <a-menu-item key="delete">删除</a-menu-item>
-        </a-menu>
-      </a-dropdown>
+      @drop="onDrop">
+      <template #title="rec">
+        <a-dropdown :trigger="['contextmenu']">
+          <div class="titleContext" :title="rec.dataRef.url">
+            <FolderOutlined v-if="!rec.dataRef.isLeaf" />
+            <img v-else-if="rec.dataRef.icon.length > 0" :src="rec.dataRef.icon" style="width: 16px" />
+            <BookOutlined v-else />
+            <span @click.prevent style="display: inline-block; min-width: 50%; padding-left: 0.4em">
+              {{ rec.dataRef.name }}
+            </span>
+          </div>
+          <template #overlay>
+            <a-menu @click="rightClick($event, rec.dataRef)">
+              <a-menu-item v-if="!rec.dataRef.isLeaf" key="add">新增</a-menu-item>
+              <a-menu-item v-else key="copy">复制URL</a-menu-item>
+              <a-menu-item v-if="rec.dataRef.isLeaf" key="pin">
+                {{ homePinList.filter((item) => item.id && item.bookmarkId == rec.dataRef.bookmarkId).length > 0 ? "从首页移除" : "固定到首页" }}
+              </a-menu-item>
+              <a-menu-item key="edit">编辑</a-menu-item>
+              <a-menu-item key="delete">删除</a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
+      </template>
     </a-tree>
     <!-- 新增、修改 -->
-    <a-modal v-model="addModal.show" :title="addModal.isAdd ? '新增' : '编辑'" :footer="null">
+    <a-modal v-model:open="addModal.show" :title="addModal.isAdd ? '新增' : '编辑'" :footer="null">
       <add-bookmark v-if="addModal.show" :isAdd="addModal.isAdd" :targetNode="addModal.targetNode" @close="close" />
     </a-modal>
   </a-spin>
@@ -93,18 +108,40 @@
 
 <script>
 import AddBookmark from "@/components/main/things/AddBookmark.vue";
-import Search from "@/components/main/Search.vue";
+import MainSearch from "@/components/main/Search.vue";
 import HttpUtil from "@/util/HttpUtil.js";
-import { mapState } from "vuex";
+import { mapState } from "pinia";
+import {
+  BookOutlined,
+  CheckOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  ExportOutlined,
+  FolderOutlined,
+  PlusOutlined,
+  ScissorOutlined,
+  SyncOutlined,
+} from "@ant-design/icons-vue";
+import dayjs from "dayjs";
 import { downloadFile } from "@/util/FileUtil";
-import ClipboardJS from "clipboard";
-import moment from "moment";
-import { TREE_DATA, SHOW_REFRESH_TOAST, refreshHomePinList, deleteData, HOME_PIN_LIST } from "@/store/modules/treeData";
+import { useGlobalConfigStore } from "@/store/globalConfig";
+import { useTreeDataStore } from "@/store/treeData";
 import { dealList, exportFileHead } from "@/views/manage/bookmarkTree/helper";
-import { GLOBAL_CONFIG } from "@/store/modules/globalConfig";
 export default {
-  name: "BookmarkManage",
-  components: { AddBookmark, Search },
+  name: "BookmarkTree",
+  components: {
+    AddBookmark,
+    MainSearch,
+    BookOutlined,
+    CheckOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    ExportOutlined,
+    FolderOutlined,
+    PlusOutlined,
+    ScissorOutlined,
+    SyncOutlined,
+  },
   data() {
     return {
       treeData: [],
@@ -112,7 +149,7 @@ export default {
       checkedKeys: [], // 已选择的keys，多选框优先级高于树节点选择
       checkedNodes: [], // 选中的节点数据
       loadedKeys: [], // 已加载数据
-      replaceFields: {
+      fieldNames: {
         title: "name",
         key: "bookmarkId",
       },
@@ -128,39 +165,25 @@ export default {
         // 是否为新增动作
         isAdd: false,
       },
-      copyBoard: null, //剪贴板对象
     };
   },
   computed: {
-    ...mapState("treeData", ["totalTreeData", HOME_PIN_LIST]),
-    ...mapState("globalConfig", ["isPhone"]),
+    ...mapState(useTreeDataStore, ["totalTreeData", "homePinList"]),
+    ...mapState(useGlobalConfigStore, ["isPhone"]),
   },
   watch: {
-    totalTreeData(newVal, oldVal) {
+    totalTreeData() {
       this.resetData();
     },
   },
   async mounted() {
-    this.$store.commit(TREE_DATA + "/" + SHOW_REFRESH_TOAST, true);
-    await this.$store.dispatch("treeData/ensureDataOk");
+    useTreeDataStore().showRefreshToast = true;
+    await useTreeDataStore().ensureDataOk();
     this.treeData = this.totalTreeData[""];
     this.loading = false;
-    //初始化clipboard
-    this.copyBoard = new ClipboardJS(".copy-to-board", {
-      text: function (trigger) {
-        return trigger.attributes.data.nodeValue;
-      },
-    });
-    this.copyBoard.on("success", (e) => {
-      this.$message.success("复制成功");
-      e.clearSelection();
-    });
   },
-  beforeDestroy() {
-    this.$store.commit(TREE_DATA + "/" + SHOW_REFRESH_TOAST, false);
-    if (this.copyBoard != null) {
-      this.copyBoard.destroy();
-    }
+  beforeUnmount() {
+    useTreeDataStore().showRefreshToast = false;
   },
   methods: {
     /**
@@ -169,7 +192,7 @@ export default {
     loadData(treeNode) {
       console.log("加载数据", treeNode);
       return new Promise((resolve) => {
-        const data = typeof treeNode === "number" ? this.$store.getters["treeData/getById"](treeNode) : treeNode.dataRef;
+        const data = typeof treeNode === "number" ? useTreeDataStore().getById(treeNode) : treeNode.dataRef;
         let newPath = data.path + "." + data.bookmarkId;
         if (!this.totalTreeData[newPath]) {
           this.totalTreeData[newPath] = [];
@@ -185,7 +208,7 @@ export default {
     async refresh(deleteCache) {
       if (deleteCache) {
         this.loading = true;
-        await this.$store.dispatch("treeData/refresh");
+        await useTreeDataStore().refresh();
       }
       this.resetData();
       this.loading = false;
@@ -220,7 +243,7 @@ export default {
         this.expandedKeys.pop();
       }
     },
-    check(key, { checked, node }) {
+    check(checkedObj, { checked, node }) {
       const item = node.dataRef;
       if (checked) {
         this.checkedKeys.push(item.bookmarkId);
@@ -229,7 +252,7 @@ export default {
         this.checkedKeys.splice(this.checkedKeys.indexOf(item.bookmarkId), 1);
         this.checkedNodes.splice(
           this.checkedNodes.findIndex((item1) => item1.bookmarkId === item.bookmarkId),
-          1
+          1,
         );
       }
     },
@@ -274,7 +297,7 @@ export default {
       const pathList = [];
       if (this.checkedNodes) {
         this.checkedNodes.forEach((item) =>
-          item.type === 1 ? pathList.push(item.path + "." + item.bookmarkId) : bookmarkIdList.push(item.bookmarkId)
+          item.type === 1 ? pathList.push(item.path + "." + item.bookmarkId) : bookmarkIdList.push(item.bookmarkId),
         );
       }
       if (this.currentSelect) {
@@ -288,7 +311,7 @@ export default {
       }
       this.loading = true;
       await HttpUtil.post("/bookmark/batchDelete", null, { pathList, bookmarkIdList });
-      await this.$store.dispatch(TREE_DATA + "/" + deleteData, { pathList, bookmarkIdList });
+      await useTreeDataStore().deleteData({ pathList, bookmarkIdList });
       //删除已经被删除的数据
       pathList.forEach((item) => {
         const id = parseInt(item.split(".").reverse()[0]);
@@ -308,14 +331,14 @@ export default {
       this.mulSelect = false;
     },
     async editData() {
-      this.$set(this.addModal, "show", true);
-      this.$set(this.addModal, "isAdd", false);
-      this.$set(this.addModal, "targetNode", this.currentSelect || (this.checkedNodes.length > 0 ? this.checkedNodes[0] : null));
+      this.addModal.show = true;
+      this.addModal.isAdd = false;
+      this.addModal.targetNode = this.currentSelect || (this.checkedNodes.length > 0 ? this.checkedNodes[0] : null);
     },
     async addData() {
-      this.$set(this.addModal, "show", true);
-      this.$set(this.addModal, "isAdd", true);
-      this.$set(this.addModal, "targetNode", this.currentSelect || (this.checkedNodes.length > 0 ? this.checkedNodes[0] : null));
+      this.addModal.show = true;
+      this.addModal.isAdd = true;
+      this.addModal.targetNode = this.currentSelect || (this.checkedNodes.length > 0 ? this.checkedNodes[0] : null);
     },
     async location(item) {
       console.log(item);
@@ -338,8 +361,6 @@ export default {
     async close(type) {
       if (type === "file") {
         this.refresh(true);
-      } else {
-        this.treeData.__ob__.dep.notify();
       }
       this.addModal = {
         show: false,
@@ -354,11 +375,10 @@ export default {
         return;
       }
       this.loading = true;
-      const body = await this.$store.dispatch("treeData/moveNode", info);
+      const body = await useTreeDataStore().moveNode(info);
       try {
         await HttpUtil.post("/bookmark/moveNode", null, body);
         this.$message.success("移动完成");
-        this.treeData.__ob__.dep.notify();
       } catch (error) {
         console.error(error);
         this.$message.error("后台移动失败，将于2s后刷新页面，以免前后台数据不一致");
@@ -370,6 +390,13 @@ export default {
     //右键点击
     async rightClick({ key }, item) {
       if (key === "copy") {
+        try {
+          await navigator.clipboard.writeText(item.url);
+          this.$message.success("复制成功");
+        } catch (error) {
+          console.error(error);
+          this.$message.error("复制失败");
+        }
         return;
       }
       //清楚多选状态，并设置当前选中
@@ -383,11 +410,8 @@ export default {
         this.$confirm({
           title: "确认删除？",
           content: "将删除当前节点和所有子节点，且不可恢复",
-          onOk: () => {
-            return new Promise(async (resolve, reject) => {
-              await this.deleteBookmarks();
-              resolve();
-            });
+          onOk: async () => {
+            await this.deleteBookmarks();
           },
         });
       } else if (key === "edit") {
@@ -399,7 +423,7 @@ export default {
         } else {
           await HttpUtil.put("/home/pin", null, { bookmarkId: item.bookmarkId });
         }
-        await this.$store.dispatch(TREE_DATA + "/" + refreshHomePinList);
+        await useTreeDataStore().refreshHomePinList();
       }
     },
     /**
@@ -410,7 +434,7 @@ export default {
       let root = document.createElement("DL");
       dealList(root, map[""], map);
       let content = exportFileHead + root.outerHTML;
-      downloadFile(moment().format("YYYY-MM-DD") + "导出书签.html", content);
+      downloadFile(dayjs().format("YYYY-MM-DD") + "导出书签.html", content);
     },
   },
 };

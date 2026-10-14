@@ -13,7 +13,7 @@ export default {
       type: "github",
       code: this.$route.query.code,
     };
-    localStorage.setItem("oauthMessage", JSON.stringify(body));
+    window.localStorage.setItem("oauthMessage", JSON.stringify(body));
   },
 };
 </script>

@@ -9,13 +9,9 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 export default {
   name: "homeTop",
   props: ["bgSrc"],
-  data() {
-    return {};
-  },
 };
 </script>
 
