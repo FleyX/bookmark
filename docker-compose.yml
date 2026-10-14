@@ -54,7 +54,7 @@ services:
     restart: unless-stopped
 
   backend:
-    image: openjdk:11.0
+    image: eclipse-temurin:25-jre
     networks:
       - bookmark
     volumes:
@@ -79,11 +79,8 @@ services:
         -Dspring.datasource.druid.password='${MYSQL_PASSWORD}' \
         -Dspring.datasource.druid.url=jdbc:mysql://${MYSQL_ADDRESS}/bookmark?useUnicode=true\&characterEncoding=utf-8\&useSSL=false\&useJDBCCompliantTimezoneShift=true\&useLegacyDatetimeCode=false\&serverTimezone=UTC \
         -Dspring.redis.host=${REDIS_HOST} \
-        -Des.host=bookmark-es \
         -DserviceAddress=${BOOKMARK_HOST} \
         -DfileSavePath=/opt/files \
-        -Dpinyin.base-url=http://pinyin:8012 \
-        -Dpinyin.token=123456321 \
         -DurlIconAddress=http://iconserver:8080 \
         -Dproxy.ip=${PROXY_IP} \
         -Dproxy.port=${PROXY_PORT} \
