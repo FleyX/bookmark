@@ -44,6 +44,10 @@ public class UserServiceImpl implements UserService {
      * 登陆最大重试次数
      */
     private static final int LOGIN_COUNT = 5;
+    /**
+     * 用户禁用状态
+     */
+    private static final int DISABLE_STATUS = 0;
     @Autowired
     private SearchEngineService searchEngineService;
 
@@ -141,6 +145,9 @@ public class UserServiceImpl implements UserService {
         if (userInfo == null || StrUtil.isEmpty(userInfo.getPassword()) || !HashUtil.sha1(HashUtil.md5(body.getPassword())).equals(userInfo.getPassword())) {
             redisTemplate.opsForValue().set(key, count == null ? "1" : String.valueOf(Integer.parseInt(count) + 1), 30, TimeUnit.MINUTES);
             throw new FormDataException("账号密码错误");
+        }
+        if (userInfo.getStatus() != null && userInfo.getStatus() == DISABLE_STATUS) {
+            throw new FormDataException("账号已被禁用，请联系管理员");
         }
         redisTemplate.delete(key);
         userDao.updateLastLoginTime(System.currentTimeMillis(), userInfo.getUserId());

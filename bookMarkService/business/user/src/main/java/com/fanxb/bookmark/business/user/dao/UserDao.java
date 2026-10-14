@@ -197,4 +197,34 @@ public interface UserDao extends BaseMapper<User> {
     @Update("update user set ${column} = #{val} where ${termColumn} = #{termVal}")
     void updateOneColumnByOneTerm(String column, Object val, String termColumn, Object termVal);
 
+    /**
+     * Description: 更新用户启用状态
+     *
+     * @param userId 用户id
+     * @param status 1正常 0禁用
+     * @author fanxb
+     */
+    @Update("update user set status=#{status} where userId=#{userId}")
+    void updateStatus(@Param("userId") int userId, @Param("status") int status);
+
+    /**
+     * Description: 分页查询用户，keyword 模糊匹配 username/email
+     *
+     * @param keyword 关键字，可为空
+     * @param start   起始行
+     * @param size    页大小
+     * @return java.util.List<com.fanxb.bookmark.common.entity.po.User>
+     * @author fanxb
+     */
+    List<User> selectUserPage(@Param("keyword") String keyword, @Param("start") int start, @Param("size") int size);
+
+    /**
+     * Description: 统计用户数量，keyword 模糊匹配 username/email
+     *
+     * @param keyword 关键字，可为空
+     * @return long
+     * @author fanxb
+     */
+    long countUser(@Param("keyword") String keyword);
+
 }

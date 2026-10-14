@@ -261,4 +261,14 @@ public interface BookmarkDao extends BaseMapper<Bookmark> {
     @Select("select bookmarkId,path from bookmark where userId=#{userId}")
     List<Bookmark> selectBookmarkIdPathByUserId(int userId);
 
+    /**
+     * 统计某个用户的书签数量（不含文件夹）
+     *
+     * @param userId 用户id
+     * @return long
+     * @author fanxb
+     */
+    @Select("select count(1) from bookmark where userId=#{userId} and type=0")
+    long countBookmarkByUserId(@Param("userId") int userId);
+
 }

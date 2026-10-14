@@ -385,6 +385,11 @@ public class BookmarkServiceImpl implements BookmarkService {
         return resPath;
     }
 
+    @Override
+    public long countBookmarkByUserId(int userId) {
+        return bookmarkDao.countBookmarkByUserId(userId);
+    }
+
     /**
      * 获取icon,通过网络获取，或者从base64还原
      *

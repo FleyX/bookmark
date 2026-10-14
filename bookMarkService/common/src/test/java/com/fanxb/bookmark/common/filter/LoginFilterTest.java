@@ -4,7 +4,10 @@ import com.fanxb.bookmark.common.constant.CommonConstant;
 import com.fanxb.bookmark.common.permission.PermissionRegistry;
 import com.fanxb.bookmark.common.service.LoginUserLogService;
 import com.fanxb.bookmark.common.service.PermissionService;
+import com.fanxb.bookmark.common.service.UserStateService;
 import com.fanxb.bookmark.common.util.JwtUtil;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -13,20 +16,25 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -54,6 +62,9 @@ class LoginFilterTest {
     private LoginUserLogService loginUserLogService;
 
     @Mock
+    private UserStateService userStateService;
+
+    @Mock
     private HttpServletRequest request;
 
     @Mock
@@ -68,11 +79,13 @@ class LoginFilterTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        loginFilter = new LoginFilter(permissionRegistry, permissionService, loginUserLogService);
+        loginFilter = new LoginFilter(permissionRegistry, permissionService, loginUserLogService, userStateService);
         ReflectionTestUtils.setField(loginFilter, "urlPrefix", URL_PREFIX);
         ReflectionTestUtils.setField(loginFilter, "secret", SECRET);
         responseWriter = new StringWriter();
         lenient().when(response.getWriter()).thenReturn(new PrintWriter(responseWriter));
+        //默认用户状态正常，仅状态相关用例覆盖
+        lenient().when(userStateService.checkUserState(anyInt(), any())).thenReturn(true);
     }
 
     @Test
@@ -154,6 +167,48 @@ class LoginFilterTest {
         verify(permissionService, never()).resolveResourceCodes(anyInt());
     }
 
+    @Test
+    void testDisabledUserReturnNoLogin() throws Exception {
+        mockRequest("GET", "/bookmark/currentUser", jwt(1));
+        when(permissionRegistry.getPublicPatterns()).thenReturn(List.of());
+        when(userStateService.checkUserState(eq(1), any())).thenReturn(false);
+
+        loginFilter.doFilter(request, response, filterChain);
+
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+        assertTrue(responseWriter.toString().contains("-1"));
+        verify(loginUserLogService, never()).logToRedis();
+    }
+
+    @Test
+    void testOldJwtAfterPasswordResetReturnNoLogin() throws Exception {
+        long resetTime = System.currentTimeMillis();
+        mockRequest("GET", "/bookmark/currentUser", jwtWithIssuedAt(1, new Date(resetTime - 10_000)));
+        when(permissionRegistry.getPublicPatterns()).thenReturn(List.of());
+        //模拟真实服务契约：签发时间早于重置时间即失效
+        when(userStateService.checkUserState(eq(1), argThat(iat -> iat != null && iat.getTime() < resetTime)))
+                .thenReturn(false);
+
+        loginFilter.doFilter(request, response, filterChain);
+
+        verify(filterChain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+        assertTrue(responseWriter.toString().contains("-1"));
+    }
+
+    @Test
+    void testNewJwtPassUserStateCheck() throws Exception {
+        mockRequest("GET", "/bookmark/currentUser", jwt(1));
+        when(permissionRegistry.getPublicPatterns()).thenReturn(List.of());
+
+        loginFilter.doFilter(request, response, filterChain);
+
+        ArgumentCaptor<Date> captor = ArgumentCaptor.forClass(Date.class);
+        verify(userStateService).checkUserState(eq(1), captor.capture());
+        assertNotNull(captor.getValue());
+        verify(filterChain).doFilter(request, response);
+        verify(loginUserLogService).logToRedis();
+    }
+
     private void mockRequest(String method, String uri, String jwt) {
         when(request.getMethod()).thenReturn(method);
         when(request.getRequestURI()).thenReturn(URL_PREFIX + uri);
@@ -162,5 +217,13 @@ class LoginFilterTest {
 
     private String jwt(int userId) {
         return JwtUtil.encode(Map.of("userId", String.valueOf(userId)), SECRET, 3600_000L);
+    }
+
+    private String jwtWithIssuedAt(int userId, Date issuedAt) {
+        return JWT.create()
+                .withIssuedAt(issuedAt)
+                .withExpiresAt(new Date(System.currentTimeMillis() + 3600_000L))
+                .withClaim("userId", String.valueOf(userId))
+                .sign(Algorithm.HMAC256(SECRET));
     }
 }

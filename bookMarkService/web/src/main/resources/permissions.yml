@@ -17,6 +17,10 @@ permissions:
     resources:
       - { code: "VIEW:/admin/user", name: "用户管理页面" }
       - { code: "GET:/user/manage/page", name: "用户分页列表" }
+      - { code: "GET:/user/manage/detail", name: "用户详情" }
+      - { code: "POST:/user/manage/status", name: "启用/禁用用户" }
+      - { code: "POST:/user/manage/roles", name: "分配用户角色" }
+      - { code: "POST:/user/manage/resetPassword", name: "重置用户密码" }
       - { code: "GET:/role/manage/options", name: "角色下拉选项" }
   - code: system:role
     name: 角色管理

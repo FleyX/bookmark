@@ -32,7 +32,9 @@ public class JwtUtil {
      */
     public static String encode(Map<String, String> map, String secret, long timeOut) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
-        JWTCreator.Builder builder = JWT.create().withExpiresAt(new Date(System.currentTimeMillis() + timeOut));
+        Date now = new Date();
+        //签发时间用于禁用/重置密码后的 JWT 吊销判断，无 iat 的旧 token 视为签发于 0
+        JWTCreator.Builder builder = JWT.create().withIssuedAt(now).withExpiresAt(new Date(now.getTime() + timeOut));
         //设置负载
         map.forEach(builder::withClaim);
         return builder.sign(algorithm);

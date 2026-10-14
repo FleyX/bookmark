@@ -53,6 +53,23 @@ public interface RoleDao extends BaseMapper<RolePo> {
     void insertUserRole(@Param("userId") int userId, @Param("roleId") int roleId, @Param("createTime") long createTime);
 
     /**
+     * Description: 查询用户绑定的全部角色（含禁用角色）
+     *
+     * @param userId 用户id
+     * @return java.util.List<com.fanxb.bookmark.common.entity.po.RolePo>
+     * @author fanxb
+     */
+    List<RolePo> selectRolesByUserId(@Param("userId") int userId);
+
+    /**
+     * Description: 删除用户的全部角色绑定
+     *
+     * @param userId 用户id
+     * @author fanxb
+     */
+    void deleteUserRoles(@Param("userId") int userId);
+
+    /**
      * Description: 根据角色id查询角色
      *
      * @param roleId 角色id

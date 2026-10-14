@@ -36,6 +36,20 @@ public class RedisConstant {
         return "bookmark_user_fail_count_" + username;
     }
 
+    /**
+     * 用户禁用标记，存在即禁用，不设过期时间
+     */
+    public static String getUserDisabledKey(int userId) {
+        return "USER_DISABLED:" + userId;
+    }
+
+    /**
+     * 用户密码被管理员重置的时间戳，值为毫秒时间戳
+     */
+    public static String getPwdResetTimeKey(int userId) {
+        return "PWD_RESET_TIME:" + userId;
+    }
+
     public static final String BING_IMG = "bing_img";
 
     public static final String USER_USE_TIME_SET="user:use_time_set";

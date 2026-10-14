@@ -25,4 +25,13 @@ public interface BookmarkApi {
      * @date 2021/3/17
      **/
     Set<String> dealBadBookmark(boolean delete, int userId);
+
+    /**
+     * 统计某个用户的书签数量（不含文件夹）
+     *
+     * @param userId 用户id
+     * @return long
+     * @author fanxb
+     */
+    long countBookmarkByUserId(int userId);
 }

@@ -31,4 +31,9 @@ public class BookmarkApiImpl implements BookmarkApi {
     public Set<String> dealBadBookmark(boolean delete, int userId) {
         return bookmarkService.dealBadBookmark(delete, userId);
     }
+
+    @Override
+    public long countBookmarkByUserId(int userId) {
+        return bookmarkService.countBookmarkByUserId(userId);
+    }
 }

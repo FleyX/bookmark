@@ -30,6 +30,20 @@
         value (#{userId}, #{roleId}, #{createTime})
     </insert>
 
+    <select id="selectRolesByUserId" resultType="com.fanxb.bookmark.common.entity.po.RolePo">
+        select r.roleId, r.code, r.name
+        from user_role ur
+                 join role r on ur.roleId = r.roleId
+        where ur.userId = #{userId}
+        order by r.roleId
+    </select>
+
+    <delete id="deleteUserRoles">
+        delete
+        from user_role
+        where userId = #{userId}
+    </delete>
+
     <select id="selectRoleById" resultType="com.fanxb.bookmark.common.entity.po.RolePo">
         select roleId, code, name, description, status, buildIn, createTime, updateTime
         from role

@@ -36,5 +36,29 @@
         or githubId = #{githubId}
     </select>
 
+    <sql id="userKeywordCondition">
+        <if test="keyword != null and keyword != ''">
+            and (username like concat('%', #{keyword}, '%') or email like concat('%', #{keyword}, '%'))
+        </if>
+    </sql>
+
+    <select id="selectUserPage" resultType="com.fanxb.bookmark.common.entity.po.User">
+        select userId, username, email, icon, createTime, lastLoginTime, status
+        from user
+        <where>
+            <include refid="userKeywordCondition"/>
+        </where>
+        order by userId
+        limit #{start}, #{size}
+    </select>
+
+    <select id="countUser" resultType="long">
+        select count(1)
+        from user
+        <where>
+            <include refid="userKeywordCondition"/>
+        </where>
+    </select>
+
 
 </mapper>

@@ -48,6 +48,11 @@ public class User {
     private int version;
 
     /**
+     * 1正常 0禁用
+     */
+    private Integer status;
+
+    /**
      * 默认搜索引擎
      */
     private Integer searchEngineId;

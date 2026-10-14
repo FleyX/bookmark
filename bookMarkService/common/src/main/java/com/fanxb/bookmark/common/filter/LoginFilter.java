@@ -8,6 +8,7 @@ import com.fanxb.bookmark.common.exception.NoLoginException;
 import com.fanxb.bookmark.common.permission.PermissionRegistry;
 import com.fanxb.bookmark.common.service.LoginUserLogService;
 import com.fanxb.bookmark.common.service.PermissionService;
+import com.fanxb.bookmark.common.service.UserStateService;
 import com.fanxb.bookmark.common.util.JsonUtil;
 import com.fanxb.bookmark.common.util.JwtUtil;
 import com.fanxb.bookmark.common.util.StringUtil;
@@ -58,6 +59,7 @@ public class LoginFilter implements Filter {
     private final PermissionRegistry permissionRegistry;
     private final PermissionService permissionService;
     private final LoginUserLogService loginUserLogService;
+    private final UserStateService userStateService;
 
     @Override
     public void init(FilterConfig filterConfig) {
@@ -103,6 +105,12 @@ public class LoginFilter implements Filter {
                 return;
             }
             if (!login) {
+                this.writeResult(response, new Result(NoLoginException.CODE, NoLoginException.MESSAGE, null));
+                return;
+            }
+            //禁用账号、管理员重置密码后，旧 JWT 按未登录处理
+            UserContext userContext = UserContextHolder.get();
+            if (!userStateService.checkUserState(userContext.getUserId(), userContext.getJwtIssuedAt())) {
                 this.writeResult(response, new Result(NoLoginException.CODE, NoLoginException.MESSAGE, null));
                 return;
             }
@@ -153,6 +161,8 @@ public class LoginFilter implements Filter {
             UserContext context = new UserContext();
             context.setJwt(jwt);
             context.setUserId(userId);
+            Claim issuedAt = map.get("iat");
+            context.setJwtIssuedAt(issuedAt == null ? null : issuedAt.asDate());
             UserContextHolder.set(context);
             return true;
         } catch (Exception e) {
