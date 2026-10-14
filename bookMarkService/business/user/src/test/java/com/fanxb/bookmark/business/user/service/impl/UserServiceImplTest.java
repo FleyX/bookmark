@@ -9,6 +9,7 @@ import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.dao.RoleDao;
 import com.fanxb.bookmark.common.entity.po.User;
 import com.fanxb.bookmark.common.exception.FormDataException;
+import com.fanxb.bookmark.common.service.PermissionService;
 import com.fanxb.bookmark.common.util.HashUtil;
 import com.fanxb.bookmark.common.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +22,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.LinkedHashSet;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -61,11 +66,14 @@ class UserServiceImplTest {
     @Mock
     private SearchEngineService searchEngineService;
 
+    @Mock
+    private PermissionService permissionService;
+
     private UserServiceImpl userService;
 
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userDao, redisTemplate, bookmarkApi, roleDao);
+        userService = new UserServiceImpl(userDao, redisTemplate, bookmarkApi, roleDao, permissionService);
         ReflectionTestUtils.setField(userService, "searchEngineService", searchEngineService);
     }
 
@@ -118,6 +126,21 @@ class UserServiceImplTest {
         assertEquals("账号已被禁用，请联系管理员", e.getMessage());
         verify(redisTemplate, never()).delete(anyString());
         verify(userDao, never()).updateLastLoginTime(anyLong(), anyInt());
+    }
+
+    @Test
+    void testGetUserInfoContainsResources() {
+        User user = new User();
+        user.setUserId(1);
+        user.setPassword("hashed");
+        when(userDao.selectByUserIdOrGithubId(1, null)).thenReturn(user);
+        when(permissionService.resolveResourceCodes(1)).thenReturn(new LinkedHashSet<>(List.of("VIEW:/admin/user", "GET:/user/manage/page")));
+
+        User res = userService.getUserInfo(1);
+
+        assertEquals(List.of("VIEW:/admin/user", "GET:/user/manage/page"), res.getResources());
+        assertFalse(res.getNoPassword());
+        verify(permissionService).resolveResourceCodes(1);
     }
 
     private void mockUserInsert() {

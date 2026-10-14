@@ -2,7 +2,16 @@ import { createRouter, createWebHistory } from "vue-router";
 import { pinia, loginInit } from "../store/index";
 import { useGlobalConfigStore } from "../store/globalConfig";
 import { useTreeDataStore } from "../store/treeData";
+import { useUserStore } from "../store/user";
 import { checkJwtValid } from "@/util/UserUtil";
+
+/**
+ * 管理后台子路由，meta.resource为进入页面所需的VIEW:资源
+ */
+const adminChildren = [
+  { path: "user", component: () => import("@/views/admin/user/index.vue"), meta: { resource: "VIEW:/admin/user" } },
+  { path: "role", component: () => import("@/views/admin/role/index.vue"), meta: { resource: "VIEW:/admin/role" } },
+];
 
 const routes = [
   { path: "/", component: () => import("@/views/home/index.vue") },
@@ -18,6 +27,11 @@ const routes = [
     ],
   },
   {
+    path: "/admin",
+    component: () => import("@/layout/admin/index.vue"),
+    children: adminChildren,
+  },
+  {
     path: "/public",
     component: () => import("@/views/public/index.vue"),
     children: [
@@ -27,6 +41,7 @@ const routes = [
       { path: "oauth/github", component: () => import("@/views/public/oauth/github/index.vue") },
       { path: "about", component: () => import("@/views/public/about/index.vue") },
       { path: "404", component: () => import("@/views/public/notFound/index.vue") },
+      { path: "403", component: () => import("@/views/public/403/index.vue") },
     ],
   },
   { path: "/:pathMatch(.*)*", redirect: "/public/404" },
@@ -38,11 +53,27 @@ const router = createRouter({
 });
 
 /**
+ * 管理后台页面级权限校验，返回需要跳转的路径，返回null说明可以进入
+ */
+function checkAdminResource(to, userStore) {
+  // /admin本身没有页面，跳转到第一个有权限的子页面
+  if (to.path === "/admin") {
+    const first = adminChildren.find((item) => userStore.hasResource(item.meta.resource));
+    return first ? `/admin/${first.path}` : "/public/403";
+  }
+  if (to.meta.resource && !userStore.hasResource(to.meta.resource)) {
+    return "/public/403";
+  }
+  return null;
+}
+
+/**
  * 在此进行登录信息判断，以及重定向到登录页面
  */
 router.beforeEach(async (to, from, next) => {
   const globalConfig = useGlobalConfigStore(pinia);
   const treeData = useTreeDataStore(pinia);
+  const userStore = useUserStore(pinia);
   if (to.query.token && checkJwtValid(to.query.token)) {
     console.log("获取到页面token", to.query.token);
     await globalConfig.setToken(to.query.token);
@@ -62,9 +93,26 @@ router.beforeEach(async (to, from, next) => {
       query: { to: btoa(to.fullPath) },
       replace: true,
     });
-  } else {
-    next();
+    return;
   }
+  //管理后台页面级权限，资源加载失败按无权限处理
+  if (to.path.startsWith("/admin")) {
+    try {
+      await userStore.loginInit();
+    } catch (err) {
+      console.error(err);
+    }
+    if (!checkJwtValid(globalConfig.token)) {
+      //加载资源时被判定未登录，HttpUtil已跳转登录页，不再做权限判断
+      return;
+    }
+    const redirectPath = checkAdminResource(to, userStore);
+    if (redirectPath) {
+      next({ path: redirectPath, replace: true });
+      return;
+    }
+  }
+  next();
 });
 
 export default router;

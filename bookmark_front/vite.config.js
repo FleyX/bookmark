@@ -13,7 +13,7 @@ export default defineConfig({
     port: 4531,
     proxy: {
       "/bookmark/api": {
-        target: "http://macbookpro.lan:8088",
+        target: "http://localhost:8088",
         changeOrigin: true,
       },
     },

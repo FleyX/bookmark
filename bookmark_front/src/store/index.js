@@ -1,6 +1,7 @@
 import { createPinia } from "pinia";
 import { useGlobalConfigStore } from "./globalConfig";
 import { useTreeDataStore } from "./treeData";
+import { useUserStore } from "./user";
 import { checkJwtValid } from "@/util/UserUtil";
 
 export const pinia = createPinia();
@@ -30,6 +31,7 @@ export async function loginInit() {
     //无需等待执行完毕
     globalConfig.loginInit();
     treeData.loginInit();
+    useUserStore(pinia).loginInit();
   }
 }
 
@@ -39,6 +41,7 @@ export async function loginInit() {
 export async function logoutClear() {
   await useGlobalConfigStore(pinia).clear();
   await useTreeDataStore(pinia).clear();
+  useUserStore(pinia).clear();
 }
 
 /**

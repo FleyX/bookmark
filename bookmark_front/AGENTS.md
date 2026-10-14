@@ -19,11 +19,11 @@ Vite 不做 `lintOnSave`，所以**必须手动跑 `pnpm lint`**，不要为了�
 
 | 目录 | 职责 |
 |---|---|
-| `src/views/` | 页面，按路由分目录（`home/`、`manage/`、`noHead/`、`public/`），入口统一 `index.vue`，页面私有组件/helper 平级放同目录 |
+| `src/views/` | 页面，按路由分目录（`home/`、`manage/`、`admin/`、`noHead/`、`public/`），入口统一 `index.vue`，页面私有组件/helper 平级放同目录 |
 | `src/components/` | 可复用组件（`main/`、`public/`） |
-| `src/layout/` | 布局组件（`home/`、`manage/`） |
-| `src/store/` | `index.js` 创建 pinia 实例并编排登录/登出初始化 + `globalConfig.js`、`treeData.js`（`defineStore`） |
-| `src/router/` | 单文件路由 + `beforeEach` token 校验 |
+| `src/layout/` | 布局组件（`home/`、`manage/`、`admin/`） |
+| `src/store/` | `index.js` 创建 pinia 实例并编排登录/登出初始化 + `globalConfig.js`、`treeData.js`、`user.js`（`defineStore`，`user.js` 存当前用户信息与已展开资源，供页面级权限判定） |
+| `src/router/` | 单文件路由 + `beforeEach` token 校验与 `/admin` 页面级权限拦截 |
 | `src/util/` | `HttpUtil.js`、`UserUtil.js`、`FileUtil.js` |
 | `src/assets/global.less` | 全局 less 变量，`main.js` 引入；`App.vue` 用 `@import (reference)` 引变量 |
 
@@ -48,7 +48,7 @@ await HttpUtil.put("/user", null, body);
 await HttpUtil.post("/common/file", null, formData, true);      // 表单上传 isForm=true
 ```
 
-`HttpUtil` 内部统一 `baseURL: "/bookmark/api"`、头 `jwt-token`，并按 code 处理（1 返回 data / -1 跳登录 / 0、-2 弹错误提示）。**不要再 `.data`，不要重复处理 code。**
+`HttpUtil` 内部统一 `baseURL: "/bookmark/api"`、头 `jwt-token`，并按 code 处理（1 返回 data / -1 跳登录 / 0、-2、-3 弹错误提示）。**不要再 `.data`，不要重复处理 code。**
 
 ## Pinia 约定
 

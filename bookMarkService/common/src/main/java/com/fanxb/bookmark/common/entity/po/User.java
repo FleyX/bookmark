@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 类功能简述：
@@ -58,5 +59,11 @@ public class User {
     private Integer searchEngineId;
 
     private LocalDateTime lastActiveTime;
+
+    /**
+     * 当前用户已展开的资源code列表，仅currentUserInfo接口返回，非数据库字段
+     */
+    @TableField(exist = false)
+    private List<String> resources;
 
 }

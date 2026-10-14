@@ -4,6 +4,7 @@ import router from "../router/index";
 import { pinia } from "../store/index";
 import { useGlobalConfigStore } from "../store/globalConfig";
 import { useTreeDataStore } from "../store/treeData";
+import { useUserStore } from "../store/user";
 
 /**
  * 请求
@@ -49,12 +50,20 @@ async function request(url, method, params, body, isForm, redirect) {
     //跳转到登录页面需要清理缓存
     await useTreeDataStore(pinia).clear();
     await useGlobalConfigStore(pinia).clear();
+    useUserStore(pinia).clear();
     router.replace(`/public/login?redirect=${encodeURIComponent(router.currentRoute.value.fullPath)}`);
     throw new Error(msg);
   } else if (code === 0) {
     //通用异常，使用error提示
     notification.error({
       message: "异常",
+      description: msg,
+    });
+    throw new Error(msg);
+  } else if (code === -3) {
+    //无权限异常，与code 0一样使用error提示，不跳登录
+    notification.error({
+      message: "无权限",
       description: msg,
     });
     throw new Error(msg);

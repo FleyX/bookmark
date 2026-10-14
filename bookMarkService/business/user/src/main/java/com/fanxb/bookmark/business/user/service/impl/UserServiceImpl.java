@@ -16,6 +16,7 @@ import com.fanxb.bookmark.common.dao.RoleDao;
 import com.fanxb.bookmark.common.entity.MailInfo;
 import com.fanxb.bookmark.common.entity.po.User;
 import com.fanxb.bookmark.common.exception.FormDataException;
+import com.fanxb.bookmark.common.service.PermissionService;
 import com.fanxb.bookmark.common.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,13 +56,16 @@ public class UserServiceImpl implements UserService {
     private final StringRedisTemplate redisTemplate;
     private final BookmarkApi bookmarkApi;
     private final RoleDao roleDao;
+    private final PermissionService permissionService;
 
     @Autowired
-    public UserServiceImpl(UserDao userDao, StringRedisTemplate redisTemplate, BookmarkApi bookmarkApi, RoleDao roleDao) {
+    public UserServiceImpl(UserDao userDao, StringRedisTemplate redisTemplate, BookmarkApi bookmarkApi, RoleDao roleDao
+            , PermissionService permissionService) {
         this.userDao = userDao;
         this.redisTemplate = redisTemplate;
         this.bookmarkApi = bookmarkApi;
         this.roleDao = roleDao;
+        this.permissionService = permissionService;
     }
 
     /**
@@ -178,7 +182,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Description: 根据userId获取用户信息
+     * Description: 根据userId获取用户信息，附带该用户已展开的资源code列表
      *
      * @param userId userId
      * @return com.fanxb.bookmark.common.entity.po.User
@@ -188,6 +192,8 @@ public class UserServiceImpl implements UserService {
     public User getUserInfo(int userId) {
         User user = userDao.selectByUserIdOrGithubId(userId, null);
         user.setNoPassword(StrUtil.isEmpty(user.getPassword()));
+        //资源已由服务端展开，超级管理员为全量资源
+        user.setResources(new ArrayList<>(permissionService.resolveResourceCodes(userId)));
         return user;
     }
 
