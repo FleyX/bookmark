@@ -42,8 +42,9 @@ public class UserStateServiceImpl implements UserStateService {
             return false;
         }
         Long pwdResetTime = state.getPwdResetTime();
-        //无 iat 的旧 token 按签发时间 0 处理，重置过密码即失效
-        return pwdResetTime == null || (jwtIssuedAt != null && jwtIssuedAt.getTime() >= pwdResetTime);
+        //无 iat 的旧 token 按签发时间 0 处理，重置过密码即失效；
+        //iat 为秒级精度，所在秒区间完全早于重置时刻才判失效，避免同秒签发的新 token 被误杀
+        return pwdResetTime == null || (jwtIssuedAt != null && (jwtIssuedAt.getTime() / 1000 + 1) * 1000 > pwdResetTime);
     }
 
     @Override

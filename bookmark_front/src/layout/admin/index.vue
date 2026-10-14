@@ -11,7 +11,7 @@
 import Side from "@/layout/admin/Side.vue";
 
 export default {
-  name: "adminLayout",
+  name: "AdminLayout",
   components: { Side },
 };
 </script>

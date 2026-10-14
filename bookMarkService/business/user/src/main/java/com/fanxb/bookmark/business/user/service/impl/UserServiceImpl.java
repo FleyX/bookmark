@@ -117,13 +117,7 @@ public class UserServiceImpl implements UserService {
         user.setLastLoginTime(System.currentTimeMillis());
         user.setVersion(0);
         userDao.addOne(user);
-        //首个注册用户绑定超级管理员角色
-        if (userDao.selectCount(null) == 1) {
-            Integer roleId = roleDao.selectRoleIdByCode(CommonConstant.SUPER_ADMIN_ROLE_CODE);
-            if (roleId != null) {
-                roleDao.insertUserRole(user.getUserId(), roleId, System.currentTimeMillis());
-            }
-        }
+        this.bindSuperAdminIfAbsent(user.getUserId());
         searchEngineService.newUserInit(user.getUserId());
         Map<String, String> data = new HashMap<>(1);
         data.put("userId", String.valueOf(user.getUserId()));
@@ -238,6 +232,15 @@ public class UserServiceImpl implements UserService {
         String key = RedisConstant.getPasswordCheckKey(userId, actionId);
         RedisUtil.set(key, "1", 5 * 60 * 1000);
         return actionId;
+    }
+
+    @Override
+    public void bindSuperAdminIfAbsent(int userId) {
+        //行锁序列化并发注册，保证全局只有一个用户通过该路径绑上超管
+        Integer roleId = roleDao.selectRoleIdByCodeForUpdate(CommonConstant.SUPER_ADMIN_ROLE_CODE);
+        if (roleId != null && roleDao.countUserByRoleId(roleId) == 0) {
+            roleDao.insertUserRole(userId, roleId, System.currentTimeMillis());
+        }
     }
 
     @Override

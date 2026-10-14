@@ -10,6 +10,7 @@ import com.fanxb.bookmark.business.user.vo.OauthBody;
 import com.fanxb.bookmark.common.constant.CommonConstant;
 import com.fanxb.bookmark.common.entity.po.User;
 import com.fanxb.bookmark.common.exception.CustomException;
+import com.fanxb.bookmark.common.exception.FormDataException;
 import com.fanxb.bookmark.common.util.HttpUtil;
 import com.fanxb.bookmark.common.util.JwtUtil;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -82,6 +83,9 @@ public class OauthServiceImpl implements OauthService {
             throw new CustomException("不支持的登陆方式" + body.getType());
         }
         User newest = dealOauth(current, other);
+        if (newest.getStatus() != null && newest.getStatus() == 0) {
+            throw new FormDataException("账号已被禁用，请联系管理员");
+        }
         return JwtUtil.encode(Collections.singletonMap("userId", String.valueOf(newest.getUserId())), CommonConstant.jwtSecret
                 , body.isRememberMe() ? LONG_EXPIRE_TIME : SHORT_EXPIRE_TIME);
     }
@@ -109,6 +113,7 @@ public class OauthServiceImpl implements OauthService {
             other.setLastLoginTime(System.currentTimeMillis());
             other.setVersion(0);
             userDao.addOne(other);
+            userService.bindSuperAdminIfAbsent(other.getUserId());
             searchEngineService.newUserInit(other.getUserId());
             return other;
         } else {

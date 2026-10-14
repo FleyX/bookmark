@@ -1,6 +1,6 @@
 # 权限注册表：权限、资源、公共 URL 的唯一定义来源，启动时 fail-fast 校验
 # 资源 code 格式：METHOD:路径（后端接口，Ant 风格匹配）或 VIEW:路径（前端页面）
-# public：免登录接口；login：登录即可的显式声明（语义锚点）；permissions：权限树，角色绑定权限 code
+# public：免登录接口；permissions：权限树，角色绑定权限 code；未登记的接口默认登录即可
 public:
   - "PUT:/user"
   - "POST:/user/login"
@@ -10,7 +10,6 @@ public:
   - "GET:/baseInfo/verifyEmail"
   - "GET:/common/config/global"
   - "GET:/home/pin"
-login: []
 permissions:
   - code: system:user
     name: 用户管理

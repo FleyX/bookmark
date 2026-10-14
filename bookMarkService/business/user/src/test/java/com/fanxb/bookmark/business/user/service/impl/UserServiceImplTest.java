@@ -82,8 +82,8 @@ class UserServiceImplTest {
         RegisterBody body = buildBody();
         when(userDao.selectByUsernameOrEmail("user1", "user1@test.com")).thenReturn(null);
         mockUserInsert();
-        when(userDao.selectCount(null)).thenReturn(1L);
-        when(roleDao.selectRoleIdByCode("super_admin")).thenReturn(9);
+        when(roleDao.selectRoleIdByCodeForUpdate("super_admin")).thenReturn(9);
+        when(roleDao.countUserByRoleId(9)).thenReturn(0);
 
         try (MockedStatic<JwtUtil> jwtUtil = mockStatic(JwtUtil.class)) {
             jwtUtil.when(() -> JwtUtil.encode(anyMap(), anyString(), anyLong())).thenReturn("token");
@@ -97,13 +97,13 @@ class UserServiceImplTest {
         RegisterBody body = buildBody();
         when(userDao.selectByUsernameOrEmail("user1", "user1@test.com")).thenReturn(null);
         mockUserInsert();
-        when(userDao.selectCount(null)).thenReturn(2L);
+        when(roleDao.selectRoleIdByCodeForUpdate("super_admin")).thenReturn(9);
+        when(roleDao.countUserByRoleId(9)).thenReturn(1);
 
         try (MockedStatic<JwtUtil> jwtUtil = mockStatic(JwtUtil.class)) {
             jwtUtil.when(() -> JwtUtil.encode(anyMap(), anyString(), anyLong())).thenReturn("token");
             assertEquals("token", userService.register(body));
         }
-        verify(roleDao, never()).selectRoleIdByCode(anyString());
         verify(roleDao, never()).insertUserRole(anyInt(), anyInt(), anyLong());
     }
 

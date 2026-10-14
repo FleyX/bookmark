@@ -86,6 +86,16 @@ class UserStateServiceImplTest {
     }
 
     @Test
+    void testNewJwtSameSecondAfterPasswordResetPass() {
+        when(redisTemplate.hasKey(DISABLED_KEY)).thenReturn(false);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        //重置发生于2500ms，新token签发于同秒2999ms，iat秒级截断为2000，不得误判失效
+        when(valueOperations.get(PWD_RESET_KEY)).thenReturn("2500");
+
+        assertTrue(userStateService.checkUserState(USER_ID, new Date(2000)));
+    }
+
+    @Test
     void testMissingIatAfterPasswordResetReturnFalse() {
         when(redisTemplate.hasKey(DISABLED_KEY)).thenReturn(false);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);

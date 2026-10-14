@@ -78,6 +78,7 @@
         select roleId, code, name
         from role
         where status = 1
+          and code != 'super_admin'
         order by roleId
     </select>
 
@@ -136,5 +137,17 @@
         insert into role_permission (roleId, permissionCode, createTime)
         value (#{roleId}, #{permissionCode}, #{createTime})
     </insert>
+
+    <select id="selectRoleIdByCodeForUpdate" resultType="java.lang.Integer">
+        select roleId
+        from role
+        where code = #{code}
+        for update
+    </select>
+
+    <select id="selectDistinctPermissionCodes" resultType="java.lang.String">
+        select distinct permissionCode
+        from role_permission
+    </select>
 
 </mapper>

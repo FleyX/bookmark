@@ -36,6 +36,14 @@ public interface UserService {
     String createNewUsername();
 
     /**
+     * 若系统尚无超级管理员绑定，则将指定用户绑定为超级管理员（注册/首次OAuth登录时调用，须在事务内）
+     *
+     * @param userId 用户id
+     * @author fanxb
+     */
+    void bindSuperAdminIfAbsent(int userId);
+
+    /**
      * 获取当前用户的version
      *
      * @param userId userId

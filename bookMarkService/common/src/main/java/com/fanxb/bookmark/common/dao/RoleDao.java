@@ -190,4 +190,21 @@ public interface RoleDao extends BaseMapper<RolePo> {
      */
     void insertRolePermission(@Param("roleId") int roleId, @Param("permissionCode") String permissionCode,
                               @Param("createTime") long createTime);
+
+    /**
+     * Description: 根据角色code查询角色id并加行锁（须在事务内调用），用于首个用户绑超管的并发安全
+     *
+     * @param code 角色code
+     * @return java.lang.Integer
+     * @author fanxb
+     */
+    Integer selectRoleIdByCodeForUpdate(@Param("code") String code);
+
+    /**
+     * Description: 查询全部已绑定的权限code（去重），用于启动时悬空绑定扫描
+     *
+     * @return java.util.List<java.lang.String>
+     * @author fanxb
+     */
+    List<String> selectDistinctPermissionCodes();
 }

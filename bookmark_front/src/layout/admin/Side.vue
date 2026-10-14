@@ -30,7 +30,7 @@ const MENUS = [
 ];
 
 export default {
-  name: "adminSide",
+  name: "AdminSide",
   data() {
     return {
       menus: MENUS,

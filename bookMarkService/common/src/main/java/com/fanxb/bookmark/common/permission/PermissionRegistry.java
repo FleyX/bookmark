@@ -39,8 +39,6 @@ public class PermissionRegistry {
 
     private final List<String> publicPatterns;
 
-    private final List<String> loginPatterns;
-
     private final Map<String, Permission> permissionMap;
 
     private final Set<String> allResourceCodes;
@@ -55,7 +53,6 @@ public class PermissionRegistry {
             throw new IllegalStateException("权限注册表文件内容为空：" + CONFIG_FILE);
         }
         this.publicPatterns = List.copyOf(asStringList(root.get("public"), "public"));
-        this.loginPatterns = List.copyOf(asStringList(root.get("login"), "login"));
         List<Permission> permissions = parsePermissions(root.get("permissions"));
         validate(permissions);
         Map<String, Permission> map = new LinkedHashMap<>();
@@ -77,16 +74,6 @@ public class PermissionRegistry {
      */
     public List<String> getPublicPatterns() {
         return publicPatterns;
-    }
-
-    /**
-     * 登录即可的 URL 匹配模式列表
-     *
-     * @return java.util.List<java.lang.String>
-     * @author fanxb
-     */
-    public List<String> getLoginPatterns() {
-        return loginPatterns;
     }
 
     /**

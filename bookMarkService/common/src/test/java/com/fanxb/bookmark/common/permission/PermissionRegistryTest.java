@@ -22,7 +22,6 @@ class PermissionRegistryTest {
             public:
               - "PUT:/user"
               - "GET:/home/pin"
-            login: []
             permissions:
               - code: system:user
                 name: 用户管理
@@ -41,7 +40,6 @@ class PermissionRegistryTest {
         PermissionRegistry registry = new PermissionRegistry(NORMAL_CONFIG);
         assertEquals(2, registry.getPublicPatterns().size());
         assertTrue(registry.getPublicPatterns().contains("PUT:/user"));
-        assertTrue(registry.getLoginPatterns().isEmpty());
         assertTrue(registry.permissionExists("system:user"));
         assertFalse(registry.permissionExists("not:exist"));
         assertEquals(3, registry.getAllResourceCodes().size());

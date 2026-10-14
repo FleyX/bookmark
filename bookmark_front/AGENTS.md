@@ -60,7 +60,7 @@ await HttpUtil.post("/common/file", null, formData, true);      // 表单上传 
 
 ## 路由约定
 
-`router/index.js` 单文件，`createWebHistory()`，**全部懒加载** `component: () => import("@/views/xxx/index.vue")`；按 `home / manage(children) / public(children)` 分组；`/:pathMatch(.*)*` 重定向 `/public/404`。
+`router/index.js` 单文件，`createWebHistory()`，**全部懒加载** `component: () => import("@/views/xxx/index.vue")`；按 `home / manage(children) / admin(children) / public(children)` 分组；`/:pathMatch(.*)*` 重定向 `/public/404`。`/admin` 子路由通过 `meta.resource` 声明所需 `VIEW:` 资源，由守卫做页面级权限拦截，无权限跳 `/public/403`。
 
 **路径清单是外部契约，不可随意变更**：`/noHead/addBookmark`（插件 iframe 嵌入，postMessage 通信）与 `/manage/sso/auth`（插件登录后回传 token）被浏览器插件直接依赖，其余路径变更也要同步检查插件与后端。
 
