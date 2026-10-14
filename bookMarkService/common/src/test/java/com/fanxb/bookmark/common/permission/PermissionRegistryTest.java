@@ -2,7 +2,9 @@ package com.fanxb.bookmark.common.permission;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -45,6 +47,18 @@ class PermissionRegistryTest {
         assertEquals(3, registry.getAllResourceCodes().size());
         assertTrue(registry.isProtected("GET:/user/manage/page"));
         assertFalse(registry.isProtected("GET:/user/currentUserInfo"));
+    }
+
+    @Test
+    void testGetPermissionTree() {
+        PermissionRegistry registry = new PermissionRegistry(NORMAL_CONFIG);
+        List<Permission> tree = registry.getPermissionTree();
+        assertEquals(2, tree.size());
+        //保持注册表声明顺序，且含资源
+        assertEquals("system:user", tree.get(0).getCode());
+        assertEquals("system:user:edit", tree.get(1).getCode());
+        assertEquals(Set.of("VIEW:/admin/user", "GET:/user/manage/**"),
+                tree.get(0).getResources().stream().map(PermissionResource::getCode).collect(Collectors.toSet()));
     }
 
     @Test

@@ -51,4 +51,126 @@ public interface RoleDao extends BaseMapper<RolePo> {
      * @author fanxb
      */
     void insertUserRole(@Param("userId") int userId, @Param("roleId") int roleId, @Param("createTime") long createTime);
+
+    /**
+     * Description: 根据角色id查询角色
+     *
+     * @param roleId 角色id
+     * @return com.fanxb.bookmark.common.entity.po.RolePo
+     * @author fanxb
+     */
+    RolePo selectRoleById(@Param("roleId") int roleId);
+
+    /**
+     * Description: 分页查询角色
+     *
+     * @param keyword 关键字，模糊匹配 code/name，可为空
+     * @param start   起始行
+     * @param size    页大小
+     * @return java.util.List<com.fanxb.bookmark.common.entity.po.RolePo>
+     * @author fanxb
+     */
+    List<RolePo> selectRolePage(@Param("keyword") String keyword, @Param("start") int start, @Param("size") int size);
+
+    /**
+     * Description: 统计角色数量
+     *
+     * @param keyword 关键字，模糊匹配 code/name，可为空
+     * @return long
+     * @author fanxb
+     */
+    long countRole(@Param("keyword") String keyword);
+
+    /**
+     * Description: 查询启用状态角色精简列表
+     *
+     * @return java.util.List<com.fanxb.bookmark.common.entity.po.RolePo>
+     * @author fanxb
+     */
+    List<RolePo> selectEnabledRoles();
+
+    /**
+     * Description: 统计角色名称使用次数
+     *
+     * @param name          角色名称
+     * @param excludeRoleId 排除的角色id，新增时传0
+     * @return int
+     * @author fanxb
+     */
+    int countRoleByName(@Param("name") String name, @Param("excludeRoleId") int excludeRoleId);
+
+    /**
+     * Description: 新增角色
+     *
+     * @param role 角色
+     * @author fanxb
+     */
+    void insertRole(RolePo role);
+
+    /**
+     * Description: 更新角色名称与描述
+     *
+     * @param roleId      角色id
+     * @param name        角色名称
+     * @param description 描述
+     * @param updateTime  更新时间
+     * @author fanxb
+     */
+    void updateRole(@Param("roleId") int roleId, @Param("name") String name, @Param("description") String description,
+                    @Param("updateTime") long updateTime);
+
+    /**
+     * Description: 更新角色状态
+     *
+     * @param roleId     角色id
+     * @param status     1启用 0禁用
+     * @param updateTime 更新时间
+     * @author fanxb
+     */
+    void updateRoleStatus(@Param("roleId") int roleId, @Param("status") int status, @Param("updateTime") long updateTime);
+
+    /**
+     * Description: 删除角色
+     *
+     * @param roleId 角色id
+     * @author fanxb
+     */
+    void deleteRole(@Param("roleId") int roleId);
+
+    /**
+     * Description: 查询角色绑定的权限code
+     *
+     * @param roleId 角色id
+     * @return java.util.List<java.lang.String>
+     * @author fanxb
+     */
+    List<String> selectPermissionCodesByRoleId(@Param("roleId") int roleId);
+
+    /**
+     * Description: 统计绑定该角色的用户数量
+     *
+     * @param roleId 角色id
+     * @return int
+     * @author fanxb
+     */
+    int countUserByRoleId(@Param("roleId") int roleId);
+
+    /**
+     * Description: 删除角色的全部权限绑定
+     *
+     * @param roleId 角色id
+     * @author fanxb
+     */
+    void deleteRolePermissions(@Param("roleId") int roleId);
+
+    /**
+     * Description: 新增角色权限绑定
+     *
+     * @param roleId         角色id
+     * @param permissionCode 权限code
+     * @param createTime     创建时间
+     * @author fanxb
+     */
+    void insertRolePermission(@Param("roleId") int roleId, @Param("permissionCode") String permissionCode,
+                              @Param("createTime") long createTime);
 }

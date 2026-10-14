@@ -30,4 +30,97 @@
         value (#{userId}, #{roleId}, #{createTime})
     </insert>
 
+    <select id="selectRoleById" resultType="com.fanxb.bookmark.common.entity.po.RolePo">
+        select roleId, code, name, description, status, buildIn, createTime, updateTime
+        from role
+        where roleId = #{roleId}
+    </select>
+
+    <sql id="keywordCondition">
+        <if test="keyword != null and keyword != ''">
+            and (code like concat('%', #{keyword}, '%') or name like concat('%', #{keyword}, '%'))
+        </if>
+    </sql>
+
+    <select id="selectRolePage" resultType="com.fanxb.bookmark.common.entity.po.RolePo">
+        select roleId, code, name, description, status, buildIn, createTime, updateTime
+        from role
+        <where>
+            <include refid="keywordCondition"/>
+        </where>
+        order by roleId
+        limit #{start}, #{size}
+    </select>
+
+    <select id="countRole" resultType="long">
+        select count(1)
+        from role
+        <where>
+            <include refid="keywordCondition"/>
+        </where>
+    </select>
+
+    <select id="selectEnabledRoles" resultType="com.fanxb.bookmark.common.entity.po.RolePo">
+        select roleId, code, name
+        from role
+        where status = 1
+        order by roleId
+    </select>
+
+    <select id="countRoleByName" resultType="int">
+        select count(1)
+        from role
+        where name = #{name}
+          and roleId != #{excludeRoleId}
+    </select>
+
+    <insert id="insertRole" useGeneratedKeys="true" keyColumn="roleId" keyProperty="roleId">
+        insert into role (code, name, description, status, buildIn, createTime, updateTime)
+        value (#{code}, #{name}, #{description}, #{status}, #{buildIn}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="updateRole">
+        update role
+        set name        = #{name},
+            description = #{description},
+            updateTime  = #{updateTime}
+        where roleId = #{roleId}
+    </update>
+
+    <update id="updateRoleStatus">
+        update role
+        set status     = #{status},
+            updateTime = #{updateTime}
+        where roleId = #{roleId}
+    </update>
+
+    <delete id="deleteRole">
+        delete
+        from role
+        where roleId = #{roleId}
+    </delete>
+
+    <select id="selectPermissionCodesByRoleId" resultType="java.lang.String">
+        select permissionCode
+        from role_permission
+        where roleId = #{roleId}
+    </select>
+
+    <select id="countUserByRoleId" resultType="int">
+        select count(1)
+        from user_role
+        where roleId = #{roleId}
+    </select>
+
+    <delete id="deleteRolePermissions">
+        delete
+        from role_permission
+        where roleId = #{roleId}
+    </delete>
+
+    <insert id="insertRolePermission">
+        insert into role_permission (roleId, permissionCode, createTime)
+        value (#{roleId}, #{permissionCode}, #{createTime})
+    </insert>
+
 </mapper>

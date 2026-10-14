@@ -17,11 +17,19 @@ permissions:
     resources:
       - { code: "VIEW:/admin/user", name: "用户管理页面" }
       - { code: "GET:/user/manage/page", name: "用户分页列表" }
+      - { code: "GET:/role/manage/options", name: "角色下拉选项" }
   - code: system:role
     name: 角色管理
     resources:
       - { code: "VIEW:/admin/role", name: "角色管理页面" }
       - { code: "GET:/role/manage/page", name: "角色分页列表" }
+      - { code: "GET:/role/manage/detail", name: "角色详情" }
+      - { code: "PUT:/role/manage", name: "新建角色" }
+      - { code: "POST:/role/manage", name: "编辑角色" }
+      - { code: "POST:/role/manage/status", name: "启用/禁用角色" }
+      - { code: "POST:/role/manage/permissions", name: "绑定角色权限" }
+      - { code: "DELETE:/role/manage/*", name: "删除角色" }
+      - { code: "GET:/role/manage/permissionTree", name: "权限树查询" }
   - code: ops:bookmark
     name: 书签运维
     resources:

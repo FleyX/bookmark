@@ -143,6 +143,16 @@ public class PermissionRegistry {
         return permissionMap.containsKey(code);
     }
 
+    /**
+     * 权限树，含全部权限及其资源，保持注册表声明顺序，供前端渲染勾选树
+     *
+     * @return java.util.List<com.fanxb.bookmark.common.permission.Permission>
+     * @author fanxb
+     */
+    public List<Permission> getPermissionTree() {
+        return List.copyOf(permissionMap.values());
+    }
+
     private static String loadConfigText() {
         try (InputStream inputStream = new ClassPathResource(CONFIG_FILE).getInputStream()) {
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
