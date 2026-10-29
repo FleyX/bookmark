@@ -1,43 +1,80 @@
 <template>
   <div class="main">
-    <div class="title">角色管理</div>
+    <header class="pageHeader">
+      <h1 class="title">角色管理</h1>
+      <p class="desc">维护角色及其权限，内置角色不可修改。</p>
+    </header>
+
     <div class="toolbar">
       <a-input-search v-model:value="keyword" class="searchInput" placeholder="搜索角色编码/名称" allow-clear @search="search" />
       <a-button type="primary" @click="openAdd">新建角色</a-button>
     </div>
-    <a-table :columns="columns" :data-source="list" :loading="loading" :pagination="pagination" row-key="roleId" @change="tableChange">
-      <template #bodyCell="{ column, record }">
-        <template v-if="column.dataIndex === 'name'">
-          {{ record.name }}
-          <a-tag v-if="record.buildIn === 1" class="buildInTag" color="blue">内置</a-tag>
-        </template>
-        <template v-else-if="column.dataIndex === 'status'">
-          <a-tag :color="record.status === 1 ? 'green' : 'red'">{{ record.status === 1 ? "启用" : "禁用" }}</a-tag>
-        </template>
-        <template v-else-if="column.dataIndex === 'operation'">
-          <span v-if="record.buildIn === 1" class="buildInTip">内置角色不可操作</span>
-          <template v-else>
-            <a @click="openEdit(record)">编辑</a>
-            <a-divider type="vertical" />
-            <a @click="openPermission(record)">权限</a>
-            <a-divider type="vertical" />
-            <a @click="toggleStatus(record)">{{ record.status === 1 ? "禁用" : "启用" }}</a>
-            <a-divider type="vertical" />
-            <a class="dangerText" @click="deleteRole(record)">删除</a>
+
+    <div class="tableWrap">
+      <a-table
+        :columns="columns"
+        :data-source="list"
+        :loading="loading"
+        :pagination="pagination"
+        :scroll="{ x: 900 }"
+        row-key="roleId"
+        @change="tableChange">
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'name'">
+            {{ record.name }}
+            <a-tag v-if="record.buildIn === 1" class="statusTag builtIn">内置</a-tag>
+          </template>
+          <template v-else-if="column.dataIndex === 'status'">
+            <a-tag class="statusTag" :class="record.status === 1 ? 'enabled' : 'disabled'">{{ record.status === 1 ? "启用" : "禁用" }}</a-tag>
+          </template>
+          <template v-else-if="column.dataIndex === 'operation'">
+            <span v-if="record.buildIn === 1" class="buildInTip">
+              <LockOutlined class="lockIcon" />
+              内置角色不可修改
+            </span>
+            <template v-else>
+              <a class="actionLink" @click="openEdit(record)">编辑</a>
+              <a-divider type="vertical" />
+              <a class="actionLink" @click="openPermission(record)">权限</a>
+              <a-divider type="vertical" />
+              <a-dropdown :trigger="['click']">
+                <a class="actionLink moreLink">
+                  更多
+                  <DownOutlined class="moreIcon" />
+                </a>
+                <template #overlay>
+                  <a-menu @click="handleMore($event.key, record)">
+                    <a-menu-item key="toggle">{{ record.status === 1 ? "禁用" : "启用" }}</a-menu-item>
+                    <a-menu-item key="delete" danger>删除</a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </template>
           </template>
         </template>
-      </template>
-    </a-table>
+        <template #emptyText>
+          <a-empty class="emptyState" :description="emptyText" />
+        </template>
+      </a-table>
+    </div>
 
-    <a-modal v-model:open="editVisible" :title="editForm.roleId ? '编辑角色' : '新建角色'" :confirm-loading="editSaving" @ok="saveRole">
-      <a-form :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="角色编码" required>
+    <a-modal
+      v-model:open="editVisible"
+      :title="editTitle"
+      :width="520"
+      :confirm-loading="editSaving"
+      ok-text="保存"
+      cancel-text="取消"
+      destroy-on-close
+      @ok="saveRole">
+      <a-form ref="editFormRef" class="dialogForm" :model="editForm" :rules="editRules" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
+        <a-form-item label="角色编码" name="code" :required="!editForm.roleId">
           <a-input v-model:value="editForm.code" :disabled="!!editForm.roleId" placeholder="小写字母、数字、下划线、冒号" />
         </a-form-item>
-        <a-form-item label="角色名称" required>
+        <a-form-item label="角色名称" name="name">
           <a-input v-model:value="editForm.name" placeholder="请输入角色名称" />
         </a-form-item>
-        <a-form-item label="描述">
+        <a-form-item label="描述" name="description">
           <a-textarea v-model:value="editForm.description" :rows="3" placeholder="请输入角色描述" />
         </a-form-item>
       </a-form>
@@ -46,24 +83,38 @@
     <a-modal
       v-model:open="permissionVisible"
       :title="`权限配置 - ${currentRole.name || ''}`"
-      width="40%"
+      :width="560"
       :confirm-loading="permissionSaving"
+      ok-text="保存"
+      cancel-text="取消"
       @ok="savePermission">
       <a-spin :spinning="permissionLoading">
-        <a-tree v-model:checkedKeys="checkedKeys" :expanded-keys="expandedKeys" checkable :tree-data="permissionTreeData" @expand="onExpand" />
+        <div class="permissionTree">
+          <a-tree v-model:checkedKeys="checkedKeys" :expanded-keys="expandedKeys" checkable :tree-data="permissionTreeData" @expand="onExpand" />
+        </div>
       </a-spin>
     </a-modal>
   </div>
 </template>
 
 <script>
+import { DownOutlined, LockOutlined } from "@ant-design/icons-vue";
 import HttpUtil from "@/util/HttpUtil";
 
 export default {
   name: "AdminRole",
+  components: { DownOutlined, LockOutlined },
   data() {
+    const validateCode = (rule, value, callback) => {
+      if (!this.editForm.roleId && !(value && value.trim())) {
+        callback(new Error("请输入角色编码"));
+      } else {
+        callback();
+      }
+    };
     return {
       keyword: "",
+      searchedKeyword: "",
       list: [],
       loading: false,
       pagination: {
@@ -74,15 +125,19 @@ export default {
         showTotal: (total) => `共 ${total} 条`,
       },
       columns: [
-        { title: "角色编码", dataIndex: "code", width: "20%" },
-        { title: "角色名称", dataIndex: "name", width: "20%" },
+        { title: "角色编码", dataIndex: "code", width: 180 },
+        { title: "角色名称", dataIndex: "name", width: 180 },
         { title: "描述", dataIndex: "description" },
-        { title: "状态", dataIndex: "status", width: "10%" },
-        { title: "操作", dataIndex: "operation", width: "26%" },
+        { title: "状态", dataIndex: "status", width: 90 },
+        { title: "操作", dataIndex: "operation", width: 180 },
       ],
       editVisible: false,
       editSaving: false,
       editForm: { roleId: null, code: "", name: "", description: "" },
+      editRules: {
+        code: [{ validator: validateCode, trigger: "blur" }],
+        name: [{ required: true, whitespace: true, message: "请输入角色名称", trigger: "blur" }],
+      },
       permissionVisible: false,
       permissionLoading: false,
       permissionSaving: false,
@@ -95,6 +150,14 @@ export default {
       //展开的树节点，权限树数据异步到达，用受控展开保证叶子层资源可见
       expandedKeys: [],
     };
+  },
+  computed: {
+    emptyText() {
+      return this.searchedKeyword ? "未找到匹配结果，请调整关键词" : "暂无角色数据";
+    },
+    editTitle() {
+      return this.editForm.roleId ? `编辑角色 - ${this.editForm.code}` : "新建角色";
+    },
   },
   created() {
     this.loadList();
@@ -117,6 +180,7 @@ export default {
       }
     },
     search() {
+      this.searchedKeyword = this.keyword.trim();
       this.pagination.current = 1;
       this.loadList();
     },
@@ -124,6 +188,13 @@ export default {
       this.pagination.current = pager.current;
       this.pagination.pageSize = pager.pageSize;
       this.loadList();
+    },
+    handleMore(key, record) {
+      if (key === "toggle") {
+        this.toggleStatus(record);
+      } else if (key === "delete") {
+        this.deleteRole(record);
+      }
     },
     openAdd() {
       this.editForm = { roleId: null, code: "", name: "", description: "" };
@@ -134,16 +205,13 @@ export default {
       this.editVisible = true;
     },
     async saveRole() {
+      try {
+        await this.$refs.editFormRef.validate();
+      } catch {
+        return;
+      }
       const code = this.editForm.code.trim();
       const name = this.editForm.name.trim();
-      if (!this.editForm.roleId && !code) {
-        this.$message.error("角色编码不能为空");
-        return;
-      }
-      if (!name) {
-        this.$message.error("角色名称不能为空");
-        return;
-      }
       this.editSaving = true;
       try {
         if (this.editForm.roleId) {
@@ -264,27 +332,145 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@titleColor: #1f2937;
+@mutedColor: rgba(0, 0, 0, 0.45);
+@primaryColor: #1677ff;
+@borderColor: #eef1f6;
+@headerBgColor: #fafbfc;
+@hoverBgColor: #f8fafc;
+
 .main {
-  .title {
-    font-size: 0.2rem;
-    margin-bottom: 0.2rem;
+  width: 100%;
+
+  .pageHeader {
+    margin-bottom: 0.16rem;
+
+    .title {
+      margin: 0;
+      font-size: 0.2rem;
+      font-weight: 600;
+      line-height: 1.35;
+      color: @titleColor;
+    }
+
+    .desc {
+      margin: 0.04rem 0 0;
+      font-size: 0.13rem;
+      color: @mutedColor;
+    }
   }
+
   .toolbar {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
+    gap: 0.08rem;
     margin-bottom: 0.16rem;
+
+    .searchInput {
+      width: 3rem;
+      max-width: 100%;
+    }
   }
-  .searchInput {
-    width: 3rem;
+
+  .tableWrap {
+    min-height: 4.8rem;
   }
-  .buildInTag {
-    margin-left: 0.08rem;
+
+  :deep(.ant-table) {
+    font-size: 0.13rem;
   }
+
+  :deep(.ant-table-thead > tr > th) {
+    padding: 0.1rem 0.12rem;
+    font-weight: 600;
+    color: #4b5563;
+    background-color: @headerBgColor;
+    border-bottom: 1px solid @borderColor;
+  }
+
+  :deep(.ant-table-tbody > tr > td) {
+    padding: 0.1rem 0.12rem;
+    border-bottom: 1px solid @borderColor;
+  }
+
+  :deep(.ant-table-tbody > tr:last-child > td) {
+    border-bottom: none;
+  }
+
+  :deep(.ant-table-tbody > tr.ant-table-row:hover > td) {
+    background-color: @hoverBgColor;
+  }
+
+  .statusTag {
+    margin-inline-end: 0;
+    padding: 0 0.08rem;
+    font-size: 0.12rem;
+    line-height: 0.2rem;
+    border-radius: 0.04rem;
+
+    &.enabled {
+      color: #3f7d3a;
+      background-color: #f0f9eb;
+      border-color: #d7ecd0;
+    }
+
+    &.disabled {
+      color: #c0392b;
+      background-color: #fdf2f2;
+      border-color: #f8d7d5;
+    }
+
+    &.builtIn {
+      margin-left: 0.06rem;
+      color: @primaryColor;
+      background-color: #eff6ff;
+      border-color: #d6e6ff;
+    }
+  }
+
   .buildInTip {
-    color: rgba(0, 0, 0, 0.35);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.04rem;
+    font-size: 0.12rem;
+    color: @mutedColor;
   }
-  .dangerText {
-    color: #ff4d4f;
+
+  .lockIcon {
+    font-size: 0.12rem;
+  }
+
+  .actionLink {
+    color: @primaryColor;
+  }
+
+  .moreLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.02rem;
+    color: @primaryColor;
+  }
+
+  .moreIcon {
+    font-size: 0.1rem;
+  }
+
+  .emptyState {
+    margin: 0.32rem 0;
+  }
+}
+
+// 弹窗内容会 teleport 到 body，相关样式不能嵌在 .main 内
+.permissionTree {
+  max-height: 58vh;
+  overflow: auto;
+}
+
+.dialogForm {
+  :deep(.ant-form-item) {
+    margin-bottom: 0.16rem;
   }
 }
 </style>

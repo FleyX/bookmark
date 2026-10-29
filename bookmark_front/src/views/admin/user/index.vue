@@ -1,48 +1,74 @@
 <template>
   <div class="main">
-    <div class="title">用户管理</div>
+    <header class="pageHeader">
+      <h1 class="title">用户管理</h1>
+      <p class="desc">管理平台用户，查看详情、分配角色或重置密码。</p>
+    </header>
+
     <div class="toolbar">
       <a-input-search v-model:value="keyword" class="searchInput" placeholder="搜索用户名/邮箱" allow-clear @search="search" />
     </div>
-    <a-table :columns="columns" :data-source="list" :loading="loading" :pagination="pagination" row-key="userId" @change="tableChange">
-      <template #bodyCell="{ column, record }">
-        <template v-if="column.dataIndex === 'icon'">
-          <img class="userIcon" :src="record.icon" />
-        </template>
-        <template v-else-if="column.dataIndex === 'status'">
-          <a-tag :color="record.status === 1 ? 'green' : 'red'">{{ record.status === 1 ? "正常" : "禁用" }}</a-tag>
-        </template>
-        <template v-else-if="column.dataIndex === 'createTime'">{{ formatTime(record.createTime) }}</template>
-        <template v-else-if="column.dataIndex === 'lastLoginTime'">{{ formatTime(record.lastLoginTime) }}</template>
-        <template v-else-if="column.dataIndex === 'operation'">
-          <a @click="openDetail(record)">详情</a>
-          <a-divider type="vertical" />
-          <a @click="toggleStatus(record)">{{ record.status === 1 ? "禁用" : "启用" }}</a>
-          <a-divider type="vertical" />
-          <a @click="openRole(record)">分配角色</a>
-          <a-divider type="vertical" />
-          <a @click="openResetPassword(record)">重置密码</a>
-        </template>
-      </template>
-    </a-table>
 
-    <a-drawer v-model:open="detailVisible" title="用户详情" width="4.5rem">
+    <div class="tableWrap">
+      <a-table
+        :columns="columns"
+        :data-source="list"
+        :loading="loading"
+        :pagination="pagination"
+        :scroll="{ x: 1042 }"
+        row-key="userId"
+        @change="tableChange">
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'icon'">
+            <img class="userIcon" :src="record.icon" :alt="`${record.username} 的头像`" />
+          </template>
+          <template v-else-if="column.dataIndex === 'status'">
+            <a-tag class="statusTag" :class="record.status === 1 ? 'enabled' : 'disabled'">{{ record.status === 1 ? "正常" : "禁用" }}</a-tag>
+          </template>
+          <template v-else-if="column.dataIndex === 'createTime'">{{ formatTime(record.createTime) }}</template>
+          <template v-else-if="column.dataIndex === 'lastLoginTime'">{{ formatTime(record.lastLoginTime) }}</template>
+          <template v-else-if="column.dataIndex === 'operation'">
+            <a class="actionLink" @click="openDetail(record)">详情</a>
+            <a-divider type="vertical" />
+            <a class="actionLink" @click="openRole(record)">分配角色</a>
+            <a-divider type="vertical" />
+            <a-dropdown :trigger="['click']">
+              <a class="actionLink moreLink">
+                更多
+                <DownOutlined class="moreIcon" />
+              </a>
+              <template #overlay>
+                <a-menu @click="handleMore($event.key, record)">
+                  <a-menu-item key="toggle">{{ record.status === 1 ? "禁用" : "启用" }}</a-menu-item>
+                  <a-menu-item key="resetPassword" danger>重置密码</a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </template>
+        </template>
+        <template #emptyText>
+          <a-empty class="emptyState" :description="emptyText" />
+        </template>
+      </a-table>
+    </div>
+
+    <a-drawer v-model:open="detailVisible" :title="detailTitle" width="min(420px, 92vw)">
       <a-spin :spinning="detailLoading">
-        <a-descriptions :column="1" bordered>
+        <a-descriptions :column="1" bordered size="small">
           <a-descriptions-item label="头像">
-            <img class="userIcon" :src="detail.icon" />
+            <img class="userIcon" :src="detail.icon" :alt="`${detail.username || ''} 的头像`" />
           </a-descriptions-item>
           <a-descriptions-item label="用户名">{{ detail.username }}</a-descriptions-item>
           <a-descriptions-item label="邮箱">{{ detail.email || "-" }}</a-descriptions-item>
           <a-descriptions-item label="状态">
-            <a-tag :color="detail.status === 1 ? 'green' : 'red'">{{ detail.status === 1 ? "正常" : "禁用" }}</a-tag>
+            <a-tag class="statusTag" :class="detail.status === 1 ? 'enabled' : 'disabled'">{{ detail.status === 1 ? "正常" : "禁用" }}</a-tag>
           </a-descriptions-item>
           <a-descriptions-item label="书签数">{{ detail.bookmarkCount || 0 }}</a-descriptions-item>
           <a-descriptions-item label="注册时间">{{ formatTime(detail.createTime) }}</a-descriptions-item>
           <a-descriptions-item label="最近登录">{{ formatTime(detail.lastLoginTime) }}</a-descriptions-item>
           <a-descriptions-item label="角色">
             <template v-if="detail.roles && detail.roles.length">
-              <a-tag v-for="role in detail.roles" :key="role.roleId" color="blue">{{ role.name }}</a-tag>
+              <a-tag v-for="role in detail.roles" :key="role.roleId" class="roleTag">{{ role.name }}</a-tag>
             </template>
             <span v-else>-</span>
           </a-descriptions-item>
@@ -50,19 +76,40 @@
       </a-spin>
     </a-drawer>
 
-    <a-modal v-model:open="roleVisible" :title="`分配角色 - ${currentUser.username || ''}`" :confirm-loading="roleSaving" @ok="saveRoles">
+    <a-modal
+      v-model:open="roleVisible"
+      :title="`分配角色 - ${currentUser.username || ''}`"
+      :width="480"
+      :confirm-loading="roleSaving"
+      ok-text="保存"
+      cancel-text="取消"
+      @ok="saveRoles">
       <a-spin :spinning="roleLoading">
         <a-select v-model:value="selectedRoleIds" mode="multiple" class="fullWidth" placeholder="请选择角色，留空表示清空" :options="roleOptions" />
       </a-spin>
     </a-modal>
 
-    <a-modal v-model:open="passwordVisible" :title="`重置密码 - ${currentUser.username || ''}`" :confirm-loading="passwordSaving" @ok="savePassword">
+    <a-modal
+      v-model:open="passwordVisible"
+      :title="`重置密码 - ${currentUser.username || ''}`"
+      :width="480"
+      :confirm-loading="passwordSaving"
+      ok-text="重置密码"
+      cancel-text="取消"
+      destroy-on-close
+      @ok="savePassword">
       <a-alert class="passwordTip" type="warning" show-icon message="重置后该用户的已登录状态将失效" />
-      <a-form :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="新密码" required>
+      <a-form
+        ref="passwordFormRef"
+        class="dialogForm"
+        :model="passwordForm"
+        :rules="passwordRules"
+        :label-col="{ span: 5 }"
+        :wrapper-col="{ span: 18 }">
+        <a-form-item label="新密码" name="password">
           <a-input-password v-model:value="passwordForm.password" placeholder="请输入新密码" />
         </a-form-item>
-        <a-form-item label="确认密码" required>
+        <a-form-item label="确认密码" name="confirm">
           <a-input-password v-model:value="passwordForm.confirm" placeholder="请再次输入新密码" />
         </a-form-item>
       </a-form>
@@ -72,13 +119,25 @@
 
 <script>
 import dayjs from "dayjs";
+import { DownOutlined } from "@ant-design/icons-vue";
 import HttpUtil from "@/util/HttpUtil";
 
 export default {
   name: "AdminUser",
+  components: { DownOutlined },
   data() {
+    const validateConfirm = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("请再次输入新密码"));
+      } else if (value !== this.passwordForm.password) {
+        callback(new Error("两次输入的密码不一致"));
+      } else {
+        callback();
+      }
+    };
     return {
       keyword: "",
+      searchedKeyword: "",
       list: [],
       loading: false,
       pagination: {
@@ -89,13 +148,13 @@ export default {
         showTotal: (total) => `共 ${total} 条`,
       },
       columns: [
-        { title: "头像", dataIndex: "icon", width: "8%" },
-        { title: "用户名", dataIndex: "username", width: "16%" },
-        { title: "邮箱", dataIndex: "email", width: "20%" },
-        { title: "状态", dataIndex: "status", width: "8%" },
-        { title: "注册时间", dataIndex: "createTime", width: "16%" },
-        { title: "最近登录", dataIndex: "lastLoginTime", width: "16%" },
-        { title: "操作", dataIndex: "operation", width: "26%" },
+        { title: "头像", dataIndex: "icon", width: 72 },
+        { title: "用户名", dataIndex: "username", width: 140 },
+        { title: "邮箱", dataIndex: "email", width: 200, ellipsis: true },
+        { title: "状态", dataIndex: "status", width: 90 },
+        { title: "注册时间", dataIndex: "createTime", width: 160 },
+        { title: "最近登录", dataIndex: "lastLoginTime", width: 160 },
+        { title: "操作", dataIndex: "operation", width: 220 },
       ],
       detailVisible: false,
       detailLoading: false,
@@ -109,7 +168,19 @@ export default {
       passwordVisible: false,
       passwordSaving: false,
       passwordForm: { password: "", confirm: "" },
+      passwordRules: {
+        password: [{ required: true, whitespace: true, message: "请输入新密码", trigger: "blur" }],
+        confirm: [{ validator: validateConfirm, trigger: "blur" }],
+      },
     };
+  },
+  computed: {
+    emptyText() {
+      return this.searchedKeyword ? "未找到匹配结果，请调整关键词" : "暂无用户数据";
+    },
+    detailTitle() {
+      return this.currentUser.username ? `用户详情 - ${this.currentUser.username}` : "用户详情";
+    },
   },
   created() {
     this.loadList();
@@ -132,6 +203,7 @@ export default {
       }
     },
     search() {
+      this.searchedKeyword = this.keyword.trim();
       this.pagination.current = 1;
       this.loadList();
     },
@@ -142,6 +214,13 @@ export default {
     },
     formatTime(time) {
       return time ? dayjs(time).format("YYYY-MM-DD HH:mm:ss") : "-";
+    },
+    handleMore(key, record) {
+      if (key === "toggle") {
+        this.toggleStatus(record);
+      } else if (key === "resetPassword") {
+        this.openResetPassword(record);
+      }
     },
     async openDetail(record) {
       this.currentUser = record;
@@ -207,12 +286,9 @@ export default {
       this.passwordVisible = true;
     },
     async savePassword() {
-      if (!this.passwordForm.password) {
-        this.$message.error("新密码不能为空");
-        return;
-      }
-      if (this.passwordForm.password !== this.passwordForm.confirm) {
-        this.$message.error("两次输入的密码不一致");
+      try {
+        await this.$refs.passwordFormRef.validate();
+      } catch {
         return;
       }
       this.passwordSaving = true;
@@ -232,28 +308,142 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@titleColor: #1f2937;
+@mutedColor: rgba(0, 0, 0, 0.45);
+@primaryColor: #1677ff;
+@borderColor: #eef1f6;
+@headerBgColor: #fafbfc;
+@hoverBgColor: #f8fafc;
+
 .main {
-  .title {
-    font-size: 0.2rem;
-    margin-bottom: 0.2rem;
+  width: 100%;
+
+  .pageHeader {
+    margin-bottom: 0.16rem;
+
+    .title {
+      margin: 0;
+      font-size: 0.2rem;
+      font-weight: 600;
+      line-height: 1.35;
+      color: @titleColor;
+    }
+
+    .desc {
+      margin: 0.04rem 0 0;
+      font-size: 0.13rem;
+      color: @mutedColor;
+    }
   }
+
   .toolbar {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
+    gap: 0.08rem;
     margin-bottom: 0.16rem;
+
+    .searchInput {
+      width: 3rem;
+      max-width: 100%;
+    }
   }
-  .searchInput {
-    width: 3rem;
+
+  .tableWrap {
+    min-height: 4.8rem;
   }
-  .userIcon {
-    width: 0.3rem;
-    height: 0.3rem;
-    border-radius: 50%;
+
+  :deep(.ant-table) {
+    font-size: 0.13rem;
   }
-  .fullWidth {
-    width: 100%;
+
+  :deep(.ant-table-thead > tr > th) {
+    padding: 0.1rem 0.12rem;
+    font-weight: 600;
+    color: #4b5563;
+    background-color: @headerBgColor;
+    border-bottom: 1px solid @borderColor;
   }
-  .passwordTip {
+
+  :deep(.ant-table-tbody > tr > td) {
+    padding: 0.1rem 0.12rem;
+    border-bottom: 1px solid @borderColor;
+  }
+
+  :deep(.ant-table-tbody > tr:last-child > td) {
+    border-bottom: none;
+  }
+
+  :deep(.ant-table-tbody > tr.ant-table-row:hover > td) {
+    background-color: @hoverBgColor;
+  }
+
+  .actionLink {
+    color: @primaryColor;
+  }
+
+  .moreLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.02rem;
+    color: @primaryColor;
+  }
+
+  .moreIcon {
+    font-size: 0.1rem;
+  }
+
+  .emptyState {
+    margin: 0.32rem 0;
+  }
+}
+
+// 弹窗与抽屉内容会 teleport 到 body，相关样式不能嵌在 .main 内
+.userIcon {
+  display: block;
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 50%;
+}
+
+.statusTag {
+  margin-inline-end: 0;
+  padding: 0 0.08rem;
+  font-size: 0.12rem;
+  line-height: 0.2rem;
+  border-radius: 0.04rem;
+
+  &.enabled {
+    color: #3f7d3a;
+    background-color: #f0f9eb;
+    border-color: #d7ecd0;
+  }
+
+  &.disabled {
+    color: #c0392b;
+    background-color: #fdf2f2;
+    border-color: #f8d7d5;
+  }
+}
+
+.roleTag {
+  margin-bottom: 0.04rem;
+  color: @primaryColor;
+  background-color: #eff6ff;
+  border-color: #d6e6ff;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.passwordTip {
+  margin-bottom: 0.16rem;
+}
+
+.dialogForm {
+  :deep(.ant-form-item) {
     margin-bottom: 0.16rem;
   }
 }
