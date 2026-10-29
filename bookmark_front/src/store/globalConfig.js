@@ -35,7 +35,12 @@ export const useGlobalConfigStore = defineStore("globalConfig", {
   actions: {
     //未登录需要进行的初始化
     async noLoginInit() {
-      this.serverConfig = await HttpUtil.get("/common/config/global");
+      try {
+        this.serverConfig = await HttpUtil.get("/common/config/global");
+      } catch {
+        //配置请求失败不阻断后续初始化，按无配置处理
+        this.serverConfig = {};
+      }
       let token = await localforage.getItem(TOKEN);
       if (token) {
         this.token = token;

@@ -32,6 +32,7 @@ export default [
         Blob: "readonly",
         FormData: "readonly",
         URL: "readonly",
+        Image: "readonly",
       },
     },
   },

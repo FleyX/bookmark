@@ -7,18 +7,18 @@
       <router-link to="/public/register">注册</router-link>
     </div>
     <div v-else class="topAction">
-      <a-tooltip style="margin-right: 1em">
-        <template #title>书签管理</template>
-        <router-link to="/manage">
-          <SettingOutlined class="bookmarkIcon" />
-        </router-link>
-      </a-tooltip>
       <a-dropdown>
         <div class="user">
           <img :src="userInfo.icon" class="userIcon" />
         </div>
         <template #overlay>
           <a-menu @click="menuClick">
+            <a-menu-item key="manage">
+              <router-link to="/manage">书签管理</router-link>
+            </a-menu-item>
+            <a-menu-item v-if="hasAnyAdminResource" key="admin">
+              <router-link to="/admin">管理后台</router-link>
+            </a-menu-item>
             <a-menu-item key="personSpace">
               <router-link to="/manage/personSpace/userInfo">个人中心</router-link>
             </a-menu-item>
@@ -34,14 +34,14 @@
 
 <script>
 import { mapState } from "pinia";
-import { SettingOutlined } from "@ant-design/icons-vue";
 import { useGlobalConfigStore } from "@/store/globalConfig";
+import { useUserStore } from "@/store/user";
 import { logoutClear } from "@/store/index";
 export default {
   name: "homeTop",
-  components: { SettingOutlined },
   computed: {
     ...mapState(useGlobalConfigStore, ["userInfo"]),
+    ...mapState(useUserStore, ["hasAnyAdminResource"]),
   },
   methods: {
     async menuClick(item) {
@@ -72,12 +72,6 @@ export default {
   .topAction {
     display: flex;
     align-items: center;
-
-    .bookmarkIcon {
-      font-size: 2em;
-      background-color: rgb(74, 74, 74, 0.5);
-      color: rgba(255, 255, 255, 0.8);
-    }
   }
 }
 </style>
