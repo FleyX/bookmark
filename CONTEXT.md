@@ -46,3 +46,7 @@ _Avoid_: 直接把权限当资源用
 **管理员**:
 拥有管理类权限角色的用户的统称（如 super_admin，或绑定了 `system:user`/`system:role`/`ops:bookmark` 权限的角色）。旧的 `manageUserId` 配置机制已废弃删除。
 _Avoid_: 角色、权限组、超管（特指 super_admin 角色）
+
+**管理后台**:
+`/admin` 下按页面级权限展示的管理界面，目前包含用户管理和角色管理；不同于普通用户的 `/manage` 书签管理界面。
+_Avoid_: 管理页（指单个页面）、书签管理
