@@ -9,6 +9,17 @@ BACKEND_URL="http://localhost:${BACKEND_PORT}/bookmark/api"
 FRONTEND_URL="http://localhost:${FRONTEND_PORT}"
 READY_TIMEOUT=60
 
+get_lan_ip() {
+    local ip=""
+    if command -v ip >/dev/null 2>&1; then
+        ip=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for (i = 1; i <= NF; i++) if ($i == "src") {print $(i + 1); exit}}')
+    fi
+    if [ -z "$ip" ]; then
+        ip=$(hostname -I 2>/dev/null | awk '{print $1}')
+    fi
+    echo "$ip"
+}
+
 # 直接杀死占用指定端口的进程
 kill_port() {
     local port=$1
@@ -78,5 +89,11 @@ wait_http "前端" "$FRONTEND_URL" "$ROOT_DIR/front.log" "$FRONTEND_PID"
 
 echo "==> 4/4 全部启动完成"
 echo "前端访问地址: $FRONTEND_URL"
+LAN_IP=$(get_lan_ip)
+if [ -n "$LAN_IP" ]; then
+    echo "局域网访问地址: http://${LAN_IP}:${FRONTEND_PORT}"
+else
+    echo "未检测到局域网 IP，请通过 ip addr 查看本机地址"
+fi
 echo "查看后端日志: tail -f $ROOT_DIR/app.log"
 echo "查看前端日志: tail -f $ROOT_DIR/front.log"
