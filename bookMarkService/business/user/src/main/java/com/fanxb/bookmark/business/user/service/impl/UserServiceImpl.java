@@ -15,6 +15,7 @@ import com.fanxb.bookmark.common.constant.RedisConstant;
 import com.fanxb.bookmark.common.dao.RoleDao;
 import com.fanxb.bookmark.common.entity.MailInfo;
 import com.fanxb.bookmark.common.entity.po.User;
+import com.fanxb.bookmark.common.exception.CustomException;
 import com.fanxb.bookmark.common.exception.FormDataException;
 import com.fanxb.bookmark.common.service.PermissionService;
 import com.fanxb.bookmark.common.util.*;
@@ -122,6 +123,38 @@ public class UserServiceImpl implements UserService {
         Map<String, String> data = new HashMap<>(1);
         data.put("userId", String.valueOf(user.getUserId()));
         return JwtUtil.encode(data, CommonConstant.jwtSecret, LONG_EXPIRE_TIME);
+    }
+
+    /**
+     * 用户表为空时创建初始化管理员，绑定超级管理员并初始化默认数据
+     *
+     * @return 非dev环境返回本次明文随机密码；dev环境或用户表非空返回null
+     * @author fanxb
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String initializeAdmin() {
+        if (userDao.countUser(null) > 0) {
+            return null;
+        }
+        boolean dev = CommonConstant.isDev;
+        String password = dev ? "123456" : RandomUtil.randomString(8);
+        User user = new User();
+        user.setUsername("admin");
+        user.setEmail("admin@example.com");
+        user.setIcon(DEFAULT_ICON);
+        user.setPassword(HashUtil.getPassword(password));
+        user.setCreateTime(System.currentTimeMillis());
+        user.setLastLoginTime(System.currentTimeMillis());
+        user.setVersion(0);
+        userDao.addOne(user);
+        Integer roleId = roleDao.selectRoleIdByCodeForUpdate(CommonConstant.SUPER_ADMIN_ROLE_CODE);
+        if (roleId == null) {
+            throw new CustomException("内置超级管理员角色不存在，初始化管理员创建失败");
+        }
+        roleDao.insertUserRole(user.getUserId(), roleId, System.currentTimeMillis());
+        searchEngineService.newUserInit(user.getUserId());
+        return dev ? null : password;
     }
 
     /**

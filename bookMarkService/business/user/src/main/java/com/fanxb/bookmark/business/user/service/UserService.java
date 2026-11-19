@@ -36,6 +36,14 @@ public interface UserService {
     String createNewUsername();
 
     /**
+     * 用户表为空时创建初始化管理员 admin，绑定超级管理员并初始化默认数据
+     *
+     * @return 非dev环境创建成功时返回本次明文随机密码；dev环境创建成功或用户表非空时返回null
+     * @author fanxb
+     */
+    String initializeAdmin();
+
+    /**
      * 若系统尚无超级管理员绑定，则将指定用户绑定为超级管理员（注册/首次OAuth登录时调用，须在事务内）
      *
      * @param userId 用户id
