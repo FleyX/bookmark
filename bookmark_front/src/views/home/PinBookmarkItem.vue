@@ -2,9 +2,9 @@
   <div>
     <a :href="pinObj.url" v-if="pinObj" class="pinBookmarkItem">
       <img :src="pinObj.icon.length > 0 ? pinObj.icon : '/favicon.ico'" class="icon" />
-      <span class="text" :title="pinObj.name">{{ pinObj.name }}</span>
+      <span class="text" data-wallpaper-contrast :title="pinObj.name">{{ pinObj.name }}</span>
       <a-dropdown :trigger="['click']">
-        <span class="action actionShow" title="操作" @click="(e) => e.preventDefault()">...</span>
+        <span class="action actionShow" data-wallpaper-contrast title="操作" @click="(e) => e.preventDefault()">...</span>
         <template #overlay>
           <a-menu @click="objAction">
             <a-menu-item key="pinOrNot">{{ pinObj.id ? "取消固定" : "固定书签" }}</a-menu-item>
@@ -15,7 +15,7 @@
       </a-dropdown>
     </a>
     <div v-else class="pinBookmarkItem" @click="showAddBlock = !showAddBlock" title="新增书签并固定到首页">
-      <PlusOutlined style="font-size: 1.5em" />
+      <span class="addIcon" data-wallpaper-contrast><PlusOutlined style="font-size: 1.5em" /></span>
     </div>
     <a-modal v-model:open="showAddBlock" title="新增" :footer="null" @afterClose="targetNode = null">
       <add-bookmark v-if="showAddBlock" :isAdd="targetNode == null" :targetNode="targetNode" addType="bookmark" @close="addBlockClose" />
@@ -98,24 +98,50 @@ export default {
   .text {
     font-size: 0.8em;
     max-width: 5.5em;
+    padding: 0.04em 0.24em 0.08em;
+    border-radius: 0.24em;
+    color: var(--wallpaper-contrast-color, #fff);
+    background-color: var(--wallpaper-contrast-background, rgba(12, 12, 12, 0.82));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
+  .addIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35em;
+    border-radius: 0.24em;
+    color: var(--wallpaper-contrast-color, #fff);
+    background-color: var(--wallpaper-contrast-background, rgba(12, 12, 12, 0.82));
+  }
+
   .action {
     position: absolute;
-    top: 0;
-    right: 0.3em;
-    display: none;
+    top: 0.05em;
+    right: 0.2em;
+    visibility: hidden;
+    padding: 0.06em 0.34em;
+    border-radius: 0.24em;
+    line-height: 1;
+    color: var(--wallpaper-contrast-color, #fff);
+    background-color: var(--wallpaper-contrast-background, rgba(12, 12, 12, 0.82));
   }
 }
 
 .pinBookmarkItem:hover {
   background-color: rgba(66, 66, 66, 0.4);
+
+  .text,
+  .addIcon,
+  .action {
+    color: var(--wallpaper-contrast-hover-color, #fff);
+    background-color: var(--wallpaper-contrast-hover-background, rgba(12, 12, 12, 0.82));
+  }
 }
 
 .pinBookmarkItem:hover .action {
-  display: block;
+  visibility: visible;
 }
 </style>

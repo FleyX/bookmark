@@ -1,5 +1,5 @@
 <template>
-  <div class="main" :style="{ backgroundImage: backgroundImg }">
+  <div ref="home" class="main" :style="{ backgroundImage: backgroundImg }">
     <top />
     <div class="content">
       <main-search :style="{ width: isPhone ? '100%' : '60%' }" />
@@ -16,6 +16,7 @@ import Bottom from "@/layout/home/Bottom.vue";
 import MainSearch from "@/components/main/Search.vue";
 import PinBookmark from "./PinBookmark.vue";
 import { useGlobalConfigStore } from "@/store/globalConfig";
+import WallpaperContrast from "./wallpaperContrast";
 
 /**
  * 前端内置背景图，后端壁纸不可用时使用
@@ -36,6 +37,10 @@ export default {
        * 当前实际展示的背景地址
        */
       backgroundSrc: DEFAULT_BG,
+      /**
+       * 当前实际展示背景对应的已加载图片
+       */
+      backgroundImage: null,
       /**
        * 背景切换轮次，用于忽略旧地址迟到的加载结果
        */
@@ -62,26 +67,83 @@ export default {
       immediate: true,
     },
   },
+  beforeCreate() {
+    this.defaultBackgroundImage = null;
+    this.defaultBackgroundLoading = false;
+    this.wallpaperContrast = null;
+    this.destroyed = false;
+  },
+  mounted() {
+    this.wallpaperContrast = new WallpaperContrast(this.$refs.home);
+    this.wallpaperContrast.setImage(this.backgroundImage);
+    if (this.backgroundSrc === DEFAULT_BG) {
+      this.loadDefaultBackground();
+    }
+  },
+  beforeUnmount() {
+    this.destroyed = true;
+    this.bgRequestId += 1;
+    if (this.wallpaperContrast) {
+      this.wallpaperContrast.destroy();
+      this.wallpaperContrast = null;
+    }
+  },
   methods: {
     switchBackground(src) {
       const url = typeof src === "string" ? src.trim() : "";
       const requestId = ++this.bgRequestId;
       if (!url) {
-        this.backgroundSrc = DEFAULT_BG;
+        this.useDefaultBackground();
         return;
       }
       const img = new Image();
       img.onload = () => {
         if (requestId === this.bgRequestId) {
           this.backgroundSrc = url;
+          this.setBackgroundImage(img);
         }
       };
       img.onerror = () => {
         if (requestId === this.bgRequestId) {
-          this.backgroundSrc = DEFAULT_BG;
+          this.useDefaultBackground();
         }
       };
       img.src = url;
+    },
+    /**
+     * 切换到内置壁纸，并单独加载它供实际选色使用
+     */
+    useDefaultBackground() {
+      this.backgroundSrc = DEFAULT_BG;
+      this.setBackgroundImage(this.defaultBackgroundImage);
+      this.loadDefaultBackground();
+    },
+    loadDefaultBackground() {
+      if (this.defaultBackgroundImage || this.defaultBackgroundLoading) {
+        return;
+      }
+      this.defaultBackgroundLoading = true;
+      const image = new Image();
+      image.onload = () => {
+        if (this.destroyed) {
+          return;
+        }
+        this.defaultBackgroundLoading = false;
+        this.defaultBackgroundImage = image;
+        if (this.backgroundSrc === DEFAULT_BG) {
+          this.setBackgroundImage(image);
+        }
+      };
+      image.onerror = () => {
+        this.defaultBackgroundLoading = false;
+      };
+      image.src = DEFAULT_BG;
+    },
+    setBackgroundImage(image) {
+      this.backgroundImage = image;
+      if (this.wallpaperContrast) {
+        this.wallpaperContrast.setImage(image);
+      }
     },
   },
 };
