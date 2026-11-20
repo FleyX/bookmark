@@ -156,6 +156,12 @@ export default {
   background-repeat: no-repeat;
   background-size: cover;
 
+  :deep([data-wallpaper-contrast]) {
+    border-radius: 0.24em;
+    color: var(--wallpaper-contrast-color, #fff);
+    background-color: var(--wallpaper-contrast-background, rgba(12, 12, 12, 0.82));
+  }
+
   .content {
     height: calc(~"100vh" - 1.21rem);
     display: flex;

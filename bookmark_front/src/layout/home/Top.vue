@@ -1,10 +1,10 @@
 <template>
   <div class="top">
     <div></div>
-    <div v-if="userInfo == null">
-      <router-link to="/public/login">登陆</router-link>
-      /
-      <router-link to="/public/register">注册</router-link>
+    <div v-if="userInfo == null" class="authLinks">
+      <router-link data-wallpaper-contrast to="/public/login">登陆</router-link>
+      <span data-wallpaper-contrast>/</span>
+      <router-link data-wallpaper-contrast to="/public/register">注册</router-link>
     </div>
     <div v-else class="topAction">
       <a-dropdown>
@@ -67,6 +67,16 @@ export default {
     border-radius: 50%;
     width: 2.5em;
     height: 2.5em;
+  }
+
+  .authLinks {
+    display: flex;
+    align-items: center;
+    gap: 0.04rem;
+
+    [data-wallpaper-contrast] {
+      padding: 0.03em 0.2em;
+    }
   }
 
   .topAction {

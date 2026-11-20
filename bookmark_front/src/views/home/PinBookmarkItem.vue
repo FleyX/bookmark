@@ -99,9 +99,6 @@ export default {
     font-size: 0.8em;
     max-width: 5.5em;
     padding: 0.04em 0.24em 0.08em;
-    border-radius: 0.24em;
-    color: var(--wallpaper-contrast-color, #fff);
-    background-color: var(--wallpaper-contrast-background, rgba(12, 12, 12, 0.82));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -112,9 +109,6 @@ export default {
     align-items: center;
     justify-content: center;
     padding: 0.35em;
-    border-radius: 0.24em;
-    color: var(--wallpaper-contrast-color, #fff);
-    background-color: var(--wallpaper-contrast-background, rgba(12, 12, 12, 0.82));
   }
 
   .action {
@@ -123,10 +117,7 @@ export default {
     right: 0.2em;
     visibility: hidden;
     padding: 0.06em 0.34em;
-    border-radius: 0.24em;
     line-height: 1;
-    color: var(--wallpaper-contrast-color, #fff);
-    background-color: var(--wallpaper-contrast-background, rgba(12, 12, 12, 0.82));
   }
 }
 
