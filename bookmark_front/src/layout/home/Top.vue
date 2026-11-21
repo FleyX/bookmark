@@ -2,9 +2,9 @@
   <div class="top">
     <div></div>
     <div v-if="userInfo == null" class="authLinks">
-      <router-link data-wallpaper-contrast to="/public/login">登陆</router-link>
-      <span data-wallpaper-contrast>/</span>
-      <router-link data-wallpaper-contrast to="/public/register">注册</router-link>
+      <router-link class="wallpaperOverlay" to="/public/login">登陆</router-link>
+      <span class="wallpaperOverlay">/</span>
+      <router-link class="wallpaperOverlay" to="/public/register">注册</router-link>
     </div>
     <div v-else class="topAction">
       <a-dropdown>
@@ -74,7 +74,7 @@ export default {
     align-items: center;
     gap: 0.04rem;
 
-    [data-wallpaper-contrast] {
+    .wallpaperOverlay {
       padding: 0.03em 0.2em;
     }
   }

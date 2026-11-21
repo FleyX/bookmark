@@ -2,9 +2,9 @@
   <div>
     <a :href="pinObj.url" v-if="pinObj" class="pinBookmarkItem">
       <img :src="pinObj.icon.length > 0 ? pinObj.icon : '/favicon.ico'" class="icon" />
-      <span class="text" data-wallpaper-contrast :title="pinObj.name">{{ pinObj.name }}</span>
+      <span class="text wallpaperOverlay" :title="pinObj.name">{{ pinObj.name }}</span>
       <a-dropdown :trigger="['click']">
-        <span class="action actionShow" data-wallpaper-contrast title="操作" @click="(e) => e.preventDefault()">...</span>
+        <span class="action actionShow wallpaperOverlay" title="操作" @click="(e) => e.preventDefault()">...</span>
         <template #overlay>
           <a-menu @click="objAction">
             <a-menu-item key="pinOrNot">{{ pinObj.id ? "取消固定" : "固定书签" }}</a-menu-item>
@@ -15,7 +15,7 @@
       </a-dropdown>
     </a>
     <div v-else class="pinBookmarkItem" @click="showAddBlock = !showAddBlock" title="新增书签并固定到首页">
-      <span class="addIcon" data-wallpaper-contrast><PlusOutlined style="font-size: 1.5em" /></span>
+      <span class="addIcon wallpaperOverlay"><PlusOutlined style="font-size: 1.5em" /></span>
     </div>
     <a-modal v-model:open="showAddBlock" title="新增" :footer="null" @afterClose="targetNode = null">
       <add-bookmark v-if="showAddBlock" :isAdd="targetNode == null" :targetNode="targetNode" addType="bookmark" @close="addBlockClose" />
@@ -124,15 +124,8 @@ export default {
 .pinBookmarkItem:hover {
   background-color: rgba(66, 66, 66, 0.4);
 
-  .text,
-  .addIcon,
   .action {
-    color: var(--wallpaper-contrast-hover-color, #fff);
-    background-color: var(--wallpaper-contrast-hover-background, rgba(12, 12, 12, 0.82));
+    visibility: visible;
   }
-}
-
-.pinBookmarkItem:hover .action {
-  visibility: visible;
 }
 </style>
